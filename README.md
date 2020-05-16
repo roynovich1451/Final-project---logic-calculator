@@ -4,5 +4,4 @@ Authors:
   oren or
  
 this repository contains our studies final project.
-subject:
-  logic calculator for students
+subject: logic calculator for students
