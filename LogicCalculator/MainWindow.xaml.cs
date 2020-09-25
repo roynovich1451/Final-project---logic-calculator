@@ -28,7 +28,7 @@ namespace LogicCalculator
             literals = new HashSet<string>();
             variables = new HashSet<string>();
             calculations = new ObservableCollection<string>();
-            Results.ItemsSource = calculations;
+            //Results.ItemsSource = calculations;
             //Test();
         }
 
