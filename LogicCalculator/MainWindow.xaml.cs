@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Windows;
+using System.Windows.Controls;
 using Xceed.Document.NET;
 using Xceed.Words.NET;
 
@@ -39,22 +40,61 @@ namespace LogicCalculator
             {
                 string input = tbValue.Text.Trim();
                 input = Regex.Replace(input, @"\s+", "");//remove spaces
-                if (CheckInput(input))
+                if (IsValidExpression(input))
                 {
                     MessageBox.Show("Correct", "Expression Check");
                 }
             }
         }
 
+
+        private List<string> HandleTableInput()
+        {
+            List<string> statementList = new List<string>();
+            UIElementCollection children = GridUserSol.Children;
+            for (int i = 0; i < children.Count; i++)
+            {
+                if (!(children[i] is TextBox))
+                    continue;
+                TextBox statement = children[i] as TextBox;
+                TextBox startLine = children[i + 1] as TextBox;
+                TextBox endLine = children[i + 2] as TextBox;
+                TextBox extra = children[i + 3] as TextBox;
+
+                int start, end;
+                IsValidExpression(statement.Text);
+                if (!Int32.TryParse(startLine.Text.Trim(),out start))
+                {
+                    string error_message = "Error at row: " + i + "\nError: Start Line is not an integer number";
+                    MessageBox.Show(error_message, "Start Line Check");
+                }
+
+                if (!Int32.TryParse(startLine.Text.Trim(), out end))
+                {
+                    string error_message = "Error at row: " + i + "\nError: End Line is not an integer number";
+                    MessageBox.Show(error_message, "End Line Check");
+                }
+
+                if (extra.Text.Contains("^") || extra.Text.Contains("∧") || extra.Text.Contains("&"))
+                    {
+                        Evaluation e = new Evaluation(statement.Text, '^', Int32.Parse(startLine.Text), Int32.Parse(endLine.Text));
+                    }
+                //return c == '^' || c == '>' || c == 'v' || c == '&' || c == '|' || c == '¬' || c == '~' ||
+                //       c == '∧' || c == '→' || c == '∨' || c == '↔' || c == '⊢' || c == '⊥';
+            }
+            return statementList;
+        }
+
+
         private void CalculateButton_click(object sender, RoutedEventArgs e)
         {
             try
             {
-                //TODO:TableWindow tb = new TableWindow();
-                //tb.Show();
+                //TODO:TableWindow statement = new TableWindow();
+                //statement.Show();
                 string input = tbValue.Text.Trim();
                 input = Regex.Replace(input, @"\s+", "");//remove spaces
-                CheckInput(input);
+                IsValidExpression(input);
                 Calculate(input);
                 //calculations.Add(input);
             }
@@ -70,8 +110,8 @@ namespace LogicCalculator
         }
         private void SaveButton_click(object sender, RoutedEventArgs e)
         {
-            string fileName="wow";//TODO: get this from somewhere
-            string path= "C:\\Oren\\LogicCalculator";//TODO: get this from somewhere
+            string fileName = "wow";//TODO: get this from somewhere
+            string path = "C:\\Oren\\LogicCalculator";//TODO: get this from somewhere
             //Check if the name has invalid chars
             fileName = fileName.Trim();
             path = path.Trim();
@@ -86,12 +126,13 @@ namespace LogicCalculator
                 return;
             }
             //TODO add overwrite option
-            if(File.Exists(Path.Combine(path, fileName))){
+            if (File.Exists(Path.Combine(path, fileName)))
+            {
                 MessageBox.Show("File exists already", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
-            using (var document = DocX.Create(@path+"\\" + fileName))
+            using (var document = DocX.Create(@path + "\\" + fileName))
             {
                 // Add a title.
                 document.InsertParagraph("Logic Calculator Results").FontSize(16d).Bold(true).UnderlineStyle(UnderlineStyle.singleLine);
@@ -103,8 +144,8 @@ namespace LogicCalculator
                 document.Save();
                 Console.WriteLine("\tCreated Document: ApplyTemplate.docx\n");
             }
-        }   
-       
+        }
+
         public void Calculate(string input)
         {
             variables.Add(input);
@@ -229,7 +270,7 @@ namespace LogicCalculator
             MessageBox.Show(error_message, "Expression Check");
         }
 
-        public bool CheckInput(string input)
+        public bool IsValidExpression(string input)
         {
             int parentheses_count = 0;
             bool after_operator = false;
@@ -331,7 +372,7 @@ namespace LogicCalculator
 
             Console.WriteLine("");
             Console.WriteLine("");
-            CheckInput(input);
+            IsValidExpression(input);
             Calculate(input);
 
             Console.WriteLine("");
