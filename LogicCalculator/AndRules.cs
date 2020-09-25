@@ -1,11 +1,14 @@
-﻿namespace LogicCalculator
+﻿using System;
+using System.Collections.Generic;
+
+namespace LogicCalculator
 {
     class AndRules
     {
-        string[] arr = new string[100];
-        AndRules(string statement,int startLine)
+        public AndRules(List<string> statementList,string statement,int startLine)
         {
-            
+            statementList.Add("R");
+            Console.WriteLine(statementList[0]);
         }
     }
 }

@@ -34,11 +34,15 @@ namespace LogicCalculator
 
         private void CheckButton_click(object sender, RoutedEventArgs e)
         {
-            string input = tbValue.Text.Trim();
-            input = Regex.Replace(input, @"\s+", "");//remove spaces
-            if (CheckInput(input))
+            int tableSize = 4;
+            for (int i = 0; i < tableSize; i++)
             {
-                MessageBox.Show("Correct", "Expression Check");
+                string input = tbValue.Text.Trim();
+                input = Regex.Replace(input, @"\s+", "");//remove spaces
+                if (CheckInput(input))
+                {
+                    MessageBox.Show("Correct", "Expression Check");
+                }
             }
         }
 
