@@ -99,8 +99,8 @@ namespace LogicCalculator
                 document.Save();
                 Console.WriteLine("\tCreated Document: ApplyTemplate.docx\n");
             }
-        }     
-
+        }   
+       
         public void Calculate(string input)
         {
             variables.Add(input);
