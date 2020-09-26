@@ -41,8 +41,9 @@ namespace LogicCalculator
             if (current_statement.rule.Contains("i"))
             {
                 if (current_statement.expression.Contains(start_statement.expression) && start_statement.rule == "given"
-                    && current_statement.expression.Contains(start_statement.expression) && end_statement.rule == "given")
+                    && current_statement.expression.Contains(end_statement.expression) && end_statement.rule == "given")
                 {
+                    MessageBox.Show("correct and");
                 }
             }
             else
@@ -70,6 +71,10 @@ namespace LogicCalculator
 
         }
         private void MT(string statement, char rule, int startLine, int endLine)
+        {
+
+        }
+        private void Given(string statement, char rule, int startLine, int endLine)
         {
 
         }

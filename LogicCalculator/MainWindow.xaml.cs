@@ -35,18 +35,18 @@ namespace LogicCalculator
         void HandleTableInput()
         {
             UIElementCollection children = GridUserSol.Children;
-            for (int i = 0; i < children.Count; i++)
+            for (int i = 0; i < children.Count; i += 4)
             {
                 if (!(children[i] is TextBox))
                     continue;
                 TextBox expression = children[i] as TextBox;
-                TextBox startLine = children[i + 1] as TextBox;
-                TextBox endLine = children[i + 2] as TextBox;
+                TextBox start_line = children[i + 1] as TextBox;
+                TextBox end_line = children[i + 2] as TextBox;
                 TextBox rule = children[i + 3] as TextBox;
 
-                  if (IsValidStatement(expression, startLine, endLine, rule, i))
+                if (IsValidStatement(expression, start_line, end_line, rule, i/4))
                 {
-                    int start = Int32.Parse(startLine.Text.Trim()), end = Int32.Parse(endLine.Text.Trim());
+                    int start = Int32.Parse(start_line.Text.Trim()), end = Int32.Parse(end_line.Text.Trim());
                     Statement s = new Statement(expression.Text, rule.Text, start, end);
                     statement_list.Add(s);
                 }
@@ -57,7 +57,7 @@ namespace LogicCalculator
 
                 if (rule.Text.Contains("^") || rule.Text.Contains("∧") || rule.Text.Contains("&"))
                 {
-                    Evaluation e = new Evaluation(statement_list,i,"and");
+                    Evaluation e = new Evaluation(statement_list, i, "and");
                 }
                 //return c == '^' || c == '>' || c == 'v' || c == '&' || c == '|' || c == '¬' || c == '~' ||
                 //       c == '∧' || c == '→' || c == '∨' || c == '↔' || c == '⊢' || c == '⊥';
@@ -69,34 +69,9 @@ namespace LogicCalculator
         #region button_clicks
         private void CheckButton_click(object sender, RoutedEventArgs e)
         {
-            int tableSize = 4;
-            for (int i = 0; i < tableSize; i++)
-            {
-                string input = tbValue.Text.Trim();
-                input = Regex.Replace(input, @"\s+", "");//remove spaces
-                if (IsValidExpression(input))
-                {
-                    MessageBox.Show("Correct", "Expression Check");
-                }
-            }
+            HandleTableInput();
         }
-        private void CalculateButton_click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                //TODO:TableWindow statement = new TableWindow();
-                //statement.Show();
-                string input = tbValue.Text.Trim();
-                input = Regex.Replace(input, @"\s+", "");//remove spaces
-                IsValidExpression(input);
-                Calculate(input);
-                //calculations.Add(input);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
+       
 
         private void NotButton_click(object sender, RoutedEventArgs e)
         {
@@ -191,7 +166,6 @@ namespace LogicCalculator
                 }
             }
         }
-
         private int Handle_Literals(string input, int i)
         {
             int end_of_first, end_of_second;
@@ -254,35 +228,39 @@ namespace LogicCalculator
 
         #region input_check
 
-        private bool IsValidStatement(TextBox expression, TextBox startLine, TextBox endLine, TextBox rule, int i)
+        private bool IsValidStatement(TextBox expression, TextBox start_line, TextBox end_line, TextBox rule, int row)
         {
             int start, end;
-            if (!IsValidExpression(expression.Text))
+            if (!IsValidExpression(expression.Text, row))
             {
                 return false;
             }
-            if (!Int32.TryParse(startLine.Text.Trim(), out start))
+            if (string.IsNullOrEmpty(start_line.Text))
             {
-                string error_message = "Error at row: " + i + "\nError: Start Line is not an integer number";
-                MessageBox.Show(error_message, "Start Line Check");
+                Expression_Error(row, "Start Line is empty");
+            }
+            if (string.IsNullOrEmpty(end_line.Text))
+            {
+                Expression_Error(row, "End Line is empty");
+            }
+            if (!Int32.TryParse(start_line.Text.Trim(), out start))
+            {
+                Expression_Error(row, "Start Line is not a positive integer number");
                 return false;
             }
-            if (!Int32.TryParse(endLine.Text.Trim(), out end))
+            if (!Int32.TryParse(end_line.Text.Trim(), out end))
             {
-                string error_message = "Error at row: " + i + "\nError: End Line is not an integer number";
-                MessageBox.Show(error_message, "End Line Check");
+                Expression_Error(row, "End Line is not a positive integer number");
                 return false;
             }
-            if (start > statement_list.Count || start < 1)
+            if (start > statement_list.Count || start < 0)
             {
-                string error_message = "Error at row: " + i + "\nError: Start Line is not in range";
-                MessageBox.Show(error_message, "End Line Check");
+                Expression_Error(row, "Start Line entered is not in the range of the table size");
                 return false;
             }
-            if (end > statement_list.Count || end < 1)
+            if (end > statement_list.Count || end < 0)
             {
-                string error_message = "Error at row: " + i + "\nError: End Line is not in range";
-                MessageBox.Show(error_message, "End Line Check");
+                Expression_Error(row, "End Line entered is not in the range of the table size");
                 return false;
             }
             return true;
@@ -294,13 +272,21 @@ namespace LogicCalculator
                 c == '∧' || c == '→' || c == '∨' || c == '↔' || c == '⊢' || c == '⊥';
         }
 
-        public void Error(int index, string error)
+
+
+        public void Expression_Error(int row, string error, int index = -1)
         {
-            string error_message = "Error at index: " + index + "\nError: " + error;
+            string error_message = "Error on row: " + row;
+            if (index != -1)
+            {
+                error_message += " index: " + index;
+            }
+            error_message += "\nError is: " + error;
+
             MessageBox.Show(error_message, "Expression Check");
         }
 
-        public bool IsValidExpression(string input)
+        public bool IsValidExpression(string input, int row)
         {
             int parentheses_count = 0;
             bool after_operator = false;
@@ -308,7 +294,7 @@ namespace LogicCalculator
 
             //Check if input is empty
             if (input.Length == 0)
-                Error(i, "No input");
+                Expression_Error(row, "No input", i);
 
             for (; i < input.Length; i++)
             {
@@ -320,7 +306,7 @@ namespace LogicCalculator
 
                 if (Char.IsNumber(c))
                 {
-                    Error(i, "Entering digits is not allowed");
+                    Expression_Error(row, "Entering digits is not allowed, problematic char is:"+c, i);
                     return false;
                 }
 
@@ -329,7 +315,7 @@ namespace LogicCalculator
                 {
                     if (i != 0 && input[i - 1] == ')')
                     {
-                        Error(i, "Missing an operator");
+                        Expression_Error(row, "Missing an operator, problematic char is:" + c, i);
                         return false;
                     }
                     after_operator = true;
@@ -340,20 +326,20 @@ namespace LogicCalculator
                 {
                     if (after_operator)
                     {
-                        Error(i, "Two operators in a row");
+                        Expression_Error(row, "Two operators in a row, problematic char is:" + c, i);
                         return false;
                     }
                     parentheses_count--;
                     if (parentheses_count < 0)
                     {
-                        Error(i, "Too many closing parentheses");
+                        Expression_Error(row, "Too many closing parentheses, problematic char is:" + c, i);
                         return false;
                     }
                 }
                 else if (Char.IsLetter(c))
                 {
                     if (!after_operator && i != 0)
-                        Error(i, "Two variables in a row");
+                        Expression_Error(row, "Two variables in a row, problematic char is:" + c, i);
                     int j = i + 1;
                     for (; j < input.Length; j++)
                     {
@@ -369,20 +355,20 @@ namespace LogicCalculator
                 {
                     if (after_operator)
                     {
-                        Error(i, "Two operators in a row");
+                        Expression_Error(row, "Two operators in a row, problematic char is:" + c, i);
                         return false;
                     }
                     after_operator = true;
                 }
                 else
                 {
-                    Error(i, "An invalid character input");
+                    Expression_Error(row, "An invalid character input, problematic char is:" + c, i);
                     return false;
                 }
             }
             if (parentheses_count > 0)
             {
-                Error(i, "Too many opening parentheses");
+                Expression_Error(row, "Too many opening parentheses", i);
                 return false;
             }
             return true;
@@ -402,7 +388,7 @@ namespace LogicCalculator
 
             Console.WriteLine("");
             Console.WriteLine("");
-            IsValidExpression(input);
+            // IsValidExpression(input);
             Calculate(input);
 
             Console.WriteLine("");
