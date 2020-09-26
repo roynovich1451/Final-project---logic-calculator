@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
-using System.Linq;
-using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -209,8 +206,6 @@ namespace LogicCalculator
         }
         #endregion
 
-
-
         void HandleTableInput()
         {
             List<TextBox> text_boxes_list = GetAllTextBoxes();
@@ -218,9 +213,9 @@ namespace LogicCalculator
             for (int i = 0; i < text_boxes_list.Count - 4; i += 4)
             {
                 TextBox expression = text_boxes_list[i] as TextBox;
+                TextBox rule = text_boxes_list[i + 3] as TextBox;
                 TextBox start_line = text_boxes_list[i + 1] as TextBox;
                 TextBox end_line = text_boxes_list[i + 2] as TextBox;
-                TextBox rule = text_boxes_list[i + 3] as TextBox;
                 int current_row = i / 4 + 1;
 
                 if (IsValidStatement(expression, start_line, end_line, rule, current_row))
@@ -493,6 +488,17 @@ namespace LogicCalculator
                 return false;
             }
             return true;
+        }
+
+        public bool IsValidSegment(string seg)
+        {
+            int index = seg.IndexOf('-'),temp;
+            if (index == -1)
+            {
+                return Int32.TryParse(seg,out _);
+            }
+            return Int32.TryParse(seg.Substring(0,index), out _) && Int32.TryParse(seg.Substring(index+1,seg.Length-index), out _);
+
         }
 
         #endregion input_check
