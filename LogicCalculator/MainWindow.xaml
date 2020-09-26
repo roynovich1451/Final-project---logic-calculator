@@ -18,6 +18,7 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="50"/>
+                <RowDefinition Height="50"/>
             </Grid.RowDefinitions>
             <!--KEYBOARD-->
             <GroupBox Header="Keyboard" Grid.Column="1" BorderThickness="2" BorderBrush="Black">
@@ -30,7 +31,8 @@
                     <Button Name="btnFalsum" Content="⊥"  Margin="0,11,0,0"/>
                 </StackPanel>
             </GroupBox>
-            <Button Name="saveUserManual" Content="User manual" Margin="5" Grid.Row="1"/>
+            <Button Name="saveUserManual" Content="User manual" Margin="5" Grid.Row="2"/>
+            <Button Name="saveButton" Click="SaveButton_click" Content="Save" Margin="5" Grid.Row="1"/>
         </Grid>
         <!--TABs-->
         <TabControl>
@@ -47,47 +49,35 @@
                         <RowDefinition Height="50"/>
                     </Grid.RowDefinitions>
                     <StackPanel Name="spLogicExpression" VerticalAlignment="Center" Grid.ColumnSpan="2" Margin="0,8">
-                        <TextBlock Text="Enter a valid logical expression" TextAlignment="Center"/>
+                        <TextBlock Text="Enter a valid logical expression" TextAlignment="Center" FontWeight="Bold"/>
                         <TextBox Name="tbValue" TextAlignment="Center" Margin="80,0"/>
-                        <StackPanel Orientation="Horizontal" Margin="0,15,0,0">
+                        <Grid Margin="0,5,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="40"/>
+                                <ColumnDefinition Width="160"/>
+                                <ColumnDefinition Width="60"/>
+                                <ColumnDefinition Width="60"/>
+                                <ColumnDefinition Width="60"/>
+                                <ColumnDefinition Width="60"/>
+                            </Grid.ColumnDefinitions>
                             <!--TABLE HEADER-->
                             <Label Content="Line" HorizontalAlignment="Center" FontWeight="Bold"/>
-                            <Label Content="Statement" HorizontalAlignment="Center" Grid.Column="1" FontWeight="Bold" Margin="70,0,0,0"/>
-                            <Label Content="Start line" HorizontalAlignment="Center" Grid.Column="2" FontWeight="Bold" Margin="75,0,0,0"/>
-                            <Label Content="End line" HorizontalAlignment="Center" Grid.Column="3" FontWeight="Bold" Margin="25,0,0,0"/>
-                            <Label Content="Extra line" HorizontalAlignment="Center" Grid.Column="3" FontWeight="Bold" Margin="20,0,0,0"/>
-                        </StackPanel>
+                            <Label Content="Statement" HorizontalAlignment="Center" Grid.Column="1" FontWeight="Bold"/>
+                            <Label Content="Rule" HorizontalAlignment="Center" Grid.Column="2" FontWeight="Bold"/>
+                            <Label HorizontalAlignment="Center" Grid.Column="3" FontWeight="Bold">
+                                <TextBlock TextWrapping="Wrap" Text="First segment"/>
+                            </Label>
+                            <Label HorizontalAlignment="Center" Grid.Column="4" FontWeight="Bold">
+                                <TextBlock TextWrapping="Wrap" Text="Second segment"/>
+                            </Label>
+                            <Label HorizontalAlignment="Center" Grid.Column="5" FontWeight="Bold">
+                                <TextBlock TextWrapping="Wrap" Text="Third segment"/>
+                            </Label>
+                        </Grid>
                     </StackPanel>
                     <ScrollViewer Grid.Row="1" Grid.ColumnSpan="2">
                         <StackPanel Name="spGridTable">
-                            <Grid Name="GridDefaultLine">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="40"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="80"/>
-                                    <ColumnDefinition Width="80"/>
-                                    <ColumnDefinition Width="80"/>
-                                </Grid.ColumnDefinitions>
-                                <Label Content="1" HorizontalAlignment="Center"/>
-                                <TextBox Name="tbState1" Grid.Column="1" Margin="2"/>
-                                <TextBox Name="tbStart1" Grid.Column="2" Margin="2"/>
-                                <TextBox Name="tbEnd1" Grid.Column="3" Margin="2"/>
-                                <TextBox Name="tbExt1" Grid.Column="4" Margin="2"/>
-                            </Grid>
-                            <Grid Name="a">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="40"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="80"/>
-                                    <ColumnDefinition Width="80"/>
-                                    <ColumnDefinition Width="80"/>
-                                </Grid.ColumnDefinitions>
-                                <Label Content="1" HorizontalAlignment="Center"/>
-                                <TextBox Name="b" Grid.Column="1" Margin="2"/>
-                                <TextBox Name="c" Grid.Column="2" Margin="2"/>
-                                <TextBox Name="d" Grid.Column="3" Margin="2"/>
-                                <TextBox Name="e" Grid.Column="4" Margin="2"/>
-                            </Grid>
+                           
                         </StackPanel>
                     </ScrollViewer>
                     <Grid Name="GridButtonsLine" Grid.Row="2" Grid.ColumnSpan="2">
@@ -99,8 +89,9 @@
                             <ColumnDefinition Width="80"/>
                             <ColumnDefinition Width="80"/>
                         </Grid.ColumnDefinitions>
-                        <Button Name="checkButton" IsDefault="True" Click="CheckButton_click" Content="Check" Margin="5"/>
-                        <Button Name="saveButton" Click="SaveButton_click" Content="Save" Margin="5" Grid.Column="5"/>
+                        <Button Name="btnAddLine" IsDefault="True" Click="btnAddLine_Click" Content="Add new line" Margin="5" Grid.Column="2" Grid.ColumnSpan="2"/>
+                        <Button Name="btncheckButton" IsDefault="True" Click="CheckButton_click" Content="Check" Margin="5" Grid.Column="5"/>
+                        
                     </Grid>
 
                 </Grid>
