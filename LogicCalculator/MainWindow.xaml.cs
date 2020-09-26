@@ -15,13 +15,12 @@ namespace LogicCalculator
     /// </summary>
     /// 
 
-
-
     public partial class MainWindow : Window
     {
         private readonly ObservableCollection<string> calculations;
         private readonly HashSet<string> literals;
         private readonly HashSet<string> variables;
+        List<Statement> statement_list = new List<Statement>();
 
         public MainWindow()
         {
@@ -33,6 +32,41 @@ namespace LogicCalculator
             //Test();
         }
 
+        void HandleTableInput()
+        {
+            UIElementCollection children = GridUserSol.Children;
+            for (int i = 0; i < children.Count; i++)
+            {
+                if (!(children[i] is TextBox))
+                    continue;
+                TextBox expression = children[i] as TextBox;
+                TextBox startLine = children[i + 1] as TextBox;
+                TextBox endLine = children[i + 2] as TextBox;
+                TextBox rule = children[i + 3] as TextBox;
+
+                  if (IsValidStatement(expression, startLine, endLine, rule, i))
+                {
+                    int start = Int32.Parse(startLine.Text.Trim()), end = Int32.Parse(endLine.Text.Trim());
+                    Statement s = new Statement(expression.Text, rule.Text, start, end);
+                    statement_list.Add(s);
+                }
+                else
+                {
+                    return;
+                }
+
+                if (rule.Text.Contains("^") || rule.Text.Contains("∧") || rule.Text.Contains("&"))
+                {
+                    Evaluation e = new Evaluation(statement_list,i,"and");
+                }
+                //return c == '^' || c == '>' || c == 'v' || c == '&' || c == '|' || c == '¬' || c == '~' ||
+                //       c == '∧' || c == '→' || c == '∨' || c == '↔' || c == '⊢' || c == '⊥';
+            }
+
+            return;
+        }
+
+        #region button_clicks
         private void CheckButton_click(object sender, RoutedEventArgs e)
         {
             int tableSize = 4;
@@ -46,46 +80,6 @@ namespace LogicCalculator
                 }
             }
         }
-
-
-        private List<string> HandleTableInput()
-        {
-            List<string> statementList = new List<string>();
-            UIElementCollection children = GridUserSol.Children;
-            for (int i = 0; i < children.Count; i++)
-            {
-                if (!(children[i] is TextBox))
-                    continue;
-                TextBox statement = children[i] as TextBox;
-                TextBox startLine = children[i + 1] as TextBox;
-                TextBox endLine = children[i + 2] as TextBox;
-                TextBox extra = children[i + 3] as TextBox;
-
-                int start, end;
-                IsValidExpression(statement.Text);
-                if (!Int32.TryParse(startLine.Text.Trim(),out start))
-                {
-                    string error_message = "Error at row: " + i + "\nError: Start Line is not an integer number";
-                    MessageBox.Show(error_message, "Start Line Check");
-                }
-
-                if (!Int32.TryParse(startLine.Text.Trim(), out end))
-                {
-                    string error_message = "Error at row: " + i + "\nError: End Line is not an integer number";
-                    MessageBox.Show(error_message, "End Line Check");
-                }
-
-                if (extra.Text.Contains("^") || extra.Text.Contains("∧") || extra.Text.Contains("&"))
-                    {
-                        Evaluation e = new Evaluation(statement.Text, '^', Int32.Parse(startLine.Text), Int32.Parse(endLine.Text));
-                    }
-                //return c == '^' || c == '>' || c == 'v' || c == '&' || c == '|' || c == '¬' || c == '~' ||
-                //       c == '∧' || c == '→' || c == '∨' || c == '↔' || c == '⊢' || c == '⊥';
-            }
-            return statementList;
-        }
-
-
         private void CalculateButton_click(object sender, RoutedEventArgs e)
         {
             try
@@ -230,6 +224,8 @@ namespace LogicCalculator
             return i;
         }
 
+        #endregion
+
         #region utility
         private int FindLiteralEnd(string input, int start)
         {
@@ -243,7 +239,7 @@ namespace LogicCalculator
             return input.Length;
         }
 
-        private int FindOperator(string input, int start)
+        public int FindOperator(string input, int start)
         {
             for (int i = start; i < input.Length; i++)
             {
@@ -257,6 +253,40 @@ namespace LogicCalculator
         #endregion
 
         #region input_check
+
+        private bool IsValidStatement(TextBox expression, TextBox startLine, TextBox endLine, TextBox rule, int i)
+        {
+            int start, end;
+            if (!IsValidExpression(expression.Text))
+            {
+                return false;
+            }
+            if (!Int32.TryParse(startLine.Text.Trim(), out start))
+            {
+                string error_message = "Error at row: " + i + "\nError: Start Line is not an integer number";
+                MessageBox.Show(error_message, "Start Line Check");
+                return false;
+            }
+            if (!Int32.TryParse(endLine.Text.Trim(), out end))
+            {
+                string error_message = "Error at row: " + i + "\nError: End Line is not an integer number";
+                MessageBox.Show(error_message, "End Line Check");
+                return false;
+            }
+            if (start > statement_list.Count || start < 1)
+            {
+                string error_message = "Error at row: " + i + "\nError: Start Line is not in range";
+                MessageBox.Show(error_message, "End Line Check");
+                return false;
+            }
+            if (end > statement_list.Count || end < 1)
+            {
+                string error_message = "Error at row: " + i + "\nError: End Line is not in range";
+                MessageBox.Show(error_message, "End Line Check");
+                return false;
+            }
+            return true;
+        }
 
         private bool IsOperator(char c)
         {
@@ -405,7 +435,6 @@ namespace LogicCalculator
         }
 
         #endregion testing
-
 
     }
 }

@@ -1,20 +1,53 @@
-﻿using System.Windows;
+﻿using System.Collections.Generic;
+using System.Windows;
+using System.Windows.Documents;
 
 namespace LogicCalculator
 {
     class Evaluation
     {
-        public Evaluation(string statement, string extra, int startLine, int endLine)
-        {
-            And(statement, startLine, endLine);
 
+        public Evaluation(List<Statement> statement_list, int current_row, string rule)
+        {
+            switch (rule)
+            {
+                case "and":
+                    And(statement_list, current_row);
+                    break;
+                case "or":
+                    break;
+                case "contra":
+                    break;
+                case "not":
+                    break;
+                case "mp":
+                    break;
+                case "mt":
+                    break;
+                case "given":
+                    break;
+               
+                    /*         case "":
+                                break;*/
+            }
         }
 
-        private void And(string statement, int startLine, int endLine)
+        private void And(List<Statement> statement_list, int current_row)
         {
-            if (statement.Contains("^") || statement.Contains("∧") || statement.Contains("&"))
-            {                
-                MessageBox.Show("Statement does not contain 'And'", "Rule Check");
+            Statement current_statement = statement_list[current_row];
+            Statement start_statement = statement_list[current_statement.start_line];
+            Statement end_statement = statement_list[current_statement.end_line];
+
+            if (current_statement.rule.Contains("i"))
+            {
+                if (current_statement.expression.Contains(start_statement.expression) && start_statement.rule == "given"
+                    && current_statement.expression.Contains(start_statement.expression) && end_statement.rule == "given")
+                {
+                }
+            }
+            else
+            {
+               // if ()
             }
         }
 
@@ -23,18 +56,26 @@ namespace LogicCalculator
         {
 
         }
+        private void Contra(string statement, char rule, int startLine, int endLine)
+        {
+
+        }
         private void Not(string statement, char rule, int startLine, int endLine)
         {
 
         }
-        private void Z(string statement, char rule, int startLine, int endLine)
+      
+        private void MP(string statement, char rule, int startLine, int endLine)
         {
 
         }
-        private void D(string statement, char rule, int startLine, int endLine)
+        private void MT(string statement, char rule, int startLine, int endLine)
         {
 
         }
-
+        private bool IsProvenAlready(string var)
+        {
+            return false;
+        }
     }
 }
