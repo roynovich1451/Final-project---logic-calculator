@@ -26,7 +26,7 @@
                     <Button Name="btnNot" Margin="0,75,0,0" Content="¬"/>
                     <Button Name="btnOr" Content="∨" Margin="0,11,0,0"/>
                     <Button Name="btnAnd" Content="∧" Margin="0,11,0,0"/>
-                    <Button Name="btnbothdirections" Content="↔"  Margin="0,11,0,0"/>
+                    <Button Name="btnbothdirections" Content="↔️"  Margin="0,11,0,0"/>
                     <Button Name="btnTurnstile" Content="⊢"  Margin="0,11,0,0"/>
                     <Button Name="btnFalsum" Content="⊥"  Margin="0,11,0,0"/>
                 </StackPanel>
@@ -77,7 +77,7 @@
                     </StackPanel>
                     <ScrollViewer Grid.Row="1" Grid.ColumnSpan="2">
                         <StackPanel Name="spGridTable">
-                           
+
                         </StackPanel>
                     </ScrollViewer>
                     <Grid Name="GridButtonsLine" Grid.Row="2" Grid.ColumnSpan="2">
@@ -91,7 +91,7 @@
                         </Grid.ColumnDefinitions>
                         <Button Name="btnAddLine" IsDefault="True" Click="btnAddLine_Click" Content="Add new line" Margin="5" Grid.Column="2" Grid.ColumnSpan="2"/>
                         <Button Name="btncheckButton" IsDefault="True" Click="CheckButton_click" Content="Check" Margin="5" Grid.Column="5"/>
-                        
+
                     </Grid>
 
                 </Grid>

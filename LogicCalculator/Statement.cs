@@ -13,5 +13,10 @@
             this.start_line = start_line;
             this.end_line = end_line;
         }
+
+        public override string ToString()
+        {
+            return "Expression: " + expression + " Rule: " + rule + " Start Line: " + start_line + " End Line: " + end_line;
+        }
     }
 }

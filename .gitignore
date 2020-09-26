@@ -371,3 +371,10 @@ MigrationBackup/
 .history
 
 # End of https://www.toptal.com/developers/gitignore/api/visualstudiocode,csharp
+*.cs
+*.baml
+*.pdb
+*.exe
+LogicCalculator/MainWindow.xaml.cs
+*.pdb
+*.exe
