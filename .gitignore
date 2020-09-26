@@ -5,3 +5,8 @@
 *.cs
 *.dll
 *.exe
+*.config
+*.CopyComplete
+*.txt
+*.resources
+*.baml
