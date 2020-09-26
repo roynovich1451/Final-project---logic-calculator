@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using Xceed.Document.NET;
 using Xceed.Words.NET;
 
@@ -18,168 +19,31 @@ namespace LogicCalculator
 
     public partial class MainWindow : Window
     {
-        private readonly ObservableCollection<string> calculations;
-        private readonly HashSet<string> literals;
-        private readonly HashSet<string> variables;
-        List<Statement> statement_list = new List<Statement>();
+        readonly List<Statement> statement_list = new List<Statement>();
         private int nextLine = 1;
-        private List<string> rules = new List<string> { "data", "∧i", "∧e", "¬¬e", "¬¬i", "→e",
+        private readonly List<string> rules = new List<string> { "data", "∧i", "∧e", "¬¬e", "¬¬i", "→e",
                                                         "→i", "MP", "MT", "Copy", "Assumption" };
+        TextBox elementWithFocus;
 
         public MainWindow()
         {
             InitializeComponent();
             List<TextBox> text_boxes_list = GetAllTextBoxes();
             PrintTextBoxList(text_boxes_list);
-            createLine();
+            CreateLine();
         }
-        #region dynamic_gui
-        private void createLine()
+
+        #region MenuBar_Click
+        private void MenuItemNew_Click(object sender, RoutedEventArgs e)
         {
-            //create new line and define cols
-            Grid newLine = new Grid();
-            ColumnDefinition gridCol1 = new ColumnDefinition();
-            gridCol1.Width = new GridLength(40);
-            ColumnDefinition gridCol2 = new ColumnDefinition();
-            gridCol2.Width = new GridLength(160);
-            ColumnDefinition gridCol3 = new ColumnDefinition();
-            gridCol3.Width = new GridLength(60);
-            ColumnDefinition gridCol4 = new ColumnDefinition();
-            gridCol4.Width = new GridLength(60);
-            ColumnDefinition gridCol5 = new ColumnDefinition();
-            gridCol5.Width = new GridLength(60);
-            ColumnDefinition gridCol6 = new ColumnDefinition();
-            gridCol6.Width = new GridLength(60);
 
-            // ADD col to new line
-            newLine.ColumnDefinitions.Add(gridCol1);
-            newLine.ColumnDefinitions.Add(gridCol2);
-            newLine.ColumnDefinitions.Add(gridCol3);
-            newLine.ColumnDefinitions.Add(gridCol4);
-            newLine.ColumnDefinitions.Add(gridCol5);
-            newLine.ColumnDefinitions.Add(gridCol6);
-
-            //label
-            Label lb = new Label();
-            lb.Content = $"{nextLine}";
-            lb.Margin = new Thickness(2);
-            lb.HorizontalContentAlignment = HorizontalAlignment.Right;
-            Grid.SetColumn(lb, 0);
-
-            //textblock - statement
-            TextBox tbState = new TextBox();
-            tbState.HorizontalAlignment = HorizontalAlignment.Center;
-            tbState.VerticalAlignment = System.Windows.VerticalAlignment.Center;
-            tbState.Name = $"tbStatement{nextLine}";
-            tbState.Margin = new Thickness(2);
-            tbState.Width = 150;
-            Grid.SetColumn(tbState, 1);
-
-            //comboBox - rule
-            ComboBox cmbRules = new ComboBox();
-            cmbRules.ItemsSource = rules;
-            cmbRules.HorizontalAlignment = HorizontalAlignment.Center;
-            cmbRules.VerticalAlignment = System.Windows.VerticalAlignment.Center;
-            cmbRules.Name = $"cmbRules{nextLine}";
-            cmbRules.Margin = new Thickness(2);
-            cmbRules.Width = 50;
-            Grid.SetColumn(cmbRules, 2);
-
-            //textblock - first segment
-            TextBox tbFirstSeg = new TextBox();
-            tbFirstSeg.HorizontalAlignment = HorizontalAlignment.Center;
-            tbFirstSeg.VerticalAlignment = System.Windows.VerticalAlignment.Center;
-            tbFirstSeg.Name = $"tbFirstSeg{nextLine}";
-            tbFirstSeg.Margin = new Thickness(2);
-            tbFirstSeg.Width = 50;
-            Grid.SetColumn(tbFirstSeg, 3);
-
-            //textblock - second segment
-            TextBox tbSecondSeg = new TextBox();
-            tbSecondSeg.HorizontalAlignment = HorizontalAlignment.Center;
-            tbSecondSeg.VerticalAlignment = System.Windows.VerticalAlignment.Center;
-            tbSecondSeg.Name = $"tbSecondSeg{nextLine}";
-            tbSecondSeg.Margin = new Thickness(2);
-            tbSecondSeg.Width = 50;
-            Grid.SetColumn(tbSecondSeg, 4);
-
-            //textblock - third segment
-            TextBox tbThirdSeg = new TextBox();
-            tbThirdSeg.HorizontalAlignment = HorizontalAlignment.Center;
-            tbThirdSeg.VerticalAlignment = System.Windows.VerticalAlignment.Center;
-            tbThirdSeg.Name = $"tbThirdSeg{nextLine}";
-            tbThirdSeg.Margin = new Thickness(2);
-            tbThirdSeg.Width = 50;
-            Grid.SetColumn(tbThirdSeg, 5);
-
-            //add children to new line
-            newLine.Children.Add(lb);
-            newLine.Children.Add(tbState);
-            newLine.Children.Add(cmbRules);
-            newLine.Children.Add(tbFirstSeg);
-            newLine.Children.Add(tbSecondSeg);
-            newLine.Children.Add(tbThirdSeg);
-
-            //add new line to StackPanel
-            spGridTable.Children.Add(newLine);
-            nextLine++;
         }
-        #endregion
 
-       
-
-        void HandleTableInput()
+        private void MenuItemOpen_Click(object sender, RoutedEventArgs e)
         {
-            List<TextBox> text_boxes_list = GetAllTextBoxes();
-            PrintTextBoxList(text_boxes_list);
-            for (int i = 0; i < text_boxes_list.Count - 4; i += 4)
-            {
-                TextBox expression = text_boxes_list[i] as TextBox;
-                TextBox start_line = text_boxes_list[i + 1] as TextBox;
-                TextBox end_line = text_boxes_list[i + 2] as TextBox;
-                TextBox rule = text_boxes_list[i + 3] as TextBox;
-                int current_row = i / 4 + 1;
 
-                if (IsValidStatement(expression, start_line, end_line, rule, current_row))
-                {
-                    int start = Int32.Parse(start_line.Text.Trim()), end = Int32.Parse(end_line.Text.Trim());
-                    Statement s = new Statement(expression.Text, rule.Text, start, end);
-                    statement_list.Add(s);
-                }
-                else
-                {
-                    return;
-                }
-
-                if (rule.Text.Contains("^") || rule.Text.Contains("∧") || rule.Text.Contains("&"))
-                {
-                    Evaluation e = new Evaluation(statement_list, current_row, "and");
-                }
-                //return c == '^' || c == '>' || c == 'v' || c == '&' || c == '|' || c == '¬' || c == '~' ||
-                //       c == '∧' || c == '→' || c == '∨' || c == '↔' || c == '⊢' || c == '⊥';
-            }
-
-            return;
         }
-
-        #region button_clicks
-
-        private void btnAddLine_Click(object sender, RoutedEventArgs e)
-        {
-            createLine();
-        }
-
-        private void CheckButton_click(object sender, RoutedEventArgs e)
-        {
-            HandleTableInput();
-        }
-
-
-        private void NotButton_click(object sender, RoutedEventArgs e)
-        {
-            tbValue.Text = tbValue.Text + '¬';
-        }
-        private void SaveButton_click(object sender, RoutedEventArgs e)
+        private void MenuItemSave_Click(object sender, RoutedEventArgs e)
         {
             string fileName = "wow";//TODO: get this from somewhere
             string path = "C:\\Oren\\LogicCalculator";//TODO: get this from somewhere
@@ -216,24 +80,228 @@ namespace LogicCalculator
                 Console.WriteLine("\tCreated Document: ApplyTemplate.docx\n");
             }
         }
+        private void MenuItemExit_Click(object sender, RoutedEventArgs e)
+        {
 
+        }
+
+        private void MenuItemManual_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
 
         #endregion
 
-
-        #region utility
-        private int FindLiteralEnd(string input, int start)
+        #region dynamic_gui
+        private void CreateLine()
         {
-            for (int i = start; i < input.Length; i++)
+            //create new line and define cols
+            Grid newLine = new Grid();
+            ColumnDefinition gridCol1 = new ColumnDefinition
             {
-                if (!Char.IsLetter(input[i]))
+                Width = new GridLength(40)
+            };
+            ColumnDefinition gridCol2 = new ColumnDefinition
+            {
+                Width = new GridLength(160)
+            };
+            ColumnDefinition gridCol3 = new ColumnDefinition
+            {
+                Width = new GridLength(60)
+            };
+            ColumnDefinition gridCol4 = new ColumnDefinition
+            {
+                Width = new GridLength(60)
+            };
+            ColumnDefinition gridCol5 = new ColumnDefinition
+            {
+                Width = new GridLength(60)
+            };
+            ColumnDefinition gridCol6 = new ColumnDefinition
+            {
+                Width = new GridLength(60)
+            };
+
+            // ADD col to new line
+            newLine.ColumnDefinitions.Add(gridCol1);
+            newLine.ColumnDefinitions.Add(gridCol2);
+            newLine.ColumnDefinitions.Add(gridCol3);
+            newLine.ColumnDefinitions.Add(gridCol4);
+            newLine.ColumnDefinitions.Add(gridCol5);
+            newLine.ColumnDefinitions.Add(gridCol6);
+
+            //label
+            Label lb = new Label
+            {
+                Content = $"{nextLine}",
+                Margin = new Thickness(2),
+                HorizontalContentAlignment = HorizontalAlignment.Right
+            };
+            Grid.SetColumn(lb, 0);
+
+            //textblock - statement
+            TextBox tbState = new TextBox
+            {
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = System.Windows.VerticalAlignment.Center,
+                Name = $"tbStatement{nextLine}",
+                Margin = new Thickness(2),
+                Width = 150
+            };
+            Grid.SetColumn(tbState, 1);
+
+            //comboBox - rule
+            ComboBox cmbRules = new ComboBox
+            {
+                ItemsSource = rules,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = System.Windows.VerticalAlignment.Center,
+                Name = $"cmbRules{nextLine}",
+                Margin = new Thickness(2),
+                Width = 50
+            };
+            Grid.SetColumn(cmbRules, 2);
+
+            //textblock - first segment
+            TextBox tbFirstSeg = new TextBox
+            {
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = System.Windows.VerticalAlignment.Center,
+                Name = $"tbFirstSeg{nextLine}",
+                Margin = new Thickness(2),
+                Width = 50
+            };
+            Grid.SetColumn(tbFirstSeg, 3);
+
+            //textblock - second segment
+            TextBox tbSecondSeg = new TextBox
+            {
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = System.Windows.VerticalAlignment.Center,
+                Name = $"tbSecondSeg{nextLine}",
+                Margin = new Thickness(2),
+                Width = 50
+            };
+            Grid.SetColumn(tbSecondSeg, 4);
+
+            //textblock - third segment
+            TextBox tbThirdSeg = new TextBox
+            {
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = System.Windows.VerticalAlignment.Center,
+                Name = $"tbThirdSeg{nextLine}",
+                Margin = new Thickness(2),
+                Width = 50
+            };
+            Grid.SetColumn(tbThirdSeg, 5);
+
+            //add children to new line
+            newLine.Children.Add(lb);
+            newLine.Children.Add(tbState);
+            newLine.Children.Add(cmbRules);
+            newLine.Children.Add(tbFirstSeg);
+            newLine.Children.Add(tbSecondSeg);
+            newLine.Children.Add(tbThirdSeg);
+
+            //add new line to StackPanel
+            spGridTable.Children.Add(newLine);
+            nextLine++;
+        }
+        #endregion
+
+
+
+        void HandleTableInput()
+        {
+            List<TextBox> text_boxes_list = GetAllTextBoxes();
+            PrintTextBoxList(text_boxes_list);
+            for (int i = 0; i < text_boxes_list.Count - 4; i += 4)
+            {
+                TextBox expression = text_boxes_list[i] as TextBox;
+                TextBox start_line = text_boxes_list[i + 1] as TextBox;
+                TextBox end_line = text_boxes_list[i + 2] as TextBox;
+                TextBox rule = text_boxes_list[i + 3] as TextBox;
+                int current_row = i / 4 + 1;
+
+                if (IsValidStatement(expression, start_line, end_line, rule, current_row))
                 {
-                    return i;
+                    int start = Int32.Parse(start_line.Text.Trim()), end = Int32.Parse(end_line.Text.Trim());
+                    Statement s = new Statement(expression.Text, rule.Text, start, end);
+                    statement_list.Add(s);
                 }
+                else
+                {
+                    return;
+                }
+
+                if (rule.Text.Contains("^") || rule.Text.Contains("∧") || rule.Text.Contains("&"))
+                {
+                    new Evaluation(statement_list, current_row, "and");
+                }
+                //return c == '^' || c == '>' || c == 'v' || c == '&' || c == '|' || c == '¬' || c == '~' ||
+                //       c == '∧' || c == '→' || c == '∨' || c == '↔' || c == '⊢' || c == '⊥';
             }
-            return input.Length;
+
+            return;
         }
 
+        #region button_clicks
+
+        private void BtnAddLine_Click(object sender, RoutedEventArgs e)
+        {
+            CreateLine();
+        }
+
+        private void CheckButton_click(object sender, RoutedEventArgs e)
+        {
+            HandleTableInput();
+        }         
+       
+        private void BtnOr_Click(object sender, RoutedEventArgs e)
+        {
+            if (elementWithFocus != null)
+            {
+                AppendKeyboardChar(elementWithFocus, "∨");
+            }
+        }
+        private void BtnAnd_Click(object sender, RoutedEventArgs e)
+        {
+            if (elementWithFocus != null)
+            {
+                AppendKeyboardChar(elementWithFocus, "∧");
+            }
+        }
+        private void Btnbothdirections_Click(object sender, RoutedEventArgs e)
+        {
+            if (elementWithFocus != null)
+            {
+                AppendKeyboardChar(elementWithFocus, "↔️");
+            }
+        }
+        private void BtnTurnstile_Click(object sender, RoutedEventArgs e)
+        {
+            if (elementWithFocus != null)
+            {
+                AppendKeyboardChar(elementWithFocus, "⊢");
+            }
+        }
+        private void BtnFalsum_Click(object sender, RoutedEventArgs e)
+        {
+            if (elementWithFocus != null)
+            {
+                AppendKeyboardChar(elementWithFocus, "⊥");
+            }
+        }
+        private void BtnNot_Click(object sender, RoutedEventArgs e)
+        {
+            if (elementWithFocus != null)
+            {
+                AppendKeyboardChar(elementWithFocus, "¬");
+            }
+        }
+        #endregion
+
+        #region utility 
         public int FindOperator(string input, int start)
         {
             for (int i = start; i < input.Length; i++)
@@ -260,11 +328,22 @@ namespace LogicCalculator
 
         #endregion
 
+        #region Keyboard_func
+        private void AppendKeyboardChar(TextBox tb, string sign)
+        {
+            tb.Text += sign;
+        }
+        private void SpKeyboard_MouseEnter(object sender, MouseEventArgs e)
+        {
+            if (Keyboard.FocusedElement is TextBox temp)
+                elementWithFocus = temp;
+        }
+        #endregion
+
         #region input_check
 
         private bool IsValidStatement(TextBox expression, TextBox start_line, TextBox end_line, TextBox rule, int row)
         {
-            int start, end;
             if (!IsValidExpression(expression.Text, row))
             {
                 return false;
@@ -284,12 +363,12 @@ namespace LogicCalculator
                 Expression_Error(row, "Rule is empty");
                 return false;
             }
-            if (!Int32.TryParse(start_line.Text.Trim(), out start))
+            if (!Int32.TryParse(start_line.Text.Trim(), out int start))
             {
                 Expression_Error(row, "Start Line is not a positive integer number");
                 return false;
             }
-            if (!Int32.TryParse(end_line.Text.Trim(), out end))
+            if (!Int32.TryParse(end_line.Text.Trim(), out int end))
             {
                 Expression_Error(row, "End Line is not a positive integer number");
                 return false;
@@ -419,50 +498,6 @@ namespace LogicCalculator
         #endregion input_check
 
         #region testing
-
-        public void Test()
-        {
-            Hide();
-            string input = "(a>b)>C";
-
-            input = Regex.Replace(input, @"\s+", "");//remove spaces
-            //string a=input.Split('(')[1];
-
-            Console.WriteLine("");
-            Console.WriteLine("");
-            // IsValidExpression(input);
-            Calculate(input);
-
-            Console.WriteLine("");
-            Console.WriteLine("Printing Literals");
-            PrintStringSet(literals);
-            Console.WriteLine("");
-            Console.WriteLine("Printing Variables");
-            PrintStringSet(variables);
-            Console.WriteLine("");
-
-            Environment.Exit(0);
-        }
-
-        public void PrintStringSet(HashSet<string> set)
-        {
-            Console.WriteLine("Size of set: " + set.Count);
-            foreach (string s in set)
-            {
-                Console.WriteLine(s);
-            }
-        }
-
-        public void PrintObservable(ObservableCollection<string> oc)
-        {
-            Console.WriteLine("Size of Observable Collection: " + oc.Count);
-            foreach (string s in oc)
-            {
-                Console.WriteLine(s.ToString());
-            }
-        }
-
-
         public void PrintTextBoxList(List<TextBox> l)
         {
             foreach (TextBox t in l)

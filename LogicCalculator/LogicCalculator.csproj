@@ -105,5 +105,12 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="exit.ico" />
+    <Resource Include="help.ico" />
+    <Resource Include="new.ico" />
+    <Resource Include="open.ico" />
+    <Resource Include="save.ico" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

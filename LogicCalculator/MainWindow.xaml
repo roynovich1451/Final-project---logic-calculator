@@ -6,100 +6,135 @@
         mc:Ignorable="d"
        Title="Logic Calculator" Height="500" Width="600">
 
-    <Grid Name="GridMain">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="5*"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-        <Grid Name="GridHelp" Grid.Column="1">
+    <DockPanel>
+        <!--MENU BAR-->
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="_File">
+                <MenuItem Header="_New" Click="MenuItemNew_Click">
+                    <MenuItem.Icon>
+                        <Image Source="new.ico"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="_Open" Click="MenuItemOpen_Click">
+                    <MenuItem.Icon>
+                        <Image Source="open.ico"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="_Save" Click="MenuItemSave_Click">
+                    <MenuItem.Icon>
+                        <Image Source="save.ico"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <Separator />
+                <MenuItem Header="_Exit"  Click="MenuItemExit_Click">
+                    <MenuItem.Icon>
+                        <Image Source="exit.ico"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+            </MenuItem>
+            <MenuItem Header="_Help">
+                <MenuItem Header="_User Manual" Click="MenuItemManual_Click">
+                    <MenuItem.Icon>
+                        <Image Source="help.ico"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+            </MenuItem>
+        </Menu>
+
+        <!--MENU BAR END-->
+        <Grid Name="GridMain" Margin="5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="470"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
-                <RowDefinition Height="50"/>
-                <RowDefinition Height="50"/>
             </Grid.RowDefinitions>
-            <!--KEYBOARD-->
-            <GroupBox Header="Keyboard" Grid.Column="1" BorderThickness="2" BorderBrush="Black">
-                <StackPanel Name="spKeyboard" Grid.Column="1">
-                    <Button Name="btnNot" Margin="0,75,0,0" Content="¬"/>
-                    <Button Name="btnOr" Content="∨" Margin="0,11,0,0"/>
-                    <Button Name="btnAnd" Content="∧" Margin="0,11,0,0"/>
-                    <Button Name="btnbothdirections" Content="↔️"  Margin="0,11,0,0"/>
-                    <Button Name="btnTurnstile" Content="⊢"  Margin="0,11,0,0"/>
-                    <Button Name="btnFalsum" Content="⊥"  Margin="0,11,0,0"/>
-                </StackPanel>
-            </GroupBox>
-            <Button Name="saveUserManual" Content="User manual" Margin="5" Grid.Row="2"/>
-            <Button Name="saveButton" Click="SaveButton_click" Content="Save" Margin="5" Grid.Row="1"/>
-        </Grid>
-        <!--TABs-->
-        <TabControl>
-            <TabItem Header="Logical proof">
-                <!--LOGICAL PROOF TAB-->
-                <Grid Name="GridLogicalProof">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="2*"/>
-                        <ColumnDefinition Width="163*"/>
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="90"/>
-                        <RowDefinition Height="7*"/>
-                        <RowDefinition Height="50"/>
-                    </Grid.RowDefinitions>
-                    <StackPanel Name="spLogicExpression" VerticalAlignment="Center" Grid.ColumnSpan="2" Margin="0,8">
-                        <TextBlock Text="Enter a valid logical expression" TextAlignment="Center" FontWeight="Bold"/>
-                        <TextBox Name="tbValue" TextAlignment="Center" Margin="80,0"/>
-                        <Grid Margin="0,5,0,0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="40"/>
-                                <ColumnDefinition Width="160"/>
-                                <ColumnDefinition Width="60"/>
-                                <ColumnDefinition Width="60"/>
-                                <ColumnDefinition Width="60"/>
-                                <ColumnDefinition Width="60"/>
-                            </Grid.ColumnDefinitions>
-                            <!--TABLE HEADER-->
-                            <Label Content="Line" HorizontalAlignment="Center" FontWeight="Bold"/>
-                            <Label Content="Statement" HorizontalAlignment="Center" Grid.Column="1" FontWeight="Bold"/>
-                            <Label Content="Rule" HorizontalAlignment="Center" Grid.Column="2" FontWeight="Bold"/>
-                            <Label HorizontalAlignment="Center" Grid.Column="3" FontWeight="Bold">
-                                <TextBlock TextWrapping="Wrap" Text="First segment"/>
-                            </Label>
-                            <Label HorizontalAlignment="Center" Grid.Column="4" FontWeight="Bold">
-                                <TextBlock TextWrapping="Wrap" Text="Second segment"/>
-                            </Label>
-                            <Label HorizontalAlignment="Center" Grid.Column="5" FontWeight="Bold">
-                                <TextBlock TextWrapping="Wrap" Text="Third segment"/>
-                            </Label>
-                        </Grid>
+            <Grid Name="GridPermanent" Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!--KEYBOARD-->
+                <GroupBox Header="Keyboard" Grid.Column="1" BorderThickness="2" BorderBrush="Black">
+                    <StackPanel Name="spKeyboard" Grid.Column="1" MouseEnter="SpKeyboard_MouseEnter">
+                        <Button Name="btnNot" Margin="0,75,0,0" Content="¬" Click="BtnNot_Click"/>
+                        <Button Name="btnOr" Content="∨" Margin="0,11,0,0" Click="BtnOr_Click"/>
+                        <Button Name="btnAnd" Content="∧" Margin="0,11,0,0" Click="BtnAnd_Click"/>
+                        <Button Name="btnbothdirections" Content="↔️"  Margin="0,11,0,0" Click="Btnbothdirections_Click"/>
+                        <Button Name="btnTurnstile" Content="⊢"  Margin="0,11,0,0" Click="BtnTurnstile_Click"/>
+                        <Button Name="btnFalsum" Content="⊥"  Margin="0,11,0,0" Click="BtnFalsum_Click"/>
                     </StackPanel>
-                    <ScrollViewer Grid.Row="1" Grid.ColumnSpan="2">
-                        <StackPanel Name="spGridTable">
+                </GroupBox>
+            </Grid>
 
-                        </StackPanel>
-                    </ScrollViewer>
-                    <Grid Name="GridButtonsLine" Grid.Row="2" Grid.ColumnSpan="2">
+            <!--TABs-->
+            <TabControl>
+                <TabItem Header="Logical proof">
+                    <!--LOGICAL PROOF TAB-->
+                    <Grid Name="GridLogicalProof">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="80"/>
-                            <ColumnDefinition Width="80"/>
-                            <ColumnDefinition Width="80"/>
-                            <ColumnDefinition Width="80"/>
-                            <ColumnDefinition Width="80"/>
-                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="6*"/>
+                            <ColumnDefinition Width="241*"/>
+                            <ColumnDefinition Width="234*"/>
                         </Grid.ColumnDefinitions>
-                        <Button Name="btnAddLine" IsDefault="True" Click="btnAddLine_Click" Content="Add new line" Margin="5" Grid.Column="2" Grid.ColumnSpan="2"/>
-                        <Button Name="btncheckButton" IsDefault="True" Click="CheckButton_click" Content="Check" Margin="5" Grid.Column="5"/>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="90"/>
+                            <RowDefinition Height="7*"/>
+                            <RowDefinition Height="50"/>
+                        </Grid.RowDefinitions>
+                        <StackPanel Name="spLogicExpression" VerticalAlignment="Center" Grid.ColumnSpan="3" Margin="0,5,-0.2,5.4">
+                            <TextBlock Text="Enter a valid logical expression" TextAlignment="Center" FontWeight="Bold"/>
+                            <TextBox Name="tbValue" TextAlignment="Center" Margin="80,0"/>
+                            <Grid Margin="0,5,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="40"/>
+                                    <ColumnDefinition Width="160"/>
+                                    <ColumnDefinition Width="60"/>
+                                    <ColumnDefinition Width="60"/>
+                                    <ColumnDefinition Width="60"/>
+                                    <ColumnDefinition Width="60"/>
+                                </Grid.ColumnDefinitions>
 
+                                <!--TABLE HEADER-->
+                                <Label Content="Line" HorizontalAlignment="Center" FontWeight="Bold"/>
+                                <Label Content="Statement" HorizontalAlignment="Center" Grid.Column="1" FontWeight="Bold"/>
+                                <Label Content="Rule" HorizontalAlignment="Center" Grid.Column="2" FontWeight="Bold"/>
+                                <Label HorizontalAlignment="Center" Grid.Column="3" FontWeight="Bold">
+                                    <TextBlock TextWrapping="Wrap" Text="First segment"/>
+                                </Label>
+                                <Label HorizontalAlignment="Center" Grid.Column="4" FontWeight="Bold">
+                                    <TextBlock TextWrapping="Wrap" Text="Second segment"/>
+                                </Label>
+                                <Label HorizontalAlignment="Center" Grid.Column="5" FontWeight="Bold">
+                                    <TextBlock TextWrapping="Wrap" Text="Third segment"/>
+                                </Label>
+                            </Grid>
+                        </StackPanel>
+                        <ScrollViewer Grid.ColumnSpan="3" Margin="0,90,-0.2,49.2" Grid.RowSpan="3">
+                            <StackPanel Name="spGridTable">
+
+                            </StackPanel>
+                        </ScrollViewer>
+                        <Grid Name="GridButtonsLine" Grid.Row="2" Grid.ColumnSpan="3" Margin="0,0.4,-0.2,0.2">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="75"/>
+                                <ColumnDefinition Width="75"/>
+                                <ColumnDefinition Width="75"/>
+                                <ColumnDefinition Width="75"/>
+                                <ColumnDefinition Width="75"/>
+                                <ColumnDefinition Width="75"/>
+                            </Grid.ColumnDefinitions>
+                            <Button Name="btnAddLine" IsDefault="True" Click="BtnAddLine_Click" Content="Add new line" Margin="5" Grid.Column="2" Grid.ColumnSpan="2"/>
+                            <Button Name="btncheckButton" IsDefault="True" Click="CheckButton_click" Content="Check" Margin="5" Grid.Column="5"/>
+                        </Grid>
                     </Grid>
-
-                </Grid>
-            </TabItem>
-            <!--TEXT EDITOR TAB-->
-            <TabItem Header="Text editor">
-                <TextBox Name="tbEditor" Margin="10"/>
-            </TabItem>
-        </TabControl>
-    </Grid>
+                </TabItem>
+                <!--TEXT EDITOR TAB-->
+                <TabItem Header="Text editor">
+                    <TextBox Name="tbEditor" Margin="10"/>
+                </TabItem>
+            </TabControl>
+        </Grid>
+    </DockPanel>
 </Window>
