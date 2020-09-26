@@ -15,16 +15,22 @@ namespace LogicCalculator
                     And(statement_list, current_row);
                     break;
                 case "or":
+                    Or(statement_list, current_row);
                     break;
-                case "contra":
+                case "pbc":
+                    PBC(statement_list, current_row);
                     break;
                 case "not":
+                    Not(statement_list, current_row);
                     break;
                 case "mp":
+                    MP(statement_list, current_row);
                     break;
                 case "mt":
+                    MT(statement_list, current_row);
                     break;
                 case "given":
+                    Given(statement_list, current_row);
                     break;
                
                     /*         case "":
@@ -53,30 +59,30 @@ namespace LogicCalculator
         }
 
 
-        private void Or(string statement, char rule, int startLine, int endLine)
+        private void Or(List<Statement> statement_list, int current_row)
         {
 
         }
-        private void Contra(string statement, char rule, int startLine, int endLine)
+        private void PBC(List<Statement> statement_list, int current_row)
         {
 
         }
-        private void Not(string statement, char rule, int startLine, int endLine)
+        private void Not(List<Statement> statement_list, int current_row)
         {
 
         }
       
-        private void MP(string statement, char rule, int startLine, int endLine)
+        private void MP(List<Statement> statement_list, int current_row)
         {
 
         }
-        private void MT(string statement, char rule, int startLine, int endLine)
+        private void MT(List<Statement> statement_list, int current_row)
         {
 
         }
-        private void Given(string statement, char rule, int startLine, int endLine)
+        private void Given(List<Statement> statement_list, int current_row)
         {
-
+            //if()
         }
         private bool IsProvenAlready(string var)
         {

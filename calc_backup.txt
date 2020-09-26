@@ -1,0 +1,82 @@
+        public void Calculate(string input)
+        {
+            variables.Add(input);
+            Console.WriteLine("input: " + input);
+            if (input.Length == 0)
+                return;
+            Console.WriteLine("input length: " + input.Length);
+            int end_of_first, end_of_second, op_index;
+            for (int i = 0; i < input.Length; i++)
+            {
+                Console.WriteLine("i: " + i + " input[i]: " + input[i]);
+
+                if (IsOperator(input[i]))
+                {
+                    Console.WriteLine("skip");
+                    Console.WriteLine();
+                    continue;
+                }
+
+                if (input[i] == '(')
+                {
+                    op_index = FindOperator(input, i);
+                    end_of_first = FindLiteralEnd(input, op_index + 1);
+                    Console.WriteLine();
+                    Console.WriteLine("op_index: " + op_index + " end: " + end_of_first);
+                    if (input[op_index + 1] != '(')
+                    {
+                        Handle_Literals(input.Substring(i + 1), end_of_first - i - 1);
+                    }
+                    else
+                    {
+                        Calculate(input.Substring(op_index + 1));
+                    }
+                    i = input.IndexOf(')') + 2;
+                    if (i == '(')
+                    {
+
+                    }
+                    else
+                    {
+                        end_of_second = FindLiteralEnd(input, i);
+                        literals.Add(input.Substring(i, end_of_second - i));
+                        i = end_of_second;
+                    }
+                }
+                else
+                {
+                    i = Handle_Literals(input, i) + 1;
+                }
+            }
+        }
+        private int Handle_Literals(string input, int i)
+        {
+            int end_of_first, end_of_second;
+            end_of_first = FindLiteralEnd(input, i);
+            if (end_of_first >= input.Length - 1)
+                return input.Length;
+            Console.WriteLine("i " + i);
+            Console.WriteLine("end_of_first " + end_of_first);
+            Console.WriteLine("\nadding to literals:" + input.Substring(i, end_of_first - i));
+            literals.Add(input.Substring(i, end_of_first - i));
+            if (i > input.Length - 2)
+                return input.Length;
+            if (input[end_of_first] == '(')
+                end_of_second = input.IndexOf(')', end_of_first + 1);
+            else
+                end_of_second = FindLiteralEnd(input, end_of_first + 1);
+            if (end_of_second == -1)
+                end_of_second = input.Length - 1;
+            Console.WriteLine("end_of_second " + end_of_second);
+            Console.WriteLine();
+            Console.WriteLine("\nadding to literals:" + input.Substring(end_of_first + 1, end_of_second - end_of_first - 1));
+            literals.Add(input.Substring(end_of_first + 1, end_of_second - end_of_first - 1));
+
+            Console.WriteLine("adding to variables:" + input.Substring(i, end_of_second - i));
+            variables.Add(input.Substring(i, end_of_second - i));
+
+            Console.WriteLine();
+
+            i = end_of_first;
+            return i;
+        }
