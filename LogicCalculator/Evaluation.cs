@@ -40,22 +40,19 @@ namespace LogicCalculator
 
         private void And(List<Statement> statement_list, int current_row)
         {
-            Statement current_statement = statement_list[current_row];
-            Statement start_statement = statement_list[current_statement.start_line];
-            Statement end_statement = statement_list[current_statement.end_line];
+            /*Statement current_statement = statement_list[current_row];
+            //Statement start_statement = statement_list[current_statement.first_segment];
 
             if (current_statement.rule.Contains("i"))
             {
-                if (current_statement.expression.Contains(start_statement.expression) && start_statement.rule == "given"
-                    && current_statement.expression.Contains(end_statement.expression) && end_statement.rule == "given")
-                {
+                if (current_statement.expression.Contains(start_statement.expression) && start_statement.rule == "given")                {
                     MessageBox.Show("correct and");
                 }
             }
             else
             {
                // if ()
-            }
+            }*/
         }
 
 
