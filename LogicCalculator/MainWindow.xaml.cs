@@ -14,95 +14,105 @@ namespace LogicCalculator
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    /// 
 
     public partial class MainWindow : Window
     {
+        #region variables
         readonly List<Statement> statement_list = new List<Statement>();
         private int table_row_num = 0;
-
-        private static readonly int TABLE_COL_NUM = 5;
+        private static readonly int TABLE_COL_NUM = 6;
         TextBox elementWithFocus;
-        private readonly List<string> rules = new List<string> { "data", "∧i", "∧e", "¬¬e", "¬¬i", "→e",
+        private readonly List<string> rules = new List<string> { "data", "^i", "^e", "¬¬e", "¬¬i", "→e",
                                                         "→i", "MP", "MT", "Copy", "Assumption" };
-
+        #endregion
         public MainWindow()
         {
             InitializeComponent();
             CreateLine();
         }
-
         #region MenuBar_Click
         private void MenuItemNew_Click(object sender, RoutedEventArgs e)
         {
-            tbValue.Text = String.Empty;
-            UIElementCollection grids = spGridTable.Children;
-            foreach (var row in grids)
+            spGridTable.Children.Clear();
+            table_row_num = 0;
+            CreateLine();
+        }
+        private void MenuItemOpen_Click(object sender, RoutedEventArgs e)
+        {
+            string path = "C:\\Oren\\Final_project_logic_calculator", file_name = "wow.docx";
+            CheckPathAndFileName(path, file_name);
+
+            using (var document = DocX.Load(path + "\\" + file_name))
             {
-                Grid g = row as Grid;
-                foreach (var child in g.Children)
+                Table proof_table = document.Tables[0];
+                //TODO: Call new to delete rows
+                for (int i = 1; i < proof_table.Rows.Count; i++)
                 {
-                    if (child is TextBox)
+                    CreateLine();
+                }
+                UIElementCollection grids = spGridTable.Children;
+
+                for (int i = 0; i < proof_table.Rows.Count - 1; i++)
+                {
+                    Grid g = grids[i] as Grid;
+                    for (int j = 1; j < TABLE_COL_NUM; j++)
                     {
-                        ((TextBox)child).Text = String.Empty;
-                    }
-                    if (child is ComboBox)
-                    {
-                        ((ComboBox)child).Text = String.Empty;
+                        if (g.Children[j] is ComboBox)
+                        {
+                            ((ComboBox)g.Children[j]).SelectedItem = proof_table.Rows[i + 1].Cells[j].Paragraphs[0].Text;
+                        }
+                        if (g.Children[j] is TextBox)
+                        {
+                            ((TextBox)g.Children[j]).Text = proof_table.Rows[i + 1].Cells[j].Paragraphs[0].Text;
+                        }
                     }
                 }
             }
         }
-        private void MenuItemOpen_Click(object sender, RoutedEventArgs e)
-        {
-            string path = "";
-            using (var document2 = DocX.Load(path + @"Second.docx"))
-            {
-
-            }
-
-        }
         private void MenuItemSave_Click(object sender, RoutedEventArgs e)
         {
-            string fileName = "wow";//TODO: get this from somewhere
+            string file_name = "wow";//TODO: get this from somewhere
             string path = "C:\\Oren\\Final_project_logic_calculator";//TODO: get this from somewhere
 
             //If the folder does not exist yet, it will be created.
             //If the folder exists already, the line will be ignored.
             System.IO.Directory.CreateDirectory(path);
 
-            if (!CheckPathAndFilename(path, fileName))
+            if (!CheckPathAndFileName(path, file_name))
             {
                 return;
             }
 
-            using (var document = DocX.Create(@path + "\\" + fileName))
+            using (var document = DocX.Create(@path + "\\" + file_name))
             {
                 // Add a title.
                 document.InsertParagraph("Logic Calculator Results\n").FontSize(16d).Bold(true).UnderlineStyle(UnderlineStyle.singleLine);
                 //Add the main expression
-                document.InsertParagraph("Logical Expression: "+tbValue.Text+'\n').FontSize(14d);
+                document.InsertParagraph("Logical Expression: " + tbValue.Text + '\n').FontSize(14d);
 
                 //Add the proof table
-                Table proof_table = document.AddTable(table_row_num, TABLE_COL_NUM);
-                proof_table.Alignment=Alignment.center;
-                List<String> input_list = GetAllTableInput();
-                PrintInputList(input_list);
-                Console.WriteLine("count " + input_list.Count);
-                Console.WriteLine("");
+                Table proof_table = document.AddTable(table_row_num + 1, TABLE_COL_NUM);
+                proof_table.Alignment = Alignment.center;
 
+                proof_table.Rows[0].Cells[0].Paragraphs.First().Append("Line").UnderlineStyle(UnderlineStyle.singleLine);
+                proof_table.Rows[0].Cells[1].Paragraphs.First().Append("Expression").UnderlineStyle(UnderlineStyle.singleLine);
+                proof_table.Rows[0].Cells[2].Paragraphs.First().Append("Rule").UnderlineStyle(UnderlineStyle.singleLine);
+                proof_table.Rows[0].Cells[3].Paragraphs.First().Append("First Segment").UnderlineStyle(UnderlineStyle.singleLine);
+                proof_table.Rows[0].Cells[4].Paragraphs.First().Append("Second Segment").UnderlineStyle(UnderlineStyle.singleLine);
+                proof_table.Rows[0].Cells[5].Paragraphs.First().Append("Third Segment").UnderlineStyle(UnderlineStyle.singleLine);
+
+                List<String> input_list = GetAllTableInput();
                 //Fill the proof table
+
                 for (int i = 0; i < table_row_num; i++)
                 {
-                    for (int j = 0; j < TABLE_COL_NUM; j++)
+                    proof_table.Rows[i + 1].Cells[0].Paragraphs.First().Append((i + 1).ToString());
+                    for (int j = 0; j < TABLE_COL_NUM - 1; j++)
                     {
-                        proof_table.Rows[i].Cells[j].Paragraphs.First().Append(input_list[i * TABLE_COL_NUM + j]);
-                        Console.WriteLine("input_list[i * TABLE_COL_NUM + j]"+ input_list[i * TABLE_COL_NUM + j]);
+                        proof_table.Rows[i + 1].Cells[j + 1].Paragraphs.First().Append(input_list[i * (TABLE_COL_NUM - 1) + j]);
                     }
                 }
                 document.InsertTable(proof_table);
-
-
                 // Save this document to disk.
                 try
                 {
@@ -112,19 +122,17 @@ namespace LogicCalculator
                 {
                     MessageBox.Show(ex.Message);
                 }
-                MessageBox.Show("Created Document: " + path + "\\" + fileName + ".docx","Documented Created");
+                MessageBox.Show("Created Document: " + path + "\\" + file_name + ".docx", "Documented Created");
             }
         }
         private void MenuItemExit_Click(object sender, RoutedEventArgs e)
         {
             Environment.Exit(0);
         }
-
         private void MenuItemManual_Click(object sender, RoutedEventArgs e)
         {
             string workingDirectory = Environment.CurrentDirectory;
             string projectDirectory = Directory.GetParent(workingDirectory).Parent.FullName;
-            Console.WriteLine(projectDirectory);
             try
             {
                 Process.Start(projectDirectory + "\\User_Manual.docx", "-p");
@@ -134,12 +142,11 @@ namespace LogicCalculator
                 MessageBox.Show(ex.Message, "Error");
             }
         }
-
         #endregion
-
-        #region dynamic_gui
+        #region Dynamic_GUI
         private void CreateLine()
         {
+            ++table_row_num;
             //create new line and define cols
             Grid newLine = new Grid();
             ColumnDefinition gridCol1 = new ColumnDefinition
@@ -250,62 +257,43 @@ namespace LogicCalculator
 
             //add new line to StackPanel
             spGridTable.Children.Add(newLine);
-            table_row_num++;
         }
         #endregion
+        void HandleTableInput()
+        {
+            List<String> text_boxes_list = GetAllTableInput();
+            int col_to_check = TABLE_COL_NUM - 1;
+            for (int i = 0; i < text_boxes_list.Count - col_to_check; i += col_to_check)
+            {
+                String expression = text_boxes_list[i];
+                String rule = text_boxes_list[i + 1];
+                String first_segment = text_boxes_list[i + 2];
+                String second_segment = text_boxes_list[i + 3];
+                String third_segment = text_boxes_list[i + 4];
+                int current_row = i / col_to_check + 1;
 
-        /*   void HandleTableInput()
-           {
-               List<TextBox> text_boxes_list = GetAllTableInput();
-               PrintInputList(text_boxes_list);
-               for (int i = 0; i < text_boxes_list.Count - 4; i += 5)
-               {
-                   TextBox expression = text_boxes_list[i] as TextBox;
-                   TextBox rule = text_boxes_list[i + 1] as TextBox;
-                   TextBox first_segment = text_boxes_list[i + 2] as TextBox;
-                   TextBox second_segment = text_boxes_list[i + 3] as TextBox;
-                   TextBox third_segment = text_boxes_list[i + 4] as TextBox;
-                   int current_row = i / 5 + 1;
+                if (!IsValidStatement(expression, rule, first_segment, second_segment, third_segment, current_row))
+                    return;
+                Statement s = new Statement(expression, rule, first_segment, second_segment, third_segment);
+                statement_list.Add(s);
 
-                   if (!second_segment.IsEnabled)
-                   {
-
-                   }
-
-                   if (IsValidStatement(expression, rule, first_segment, second_segment, third_segment, current_row))
-                   {
-                       /* int start = Int32.Parse(start_line.Text.Trim()), end = Int32.Parse(end_line.Text.Trim());
-                        Statement s = new Statement(expression.Text, rule.Text, start, end);
-                        statement_list.Add(s);
-                   }
-                   else
-                   {
-                       return;
-                   }
-
-                   if (rule.Text.Contains("^") || rule.Text.Contains("∧") || rule.Text.Contains("&"))
-                   {
-                       new Evaluation(statement_list, current_row, "and");
-                   }
-                   //return c == '^' || c == '>' || c == 'v' || c == '&' || c == '|' || c == '¬' || c == '~' ||
-                   //       c == '∧' || c == '→' || c == '∨' || c == '↔' || c == '⊢' || c == '⊥';
-               }
-
-               return;
-           }
-   */
+                if (rule.Contains("^") || rule.Contains("∧") || rule.Contains("&"))
+                {
+                    new Evaluation(statement_list, current_row, "and");
+                }
+                //return c == '^' || c == '>' || c == 'v' || c == '&' || c == '|' || c == '¬' || c == '~' ||
+                //       c == '∧'|| c == '→' || c == '∨'|| c == '↔' || c == '⊢' || c == '⊥';
+            }
+        }
         #region button_clicks
-
         private void BtnAddLine_Click(object sender, RoutedEventArgs e)
         {
             CreateLine();
         }
-
         private void CheckButton_click(object sender, RoutedEventArgs e)
         {
-            //HandleTableInput();
+            HandleTableInput();
         }
-
         private void BtnOr_Click(object sender, RoutedEventArgs e)
         {
             if (elementWithFocus != null)
@@ -348,8 +336,27 @@ namespace LogicCalculator
                 AppendKeyboardChar(elementWithFocus, "¬");
             }
         }
+        private void btnClear_Click(object sender, RoutedEventArgs e)
+        {
+            tbValue.Text = String.Empty;
+            UIElementCollection grids = spGridTable.Children;
+            foreach (var row in grids)
+            {
+                Grid g = row as Grid;
+                foreach (var child in g.Children)
+                {
+                    if (child is TextBox)
+                    {
+                        ((TextBox)child).Text = String.Empty;
+                    }
+                    if (child is ComboBox)
+                    {
+                        ((ComboBox)child).Text = String.Empty;
+                    }
+                }
+            }
+        }
         #endregion
-
         #region utility 
         public int FindOperator(string input, int start)
         {
@@ -386,7 +393,6 @@ namespace LogicCalculator
         }
 
         #endregion
-
         #region Keyboard_func
         private void AppendKeyboardChar(TextBox tb, string sign)
         {
@@ -398,45 +404,40 @@ namespace LogicCalculator
                 elementWithFocus = temp;
         }
         #endregion
-
         #region input_check
 
-        private bool IsValidStatement(TextBox expression, TextBox rule, TextBox first_segment,
-           TextBox second_segment, TextBox third_segment, int row)
+        private bool IsValidStatement(String expression, String rule, String first_segment,
+           String second_segment, String third_segment, int row)
         {
-            if (!IsValidExpression(expression.Text, row))
+            if (!IsValidExpression(expression, row))
             {
-                return false;
-            }
-            if (string.IsNullOrEmpty(first_segment.Text))
-            {
-                Expression_Error(row, "Start Line is empty");
                 return false;
             }
 
-            if (string.IsNullOrEmpty(rule.Text))
+            if (string.IsNullOrEmpty(rule))
             {
                 Expression_Error(row, "Rule is empty");
                 return false;
             }
-            if (!Int32.TryParse(first_segment.Text.Trim(), out int start))
+            if (string.IsNullOrEmpty(first_segment))
             {
-                Expression_Error(row, "first_segment is not a positive integer number");
+                Expression_Error(row, "First segment is empty");
                 return false;
             }
-            if (!Int32.TryParse(second_segment.Text.Trim(), out int end))
+
+            if (!IsValidSegment(first_segment))
             {
-                Expression_Error(row, "End Line is not a positive integer number");
+                Expression_Error(row, "First segment is not a positive integer number");
                 return false;
             }
-            if (start > statement_list.Count || start < 0)
+            if (!IsValidSegment(second_segment))
             {
-                Expression_Error(row, "Start Line entered is not in the range of the table size");
+                Expression_Error(row, "Second segment is not a positive integer number");
                 return false;
             }
-            if (end > statement_list.Count || end < 0)
+            if (!IsValidSegment(third_segment))
             {
-                Expression_Error(row, "End Line entered is not in the range of the table size");
+                Expression_Error(row, "Third segment is not a positive integer number");
                 return false;
             }
             return true;
@@ -562,32 +563,31 @@ namespace LogicCalculator
 
         }
 
-        public bool CheckPathAndFilename(string path, string fileName)
+        public bool CheckPathAndFileName(string path, string file_name)
         {
             //Check if the name has invalid chars
-            fileName = fileName.Trim();
+            file_name = file_name.Trim();
             path = path.Trim();
-            if (string.IsNullOrEmpty(fileName))
+            if (string.IsNullOrEmpty(file_name))
             {
                 MessageBox.Show("File name is empty", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
-            if (fileName.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
+            if (file_name.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
             {
                 MessageBox.Show("File name can not contain < > : \" / \\ | ? *", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
             //TODO add overwrite option
-            if (File.Exists(Path.Combine(path, fileName)))
+            /*if (File.Exists(Path.Combine(path, file_name)))
             {
                 MessageBox.Show("File exists already", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
-            }
+            }*/
             return true;
         }
 
         #endregion input_check
-
         #region testing
         public void PrintInputList(List<String> l)
         {
@@ -596,8 +596,6 @@ namespace LogicCalculator
                 Console.WriteLine(t);
             }
         }
-
         #endregion testing
-
     }
 }

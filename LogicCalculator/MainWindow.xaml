@@ -125,6 +125,7 @@
                                 <ColumnDefinition Width="75"/>
                                 <ColumnDefinition Width="75"/>
                             </Grid.ColumnDefinitions>
+                            <Button Name="btnClear" IsDefault="True" Click="btnClear_Click" Content="Clear" Margin="5" Grid.Column="0"/>
                             <Button Name="btnAddLine" IsDefault="True" Click="BtnAddLine_Click" Content="Add new line" Margin="5" Grid.Column="2" Grid.ColumnSpan="2"/>
                             <Button Name="btncheckButton" IsDefault="True" Click="CheckButton_click" Content="Check" Margin="5" Grid.Column="5"/>
                         </Grid>
