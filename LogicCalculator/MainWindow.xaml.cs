@@ -173,6 +173,7 @@ namespace LogicCalculator
                                 TextBox tbc = child as TextBox;
                                 tbc.IsEnabled = false;
                                 tbc.Visibility = Visibility.Hidden;
+                                tbc.Text = "";
                             }
                         }
                         break;
@@ -191,6 +192,7 @@ namespace LogicCalculator
                                 TextBox tbc = child as TextBox;
                                 tbc.IsEnabled = false;
                                 tbc.Visibility = Visibility.Hidden;
+                                tbc.Text = "";
                             }
                         }
                         break;
@@ -210,6 +212,7 @@ namespace LogicCalculator
                                 TextBox tbc = child as TextBox;
                                 tbc.IsEnabled = false;
                                 tbc.Visibility = Visibility.Hidden;
+                                tbc.Text = "";
                             }
                         }
                         break;
