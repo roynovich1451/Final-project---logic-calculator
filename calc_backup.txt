@@ -1,82 +1,594 @@
-        public void Calculate(string input)
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+using Xceed.Document.NET;
+using Xceed.Words.NET;
+
+namespace LogicCalculator
+{
+    /// <summary>
+    /// Interaction logic for MainWindow.xaml
+    /// </summary>
+
+    public partial class MainWindow : Window
+    {
+        #region variables
+        readonly List<Statement> statement_list = new List<Statement>();
+        private int table_row_num = 0;
+        private static readonly int TABLE_COL_NUM = 6;
+        TextBox elementWithFocus;
+        private readonly List<string> rules = new List<string> { "data", "^i", "^e", "¬¬e", "¬¬i", "→e",
+                                                        "→i", "MP", "MT", "Copy", "Assumption" };
+        #endregion
+        public MainWindow()
         {
-            variables.Add(input);
-            Console.WriteLine("input: " + input);
-            if (input.Length == 0)
-                return;
-            Console.WriteLine("input length: " + input.Length);
-            int end_of_first, end_of_second, op_index;
-            for (int i = 0; i < input.Length; i++)
+            InitializeComponent();
+            CreateLine();
+        }
+        #region MenuBar_Click
+        private void MenuItemNew_Click(object sender, RoutedEventArgs e)
+        {
+            spGridTable.Children.Clear();
+            table_row_num = 0;
+            CreateLine();
+        }
+        private void MenuItemOpen_Click(object sender, RoutedEventArgs e)
+        {
+            string path = "C:\\Oren\\Final_project_logic_calculator", file_name = "wow.docx";
+            CheckPathAndFileName(path, file_name);
+
+            using (var document = DocX.Load(path + "\\" + file_name))
             {
-                Console.WriteLine("i: " + i + " input[i]: " + input[i]);
-
-                if (IsOperator(input[i]))
+                Table proof_table = document.Tables[0];
+                //TODO: Call new to delete rows
+                for (int i = 1; i < proof_table.Rows.Count; i++)
                 {
-                    Console.WriteLine("skip");
-                    Console.WriteLine();
-                    continue;
+                    CreateLine();
                 }
+                UIElementCollection grids = spGridTable.Children;
 
-                if (input[i] == '(')
+                for (int i = 0; i < proof_table.Rows.Count - 1; i++)
                 {
-                    op_index = FindOperator(input, i);
-                    end_of_first = FindLiteralEnd(input, op_index + 1);
-                    Console.WriteLine();
-                    Console.WriteLine("op_index: " + op_index + " end: " + end_of_first);
-                    if (input[op_index + 1] != '(')
+                    Grid g = grids[i] as Grid;
+                    for (int j = 1; j < TABLE_COL_NUM; j++)
                     {
-                        Handle_Literals(input.Substring(i + 1), end_of_first - i - 1);
+                        if (g.Children[j] is ComboBox)
+                        {
+                            ((ComboBox)g.Children[j]).SelectedItem = proof_table.Rows[i + 1].Cells[j].Paragraphs[0].Text;
+                        }
+                        if (g.Children[j] is TextBox)
+                        {
+                            ((TextBox)g.Children[j]).Text = proof_table.Rows[i + 1].Cells[j].Paragraphs[0].Text;
+                        }
                     }
-                    else
-                    {
-                        Calculate(input.Substring(op_index + 1));
-                    }
-                    i = input.IndexOf(')') + 2;
-                    if (i == '(')
-                    {
-
-                    }
-                    else
-                    {
-                        end_of_second = FindLiteralEnd(input, i);
-                        literals.Add(input.Substring(i, end_of_second - i));
-                        i = end_of_second;
-                    }
-                }
-                else
-                {
-                    i = Handle_Literals(input, i) + 1;
                 }
             }
         }
-        private int Handle_Literals(string input, int i)
+        private void MenuItemSave_Click(object sender, RoutedEventArgs e)
         {
-            int end_of_first, end_of_second;
-            end_of_first = FindLiteralEnd(input, i);
-            if (end_of_first >= input.Length - 1)
-                return input.Length;
-            Console.WriteLine("i " + i);
-            Console.WriteLine("end_of_first " + end_of_first);
-            Console.WriteLine("\nadding to literals:" + input.Substring(i, end_of_first - i));
-            literals.Add(input.Substring(i, end_of_first - i));
-            if (i > input.Length - 2)
-                return input.Length;
-            if (input[end_of_first] == '(')
-                end_of_second = input.IndexOf(')', end_of_first + 1);
-            else
-                end_of_second = FindLiteralEnd(input, end_of_first + 1);
-            if (end_of_second == -1)
-                end_of_second = input.Length - 1;
-            Console.WriteLine("end_of_second " + end_of_second);
-            Console.WriteLine();
-            Console.WriteLine("\nadding to literals:" + input.Substring(end_of_first + 1, end_of_second - end_of_first - 1));
-            literals.Add(input.Substring(end_of_first + 1, end_of_second - end_of_first - 1));
+            string file_name = "wow";//TODO: get this from somewhere
+            string path = "C:\\Oren\\Final_project_logic_calculator";//TODO: get this from somewhere
 
-            Console.WriteLine("adding to variables:" + input.Substring(i, end_of_second - i));
-            variables.Add(input.Substring(i, end_of_second - i));
+            //If the folder does not exist yet, it will be created.
+            //If the folder exists already, the line will be ignored.
+            System.IO.Directory.CreateDirectory(path);
 
-            Console.WriteLine();
+            if (!CheckPathAndFileName(path, file_name))
+            {
+                return;
+            }
 
-            i = end_of_first;
-            return i;
+            using (var document = DocX.Create(@path + "\\" + file_name))
+            {
+                // Add a title.
+                document.InsertParagraph("Logic Calculator Results\n").FontSize(16d).Bold(true).UnderlineStyle(UnderlineStyle.singleLine);
+                //Add the main expression
+                document.InsertParagraph("Logical Expression: " + tbValue.Text + '\n').FontSize(14d);
+
+                //Add the proof table
+                Table proof_table = document.AddTable(table_row_num + 1, TABLE_COL_NUM);
+                proof_table.Alignment = Alignment.center;
+
+                proof_table.Rows[0].Cells[0].Paragraphs.First().Append("Line").UnderlineStyle(UnderlineStyle.singleLine);
+                proof_table.Rows[0].Cells[1].Paragraphs.First().Append("Expression").UnderlineStyle(UnderlineStyle.singleLine);
+                proof_table.Rows[0].Cells[2].Paragraphs.First().Append("Rule").UnderlineStyle(UnderlineStyle.singleLine);
+                proof_table.Rows[0].Cells[3].Paragraphs.First().Append("First Segment").UnderlineStyle(UnderlineStyle.singleLine);
+                proof_table.Rows[0].Cells[4].Paragraphs.First().Append("Second Segment").UnderlineStyle(UnderlineStyle.singleLine);
+                proof_table.Rows[0].Cells[5].Paragraphs.First().Append("Third Segment").UnderlineStyle(UnderlineStyle.singleLine);
+
+                List<String> input_list = GetAllTableInput();
+                //Fill the proof table
+
+                for (int i = 0; i < table_row_num; i++)
+                {
+                    proof_table.Rows[i + 1].Cells[0].Paragraphs.First().Append((i + 1).ToString());
+                    for (int j = 0; j < TABLE_COL_NUM - 1; j++)
+                    {
+                        proof_table.Rows[i + 1].Cells[j + 1].Paragraphs.First().Append(input_list[i * (TABLE_COL_NUM - 1) + j]);
+                    }
+                }
+                document.InsertTable(proof_table);
+                // Save this document to disk.
+                try
+                {
+                    document.Save();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                }
+                MessageBox.Show("Created Document: " + path + "\\" + file_name + ".docx", "Documented Created");
+            }
         }
+        private void MenuItemExit_Click(object sender, RoutedEventArgs e)
+        {
+            Environment.Exit(0);
+        }
+        private void MenuItemManual_Click(object sender, RoutedEventArgs e)
+        {
+            string workingDirectory = Environment.CurrentDirectory;
+            string projectDirectory = Directory.GetParent(workingDirectory).Parent.FullName;
+            try
+            {
+                Process.Start(projectDirectory + "\\User_Manual.docx", "-p");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error");
+            }
+        }
+        #endregion
+        #region Dynamic_GUI
+        private void CreateLine()
+        {
+            ++table_row_num;
+            //create new line and define cols
+            Grid newLine = new Grid();
+            ColumnDefinition gridCol1 = new ColumnDefinition
+            {
+                Width = new GridLength(40)
+            };
+            ColumnDefinition gridCol2 = new ColumnDefinition
+            {
+                Width = new GridLength(160)
+            };
+            ColumnDefinition gridCol3 = new ColumnDefinition
+            {
+                Width = new GridLength(60)
+            };
+            ColumnDefinition gridCol4 = new ColumnDefinition
+            {
+                Width = new GridLength(60)
+            };
+            ColumnDefinition gridCol5 = new ColumnDefinition
+            {
+                Width = new GridLength(60)
+            };
+            ColumnDefinition gridCol6 = new ColumnDefinition
+            {
+                Width = new GridLength(60)
+            };
+
+            // ADD col to new line
+            newLine.ColumnDefinitions.Add(gridCol1);
+            newLine.ColumnDefinitions.Add(gridCol2);
+            newLine.ColumnDefinitions.Add(gridCol3);
+            newLine.ColumnDefinitions.Add(gridCol4);
+            newLine.ColumnDefinitions.Add(gridCol5);
+            newLine.ColumnDefinitions.Add(gridCol6);
+
+            //label
+            Label lb = new Label
+            {
+                Content = $"{table_row_num}",
+                Margin = new Thickness(2),
+                HorizontalContentAlignment = HorizontalAlignment.Right
+            };
+            Grid.SetColumn(lb, 0);
+
+            //textblock - statement
+            TextBox tbState = new TextBox
+            {
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = System.Windows.VerticalAlignment.Center,
+                Name = $"tbStatement{table_row_num}",
+                Margin = new Thickness(2),
+                Width = 150
+            };
+            Grid.SetColumn(tbState, 1);
+
+            //comboBox - rule
+            ComboBox cmbRules = new ComboBox
+            {
+                ItemsSource = rules,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = System.Windows.VerticalAlignment.Center,
+                Name = $"cmbRules{table_row_num}",
+                Margin = new Thickness(2),
+                Width = 50
+            };
+            Grid.SetColumn(cmbRules, 2);
+
+            //textblock - first segment
+            TextBox tbFirstSeg = new TextBox
+            {
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = System.Windows.VerticalAlignment.Center,
+                Name = $"tbFirstSeg{table_row_num}",
+                Margin = new Thickness(2),
+                Width = 50
+            };
+            Grid.SetColumn(tbFirstSeg, 3);
+
+            //textblock - second segment
+            TextBox tbSecondSeg = new TextBox
+            {
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = System.Windows.VerticalAlignment.Center,
+                Name = $"tbSecondSeg{table_row_num}",
+                Margin = new Thickness(2),
+                Width = 50
+            };
+            Grid.SetColumn(tbSecondSeg, 4);
+
+            //textblock - third segment
+            TextBox tbThirdSeg = new TextBox
+            {
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = System.Windows.VerticalAlignment.Center,
+                Name = $"tbThirdSeg{table_row_num}",
+                Margin = new Thickness(2),
+                Width = 50
+            };
+            Grid.SetColumn(tbThirdSeg, 5);
+
+            //add children to new line
+            newLine.Children.Add(lb);
+            newLine.Children.Add(tbState);
+            newLine.Children.Add(cmbRules);
+            newLine.Children.Add(tbFirstSeg);
+            newLine.Children.Add(tbSecondSeg);
+            newLine.Children.Add(tbThirdSeg);
+
+            //add new line to StackPanel
+            spGridTable.Children.Add(newLine);
+        }
+        #endregion
+        void HandleTableInput()
+        {
+            List<String> text_boxes_list = GetAllTableInput();
+            int col_to_check = TABLE_COL_NUM - 1;
+            for (int i = 0; i < text_boxes_list.Count - col_to_check; i += col_to_check)
+            {
+                String expression = text_boxes_list[i];
+                String rule = text_boxes_list[i + 1];
+                String first_segment = text_boxes_list[i + 2];
+                String second_segment = text_boxes_list[i + 3];
+                String third_segment = text_boxes_list[i + 4];
+                int current_row = i / col_to_check + 1;
+
+                if (!IsValidStatement(expression, rule, first_segment, second_segment, third_segment, current_row))
+                    return;
+                Statement s = new Statement(expression, rule, first_segment, second_segment, third_segment);
+                statement_list.Add(s);
+
+                if (rule=="^i")
+                {
+                    new Evaluation(statement_list, current_row, "^i");
+                }
+                //return c == '^' || c == '>' || c == 'v' || c == '&' || c == '|' || c == '¬' || c == '~' ||
+                //       c == '∧'|| c == '→' || c == '∨'|| c == '↔' || c == '⊢' || c == '⊥';
+            }
+        }
+        #region button_clicks
+        private void BtnAddLine_Click(object sender, RoutedEventArgs e)
+        {
+            CreateLine();
+        }
+        private void CheckButton_click(object sender, RoutedEventArgs e)
+        {
+            HandleTableInput();
+        }
+        private void BtnOr_Click(object sender, RoutedEventArgs e)
+        {
+            if (elementWithFocus != null)
+            {
+                AppendKeyboardChar(elementWithFocus, "∨");
+            }
+        }
+        private void BtnAnd_Click(object sender, RoutedEventArgs e)
+        {
+            if (elementWithFocus != null)
+            {
+                AppendKeyboardChar(elementWithFocus, "∧");
+            }
+        }
+        private void Btnbothdirections_Click(object sender, RoutedEventArgs e)
+        {
+            if (elementWithFocus != null)
+            {
+                AppendKeyboardChar(elementWithFocus, "↔️");
+            }
+        }
+        private void BtnTurnstile_Click(object sender, RoutedEventArgs e)
+        {
+            if (elementWithFocus != null)
+            {
+                AppendKeyboardChar(elementWithFocus, "⊢");
+            }
+        }
+        private void BtnFalsum_Click(object sender, RoutedEventArgs e)
+        {
+            if (elementWithFocus != null)
+            {
+                AppendKeyboardChar(elementWithFocus, "⊥");
+            }
+        }
+        private void BtnNot_Click(object sender, RoutedEventArgs e)
+        {
+            if (elementWithFocus != null)
+            {
+                AppendKeyboardChar(elementWithFocus, "¬");
+            }
+        }
+        private void btnClear_Click(object sender, RoutedEventArgs e)
+        {
+            tbValue.Text = String.Empty;
+            UIElementCollection grids = spGridTable.Children;
+            foreach (var row in grids)
+            {
+                Grid g = row as Grid;
+                foreach (var child in g.Children)
+                {
+                    if (child is TextBox)
+                    {
+                        ((TextBox)child).Text = String.Empty;
+                    }
+                    if (child is ComboBox)
+                    {
+                        ((ComboBox)child).Text = String.Empty;
+                    }
+                }
+            }
+        }
+        #endregion
+        #region utility 
+        public int FindOperator(string input, int start)
+        {
+            for (int i = start; i < input.Length; i++)
+            {
+                if (IsOperator(input[i]))
+                {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        public List<String> GetAllTableInput()
+        {
+            UIElementCollection grids = spGridTable.Children;
+            List<String> ret = new List<String>();
+            foreach (var row in grids)
+            {
+                Grid g = row as Grid;
+                foreach (var child in g.Children)
+                {
+                    if (child is TextBox)
+                    {
+                        ret.Add(((TextBox)child).Text);
+                    }
+                    if (child is ComboBox)
+                    {
+                        ret.Add(((ComboBox)child).Text);
+                    }
+                }
+            }
+            return ret;
+        }
+
+        #endregion
+        #region Keyboard_func
+        private void AppendKeyboardChar(TextBox tb, string sign)
+        {
+            tb.Text += sign;
+        }
+        private void SpKeyboard_MouseEnter(object sender, MouseEventArgs e)
+        {
+            if (Keyboard.FocusedElement is TextBox temp)
+                elementWithFocus = temp;
+        }
+        #endregion
+        #region input_check
+        private bool IsValidStatement(String expression, String rule, String first_segment,
+           String second_segment, String third_segment, int row)
+        {
+            if (!IsValidExpression(expression, row))
+            {
+                return false;
+            }
+
+            if (string.IsNullOrEmpty(rule))
+            {
+                Expression_Error(row, "Rule is empty");
+                return false;
+            }
+            if (string.IsNullOrEmpty(first_segment))
+            {
+                Expression_Error(row, "First segment is empty");
+                return false;
+            }
+
+            if (!IsValidSegment(first_segment))
+            {
+                Expression_Error(row, "First segment is not a positive integer number");
+                return false;
+            }
+            if (!IsValidSegment(second_segment))
+            {
+                Expression_Error(row, "Second segment is not a positive integer number");
+                return false;
+            }
+            if (!IsValidSegment(third_segment))
+            {
+                Expression_Error(row, "Third segment is not a positive integer number");
+                return false;
+            }
+            return true;
+        }
+        private bool IsOperator(char c)
+        {
+            return c == '^' || c == '>' || c == 'v' || c == '&' || c == '|' || c == '¬' || c == '~' ||
+                c == '∧' || c == '→' || c == '∨' || c == '↔' || c == '⊢' || c == '⊥';
+        }
+        public void Expression_Error(int row, string error, int index = -1)
+        {
+            string error_message = "Error on row: " + row;
+            if (index != -1)
+            {
+                error_message += " index: " + index;
+            }
+            error_message += "\nError is: " + error;
+
+            MessageBox.Show(error_message, "Expression Check");
+        }
+        public bool IsValidExpression(string input, int row)
+        {
+            int parentheses_count = 0;
+            bool after_operator = false;
+            int i = 0;
+
+            //Check if input is empty
+            if (input.Length == 0)
+                Expression_Error(row, "No input", i);
+
+            for (; i < input.Length; i++)
+            {
+                char c = input[i];
+
+                //Ignore spaces
+                if (Char.IsWhiteSpace(c))
+                    continue;
+
+                if (Char.IsNumber(c))
+                {
+                    Expression_Error(row, "Entering digits is not allowed, problematic char is:" + c, i);
+                    return false;
+                }
+
+                //Open parentheses
+                else if (c == '(')
+                {
+                    if (i != 0 && input[i - 1] == ')')
+                    {
+                        Expression_Error(row, "Missing an operator, problematic char is:" + c, i);
+                        return false;
+                    }
+                    after_operator = true;
+                    parentheses_count++;
+                }
+                //Close parentheses
+                else if (c == ')')
+                {
+                    if (after_operator)
+                    {
+                        Expression_Error(row, "Two operators in a row, problematic char is:" + c, i);
+                        return false;
+                    }
+                    parentheses_count--;
+                    if (parentheses_count < 0)
+                    {
+                        Expression_Error(row, "Too many closing parentheses, problematic char is:" + c, i);
+                        return false;
+                    }
+                }
+                else if (Char.IsLetter(c))
+                {
+                    if (!after_operator && i != 0)
+                    {
+                        Expression_Error(row, "Two variables in a row, problematic char is:" + c, i);
+                        return false;
+                    }
+                    int j = i + 1;
+                    for (; j < input.Length; j++)
+                    {
+                        c = input[j];
+                        if (!Char.IsLetter(c))
+                            break;
+                    }
+                    i = j - 1;
+
+                    after_operator = false;
+                }
+                else if (IsOperator(c))
+                {
+                    if (after_operator)
+                    {
+                        Expression_Error(row, "Two operators in a row, problematic char is:" + c, i);
+                        return false;
+                    }
+                    after_operator = true;
+                }
+                else
+                {
+                    Expression_Error(row, "An invalid character input, problematic char is:" + c, i);
+                    return false;
+                }
+            }
+            if (parentheses_count > 0)
+            {
+                Expression_Error(row, "Too many opening parentheses", i);
+                return false;
+            }
+            return true;
+        }
+        public bool IsValidSegment(string seg)
+        {
+            int index = seg.IndexOf('-');
+            if (index == -1)
+            {
+                return Int32.TryParse(seg, out _);
+            }
+            return Int32.TryParse(seg.Substring(0, index), out _) && Int32.TryParse(seg.Substring(index + 1, seg.Length - index), out _);
+        }
+        public bool CheckPathAndFileName(string path, string file_name)
+        {
+            //Check if the name has invalid chars
+            file_name = file_name.Trim();
+            path = path.Trim();
+            if (string.IsNullOrEmpty(file_name))
+            {
+                MessageBox.Show("File name is empty", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
+            if (file_name.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
+            {
+                MessageBox.Show("File name can not contain < > : \" / \\ | ? *", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
+            //TODO add overwrite option
+            /*if (File.Exists(Path.Combine(path, file_name)))
+            {
+                MessageBox.Show("File exists already", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }*/
+            return true;
+        }
+
+        #endregion input_check
+        #region testing
+        public void PrintInputList(List<String> l)
+        {
+            foreach (String t in l)
+            {
+                Console.WriteLine(t);
+            }
+        }
+        #endregion testing
+    }
+}

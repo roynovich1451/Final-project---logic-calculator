@@ -41,7 +41,7 @@ namespace LogicCalculator
         private static readonly int TABLE_COL_NUM = 6;
         TextBox elementWithFocus;
         private readonly List<string> rules = new List<string> { "Data", "Assumption", "LEM", "PBC", "MP", "MT", "Copy"
-                                                                 ,"∧i", "∧e1", "∧e2", "∨i1", "∨i2", "∨e", "¬¬e", 
+                                                                 ,"∧i", "∧e1", "∧e2", "∨i1", "∨i2", "∨e", "¬¬e",
                                                                  "¬¬i", "→i", "⊥e", "¬i", "→i"};
         private int hyphen_chunks = MAX_HYPHEN_CHUNKS;
         private int spaces_chunks = MIN_HYPHEN_CHUNKS;
@@ -68,8 +68,12 @@ namespace LogicCalculator
 
             using (var document = DocX.Load(path + "\\" + file_name))
             {
+                //Clear Table
+                spGridTable.Children.Clear();
+                table_row_num = 0;
+
                 Table proof_table = document.Tables[0];
-                //TODO: Call new to delete rows
+   
                 for (int i = 1; i < proof_table.Rows.Count; i++)
                 {
                     CreateLine();
@@ -172,14 +176,14 @@ namespace LogicCalculator
         private string createBoxLine(BoxState state)
         {
             StringBuilder line = new StringBuilder();
-            
+
             if (state == BoxState.Open)
             {
                 line.Append(' ', SPACES * spaces_chunks);
                 line.Append('-', HYPHEN * hyphen_chunks);
                 line[SPACES * spaces_chunks] = '┌';
-                line[line.Length-1] = '┐';
-                if (hyphen_chunks > MIN_HYPHEN_CHUNKS) 
+                line[line.Length - 1] = '┐';
+                if (hyphen_chunks > MIN_HYPHEN_CHUNKS)
                 {
                     ++spaces_chunks;
                     --hyphen_chunks;
@@ -195,7 +199,7 @@ namespace LogicCalculator
                 line.Append(' ', SPACES * spaces_chunks);
                 line.Append('-', HYPHEN * hyphen_chunks);
                 line[SPACES * spaces_chunks] = '└';
-                line[line.Length - 1] = '┘';  
+                line[line.Length - 1] = '┘';
             }
             return line.ToString();
         }
@@ -214,10 +218,10 @@ namespace LogicCalculator
             tbline.Text = createBoxLine(state);
             return tbline;
         }
-        
+
         private bool removeTextBlock(int location, BoxState state)
         {
-            if (location < 0 || location > spGridTable.Children.Count-1) return false;
+            if (location < 0 || location > spGridTable.Children.Count - 1) return false;
             if (spGridTable.Children[location] is TextBlock)
             {
                 TextBlock tb = spGridTable.Children[location] as TextBlock;
@@ -246,7 +250,7 @@ namespace LogicCalculator
             }
             return false;
         }
-        
+
         private void handleBox(ComboBox cmb, int location)
         {
             var rule = cmb.SelectedItem as string;
@@ -264,10 +268,10 @@ namespace LogicCalculator
                     ++box_closers;
                     break;
                 default:
-                    removeTextBlock(location+1, BoxState.Close);
-                    removeTextBlock(location-1, BoxState.Open);
+                    removeTextBlock(location + 1, BoxState.Close);
+                    removeTextBlock(location - 1, BoxState.Open);
                     break;
-                  
+
             }
         }
 
@@ -337,7 +341,7 @@ namespace LogicCalculator
                 VerticalAlignment = System.Windows.VerticalAlignment.Center,
                 Name = $"cmbRules{table_row_num}",
                 Margin = new Thickness(THICKNESS),
-                Width = COL_SEGMENT_WIDTH-CHILD_MARGIN
+                Width = COL_SEGMENT_WIDTH - CHILD_MARGIN
             };
             cmbRules.SelectionChanged += new SelectionChangedEventHandler(cmb_SelectedValueChanged);
             Grid.SetColumn(cmbRules, 2);
@@ -387,7 +391,7 @@ namespace LogicCalculator
             spGridTable.Children.Add(newLine);
         }
         #endregion
-        
+
         #region EVENTS
         private void makeInvisible(Grid g, int needed)
         {
@@ -585,7 +589,9 @@ namespace LogicCalculator
         #region UTILITY 
         void HandleTableInput()
         {
+            statement_list.Add(new Statement (tbValue.Text,"first","0"));
             List<String> text_boxes_list = GetAllTableInput();
+            //One less column because of the line number column
             int col_to_check = TABLE_COL_NUM - 1;
             for (int i = 0; i < text_boxes_list.Count - col_to_check; i += col_to_check)
             {
@@ -599,14 +605,8 @@ namespace LogicCalculator
                 if (!IsValidStatement(expression, rule, first_segment, second_segment, third_segment, current_row))
                     return;
                 Statement s = new Statement(expression, rule, first_segment, second_segment, third_segment);
-                statement_list.Add(s);
-
-                if (rule.Contains("^") || rule.Contains("∧") || rule.Contains("&"))
-                {
-                    new Evaluation(statement_list, current_row, "and");
-                }
-                //return c == '^' || c == '>' || c == 'v' || c == '&' || c == '|' || c == '¬' || c == '~' ||
-                //       c == '∧'|| c == '→' || c == '∨'|| c == '↔' || c == '⊢' || c == '⊥';
+                statement_list.Add(s);                
+                new Evaluation(statement_list, current_row, rule); 
             }
         }
         private void displayMsg(string msg, string title)
@@ -719,7 +719,7 @@ namespace LogicCalculator
 
         private bool IsOperator(char c)
         {
-            return c == '^' || c == '>' || c == 'v' || c == '&' || c == '|' || c == '¬' || c == '~' ||
+            return c == '^' || c == '>' || c == 'v' || c == '|' || c == '¬' || c == '~' ||
                 c == '∧' || c == '→' || c == '∨' || c == '↔' || c == '⊢' || c == '⊥';
         }
 

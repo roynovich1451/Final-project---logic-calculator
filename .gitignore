@@ -11,3 +11,4 @@
 *.resources
 *.baml
 .vs/LogicCalculator/v16/.suo
+calc_backup.txt
