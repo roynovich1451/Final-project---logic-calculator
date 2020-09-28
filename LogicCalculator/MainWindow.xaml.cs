@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -23,23 +24,37 @@ namespace LogicCalculator
         const int COL_SEGMENT_WIDTH = 60;
         const int CHILD_MARGIN = 4;
         const int THICKNESS = 2;
+        const int SPACES = 5;
+        const int HYPHEN = 10;
+        const int MAX_HYPHEN_CHUNKS = 8;
+        const int MIN_HYPHEN_CHUNKS = 1;
+        enum BoxState
+        {
+            Open,
+            Close
+        }
         #endregion
 
-        #region variables
+        #region VARIABLES
         readonly List<Statement> statement_list = new List<Statement>();
         private int table_row_num = 0;
         private static readonly int TABLE_COL_NUM = 6;
         TextBox elementWithFocus;
         private readonly List<string> rules = new List<string> { "Data", "Assumption", "LEM", "PBC", "MP", "MT", "Copy"
                                                                  ,"∧i", "∧e1", "∧e2", "∨i1", "∨i2", "∨e", "¬¬e", 
-                                                                 "¬¬i", "→i", "⊥e", "¬i" };
+                                                                 "¬¬i", "→i", "⊥e", "¬i", "→i"};
+        private int hyphen_chunks = MAX_HYPHEN_CHUNKS;
+        private int spaces_chunks = MIN_HYPHEN_CHUNKS;
+        private int box_closers = 0;
+        private int box_openers = 0;
         #endregion
         public MainWindow()
         {
             InitializeComponent();
             CreateLine();
         }
-        #region MenuBar_Click
+
+        #region MENUBAR_CLICKS
         private void MenuItemNew_Click(object sender, RoutedEventArgs e)
         {
             spGridTable.Children.Clear();
@@ -152,121 +167,110 @@ namespace LogicCalculator
             }
         }
         #endregion
-        #region Dynamic_GUI
-        private void makeInvisible(Grid g, int needed)
+
+        #region DYNAMIC_GUI
+        private string createBoxLine(BoxState state)
         {
-            foreach (UIElement child in g.Children)
+            StringBuilder line = new StringBuilder();
+            
+            if (state == BoxState.Open)
             {
-                switch (needed)
+                line.Append(' ', SPACES * spaces_chunks);
+                line.Append('-', HYPHEN * hyphen_chunks);
+                line[SPACES * spaces_chunks] = '┌';
+                line[line.Length-1] = '┐';
+                if (hyphen_chunks > MIN_HYPHEN_CHUNKS) 
                 {
-                    case 0:
-                        if (child is TextBox)
-                        {
-                            if (Grid.GetColumn(child) == 1)
-                            {
-                                TextBox tbc = child as TextBox;
-                                tbc.IsEnabled = true;
-                                tbc.Visibility = Visibility.Visible;
-                            }
-                            else
-                            {
-                                TextBox tbc = child as TextBox;
-                                tbc.IsEnabled = false;
-                                tbc.Visibility = Visibility.Hidden;
-                                tbc.Text = "";
-                            }
-                        }
-                        break;
-                    case 1:
-                        if (child is TextBox)
-                        {
-                            if (Grid.GetColumn(child) == 1 ||
-                                Grid.GetColumn(child) == 3)
-                            {
-                                TextBox tbc = child as TextBox;
-                                tbc.IsEnabled = true;
-                                tbc.Visibility = Visibility.Visible;
-                            }
-                            else
-                            {
-                                TextBox tbc = child as TextBox;
-                                tbc.IsEnabled = false;
-                                tbc.Visibility = Visibility.Hidden;
-                                tbc.Text = "";
-                            }
-                        }
-                        break;
-                    case 2:
-                        if (child is TextBox)
-                        {
-                            if (Grid.GetColumn(child) == 1 ||
-                                Grid.GetColumn(child) == 3 ||
-                                Grid.GetColumn(child) == 4)
-                            {
-                                TextBox tbc = child as TextBox;
-                                tbc.IsEnabled = true;
-                                tbc.Visibility = Visibility.Visible;
-                            }
-                            else
-                            {
-                                TextBox tbc = child as TextBox;
-                                tbc.IsEnabled = false;
-                                tbc.Visibility = Visibility.Hidden;
-                                tbc.Text = "";
-                            }
-                        }
-                        break;
-                    case 3:
-                        if (child is TextBox)
-                        {
-                            TextBox tbc = child as TextBox;
-                            tbc.IsEnabled = true;
-                            tbc.Visibility = Visibility.Visible;
-                        }
-                        break;
+                    ++spaces_chunks;
+                    --hyphen_chunks;
                 }
             }
-        }
-        private void cmb_SelectedValueChanged(object sender, SelectionChangedEventArgs e)
-        {
-            ComboBox cmb = sender as ComboBox;
-            Grid parent = cmb.Parent as Grid;
-            var location = spGridTable.Children.IndexOf(parent);
-            switch (cmb.SelectedItem)
+            else
             {
-                //0 seg
-                case "Data":
-                case "Assumption":
-                case "LEM":
-                    makeInvisible(parent, 0);
-                    break;
-                //1 seg
-                case "PBC":
-                case "Copy":
-                case "∧e1":
-                case "∧e2":
-                case "¬¬e":
-                case "¬¬i":
-                case "→i":
-                case "∨i1":
-                case "∨i2":
-                case "⊥e":
-                case "¬i":
-                    makeInvisible(parent, 1);
-                    break;
-                //2 seg
-                case "MP":
-                case "MT":
-                case "∧i":
-                    makeInvisible(parent, 2);
-                    break;
-                //3 seg
-                case "∨e":
-                    makeInvisible(parent, 3);
-                    break;
+                if (hyphen_chunks < MAX_HYPHEN_CHUNKS)
+                {
+                    --spaces_chunks;
+                    ++hyphen_chunks;
+                }
+                line.Append(' ', SPACES * spaces_chunks);
+                line.Append('-', HYPHEN * hyphen_chunks);
+                line[SPACES * spaces_chunks] = '└';
+                line[line.Length - 1] = '┘';  
             }
+            return line.ToString();
+        }
+
+        private TextBlock createBox(BoxState state)
+        {
+            //textblock - opener
+            TextBlock tbline = new TextBlock
+            {
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = System.Windows.VerticalAlignment.Center,
+                Margin = new Thickness(2),
+                FontWeight = FontWeights.Bold,
+                Width = 420
+            };
+            tbline.Text = createBoxLine(state);
+            return tbline;
         }
         
+        private bool removeTextBlock(int location, BoxState state)
+        {
+            if (location < 0 || location > spGridTable.Children.Count-1) return false;
+            if (spGridTable.Children[location] is TextBlock)
+            {
+                TextBlock tb = spGridTable.Children[location] as TextBlock;
+                if (state == BoxState.Open && tb.Text.Contains('┌'))
+                {
+                    spGridTable.Children.RemoveAt(location);
+                    --box_openers;
+                    if (hyphen_chunks < MAX_HYPHEN_CHUNKS)
+                    {
+                        --spaces_chunks;
+                        ++hyphen_chunks;
+                    }
+                    return true;
+                }
+                if (state == BoxState.Close && tb.Text.Contains('└'))
+                {
+                    spGridTable.Children.RemoveAt(location);
+                    --box_closers;
+                    if (hyphen_chunks > MIN_HYPHEN_CHUNKS)
+                    {
+                        ++spaces_chunks;
+                        --hyphen_chunks;
+                    }
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        private void handleBox(ComboBox cmb, int location)
+        {
+            var rule = cmb.SelectedItem as string;
+            switch (rule)
+            {
+                case "Assumption":
+                    removeTextBlock(location + 1, BoxState.Close);
+                    spGridTable.Children.Insert(location, createBox(BoxState.Open));
+                    ++box_openers;
+                    break;
+                case "→i":
+                    if (removeTextBlock(location - 1, BoxState.Open)) --location;
+                    if (!ruleSelectionChecker(cmb, rule)) return;
+                    spGridTable.Children.Insert(location + 1, createBox(BoxState.Close));
+                    ++box_closers;
+                    break;
+                default:
+                    removeTextBlock(location+1, BoxState.Close);
+                    removeTextBlock(location-1, BoxState.Open);
+                    break;
+                  
+            }
+        }
+
         private void CreateLine()
         {
             ++table_row_num;
@@ -383,33 +387,129 @@ namespace LogicCalculator
             spGridTable.Children.Add(newLine);
         }
         #endregion
-        void HandleTableInput()
+        
+        #region EVENTS
+        private void makeInvisible(Grid g, int needed)
         {
-            List<String> text_boxes_list = GetAllTableInput();
-            int col_to_check = TABLE_COL_NUM - 1;
-            for (int i = 0; i < text_boxes_list.Count - col_to_check; i += col_to_check)
+            foreach (UIElement child in g.Children)
             {
-                String expression = text_boxes_list[i];
-                String rule = text_boxes_list[i + 1];
-                String first_segment = text_boxes_list[i + 2];
-                String second_segment = text_boxes_list[i + 3];
-                String third_segment = text_boxes_list[i + 4];
-                int current_row = i / col_to_check + 1;
-
-                if (!IsValidStatement(expression, rule, first_segment, second_segment, third_segment, current_row))
-                    return;
-                Statement s = new Statement(expression, rule, first_segment, second_segment, third_segment);
-                statement_list.Add(s);
-
-                if (rule.Contains("^") || rule.Contains("∧") || rule.Contains("&"))
+                switch (needed)
                 {
-                    new Evaluation(statement_list, current_row, "and");
+                    case 0:
+                        if (child is TextBox)
+                        {
+                            if (Grid.GetColumn(child) == 1)
+                            {
+                                TextBox tbc = child as TextBox;
+                                tbc.IsEnabled = true;
+                                tbc.Visibility = Visibility.Visible;
+                            }
+                            else
+                            {
+                                TextBox tbc = child as TextBox;
+                                tbc.IsEnabled = false;
+                                tbc.Visibility = Visibility.Hidden;
+                                tbc.Text = "";
+                            }
+                        }
+                        break;
+                    case 1:
+                        if (child is TextBox)
+                        {
+                            if (Grid.GetColumn(child) == 1 ||
+                                Grid.GetColumn(child) == 3)
+                            {
+                                TextBox tbc = child as TextBox;
+                                tbc.IsEnabled = true;
+                                tbc.Visibility = Visibility.Visible;
+                            }
+                            else
+                            {
+                                TextBox tbc = child as TextBox;
+                                tbc.IsEnabled = false;
+                                tbc.Visibility = Visibility.Hidden;
+                                tbc.Text = "";
+                            }
+                        }
+                        break;
+                    case 2:
+                        if (child is TextBox)
+                        {
+                            if (Grid.GetColumn(child) == 1 ||
+                                Grid.GetColumn(child) == 3 ||
+                                Grid.GetColumn(child) == 4)
+                            {
+                                TextBox tbc = child as TextBox;
+                                tbc.IsEnabled = true;
+                                tbc.Visibility = Visibility.Visible;
+                            }
+                            else
+                            {
+                                TextBox tbc = child as TextBox;
+                                tbc.IsEnabled = false;
+                                tbc.Visibility = Visibility.Hidden;
+                                tbc.Text = "";
+                            }
+                        }
+                        break;
+                    case 3:
+                        if (child is TextBox)
+                        {
+                            TextBox tbc = child as TextBox;
+                            tbc.IsEnabled = true;
+                            tbc.Visibility = Visibility.Visible;
+                        }
+                        break;
                 }
-                //return c == '^' || c == '>' || c == 'v' || c == '&' || c == '|' || c == '¬' || c == '~' ||
-                //       c == '∧'|| c == '→' || c == '∨'|| c == '↔' || c == '⊢' || c == '⊥';
             }
         }
-        #region button_clicks
+        private void cmb_SelectedValueChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ComboBox cmb = sender as ComboBox;
+            Grid parent = cmb.Parent as Grid;
+            var location = spGridTable.Children.IndexOf(parent);
+            switch (cmb.SelectedItem)
+            {
+                //0 seg
+                case "Data":
+                case "Assumption":
+                case "LEM":
+                    makeInvisible(parent, 0);
+                    handleBox(cmb, location);
+                    break;
+                //1 seg
+                case "PBC":
+                case "Copy":
+                case "∧e1":
+                case "∧e2":
+                case "¬¬e":
+                case "¬¬i":
+                case "→i":
+                case "∨i1":
+                case "∨i2":
+                case "⊥e":
+                case "¬i":
+                    makeInvisible(parent, 1);
+                    handleBox(cmb, location);
+                    break;
+                //2 seg
+                case "MP":
+                case "MT":
+                case "∧i":
+                    makeInvisible(parent, 2);
+                    break;
+                //3 seg
+                case "∨e":
+                    makeInvisible(parent, 3);
+                    break;
+                default:
+                    makeInvisible(parent, 3);
+                    break;
+            }
+        }
+        #endregion
+
+        #region BUTTON_CLICKS
         private void BtnAddLine_Click(object sender, RoutedEventArgs e)
         {
             CreateLine();
@@ -481,7 +581,55 @@ namespace LogicCalculator
             }
         }
         #endregion
-        #region utility 
+
+        #region UTILITY 
+        void HandleTableInput()
+        {
+            List<String> text_boxes_list = GetAllTableInput();
+            int col_to_check = TABLE_COL_NUM - 1;
+            for (int i = 0; i < text_boxes_list.Count - col_to_check; i += col_to_check)
+            {
+                String expression = text_boxes_list[i];
+                String rule = text_boxes_list[i + 1];
+                String first_segment = text_boxes_list[i + 2];
+                String second_segment = text_boxes_list[i + 3];
+                String third_segment = text_boxes_list[i + 4];
+                int current_row = i / col_to_check + 1;
+
+                if (!IsValidStatement(expression, rule, first_segment, second_segment, third_segment, current_row))
+                    return;
+                Statement s = new Statement(expression, rule, first_segment, second_segment, third_segment);
+                statement_list.Add(s);
+
+                if (rule.Contains("^") || rule.Contains("∧") || rule.Contains("&"))
+                {
+                    new Evaluation(statement_list, current_row, "and");
+                }
+                //return c == '^' || c == '>' || c == 'v' || c == '&' || c == '|' || c == '¬' || c == '~' ||
+                //       c == '∧'|| c == '→' || c == '∨'|| c == '↔' || c == '⊢' || c == '⊥';
+            }
+        }
+        private void displayMsg(string msg, string title)
+        {
+            MessageBox.Show(msg, title, MessageBoxButton.OK, MessageBoxImage.Error);
+            return;
+        }
+        private bool ruleSelectionChecker(ComboBox cmb, string rule)
+        {
+            switch (rule)
+            {
+                case "→i":
+                    if (box_closers == box_openers)
+                    {
+                        displayMsg("Error: more box closers then box openers", "Error");
+                        cmb.SelectedItem = null;
+                        return false;
+                    }
+                    return true;
+                default:
+                    return false;
+            }
+        }
         public int FindOperator(string input, int start)
         {
             for (int i = start; i < input.Length; i++)
@@ -517,7 +665,8 @@ namespace LogicCalculator
         }
 
         #endregion
-        #region Keyboard_func
+
+        #region KEYBOARD_FUNC
         private void AppendKeyboardChar(TextBox tb, string sign)
         {
             tb.Text += sign;
@@ -528,7 +677,8 @@ namespace LogicCalculator
                 elementWithFocus = temp;
         }
         #endregion
-        #region input_check
+
+        #region INPUT_CHECKS
 
         private bool IsValidStatement(String expression, String rule, String first_segment,
            String second_segment, String third_segment, int row)
@@ -712,7 +862,8 @@ namespace LogicCalculator
         }
 
         #endregion input_check
-        #region testing
+
+        #region TESTING
         public void PrintInputList(List<String> l)
         {
             foreach (String t in l)
