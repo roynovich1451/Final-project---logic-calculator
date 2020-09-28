@@ -17,13 +17,22 @@ namespace LogicCalculator
 
     public partial class MainWindow : Window
     {
+        #region DEFINES
+        const int COL_LABEL_WIDTH = 40;
+        const int COL_STATEMENT_WIDTH = 160;
+        const int COL_SEGMENT_WIDTH = 60;
+        const int CHILD_MARGIN = 4;
+        const int THICKNESS = 2;
+        #endregion
+
         #region variables
         readonly List<Statement> statement_list = new List<Statement>();
         private int table_row_num = 0;
         private static readonly int TABLE_COL_NUM = 6;
         TextBox elementWithFocus;
-        private readonly List<string> rules = new List<string> { "data", "^i", "^e", "¬¬e", "¬¬i", "→e",
-                                                        "→i", "MP", "MT", "Copy", "Assumption" };
+        private readonly List<string> rules = new List<string> { "Data", "Assumption", "LEM", "PBC", "MP", "MT", "Copy"
+                                                                 ,"∧i", "∧e1", "∧e2", "∨i1", "∨i2", "∨e", "¬¬e", 
+                                                                 "¬¬i", "→i", "⊥e", "¬i" };
         #endregion
         public MainWindow()
         {
@@ -144,6 +153,117 @@ namespace LogicCalculator
         }
         #endregion
         #region Dynamic_GUI
+        private void makeInvisible(Grid g, int needed)
+        {
+            foreach (UIElement child in g.Children)
+            {
+                switch (needed)
+                {
+                    case 0:
+                        if (child is TextBox)
+                        {
+                            if (Grid.GetColumn(child) == 1)
+                            {
+                                TextBox tbc = child as TextBox;
+                                tbc.IsEnabled = true;
+                                tbc.Visibility = Visibility.Visible;
+                            }
+                            else
+                            {
+                                TextBox tbc = child as TextBox;
+                                tbc.IsEnabled = false;
+                                tbc.Visibility = Visibility.Hidden;
+                            }
+                        }
+                        break;
+                    case 1:
+                        if (child is TextBox)
+                        {
+                            if (Grid.GetColumn(child) == 1 ||
+                                Grid.GetColumn(child) == 3)
+                            {
+                                TextBox tbc = child as TextBox;
+                                tbc.IsEnabled = true;
+                                tbc.Visibility = Visibility.Visible;
+                            }
+                            else
+                            {
+                                TextBox tbc = child as TextBox;
+                                tbc.IsEnabled = false;
+                                tbc.Visibility = Visibility.Hidden;
+                            }
+                        }
+                        break;
+                    case 2:
+                        if (child is TextBox)
+                        {
+                            if (Grid.GetColumn(child) == 1 ||
+                                Grid.GetColumn(child) == 3 ||
+                                Grid.GetColumn(child) == 4)
+                            {
+                                TextBox tbc = child as TextBox;
+                                tbc.IsEnabled = true;
+                                tbc.Visibility = Visibility.Visible;
+                            }
+                            else
+                            {
+                                TextBox tbc = child as TextBox;
+                                tbc.IsEnabled = false;
+                                tbc.Visibility = Visibility.Hidden;
+                            }
+                        }
+                        break;
+                    case 3:
+                        if (child is TextBox)
+                        {
+                            TextBox tbc = child as TextBox;
+                            tbc.IsEnabled = true;
+                            tbc.Visibility = Visibility.Visible;
+                        }
+                        break;
+                }
+            }
+        }
+        private void cmb_SelectedValueChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ComboBox cmb = sender as ComboBox;
+            Grid parent = cmb.Parent as Grid;
+            var location = spGridTable.Children.IndexOf(parent);
+            switch (cmb.SelectedItem)
+            {
+                //0 seg
+                case "Data":
+                case "Assumption":
+                case "LEM":
+                    makeInvisible(parent, 0);
+                    break;
+                //1 seg
+                case "PBC":
+                case "Copy":
+                case "∧e1":
+                case "∧e2":
+                case "¬¬e":
+                case "¬¬i":
+                case "→i":
+                case "∨i1":
+                case "∨i2":
+                case "⊥e":
+                case "¬i":
+                    makeInvisible(parent, 1);
+                    break;
+                //2 seg
+                case "MP":
+                case "MT":
+                case "∧i":
+                    makeInvisible(parent, 2);
+                    break;
+                //3 seg
+                case "∨e":
+                    makeInvisible(parent, 3);
+                    break;
+            }
+        }
+        
         private void CreateLine()
         {
             ++table_row_num;
@@ -151,27 +271,27 @@ namespace LogicCalculator
             Grid newLine = new Grid();
             ColumnDefinition gridCol1 = new ColumnDefinition
             {
-                Width = new GridLength(40)
+                Width = new GridLength(COL_LABEL_WIDTH)
             };
             ColumnDefinition gridCol2 = new ColumnDefinition
             {
-                Width = new GridLength(160)
+                Width = new GridLength(COL_STATEMENT_WIDTH)
             };
             ColumnDefinition gridCol3 = new ColumnDefinition
             {
-                Width = new GridLength(60)
+                Width = new GridLength(COL_SEGMENT_WIDTH)
             };
             ColumnDefinition gridCol4 = new ColumnDefinition
             {
-                Width = new GridLength(60)
+                Width = new GridLength(COL_SEGMENT_WIDTH)
             };
             ColumnDefinition gridCol5 = new ColumnDefinition
             {
-                Width = new GridLength(60)
+                Width = new GridLength(COL_SEGMENT_WIDTH)
             };
             ColumnDefinition gridCol6 = new ColumnDefinition
             {
-                Width = new GridLength(60)
+                Width = new GridLength(COL_SEGMENT_WIDTH)
             };
 
             // ADD col to new line
@@ -186,7 +306,7 @@ namespace LogicCalculator
             Label lb = new Label
             {
                 Content = $"{table_row_num}",
-                Margin = new Thickness(2),
+                Margin = new Thickness(THICKNESS),
                 HorizontalContentAlignment = HorizontalAlignment.Right
             };
             Grid.SetColumn(lb, 0);
@@ -197,8 +317,8 @@ namespace LogicCalculator
                 HorizontalAlignment = HorizontalAlignment.Center,
                 VerticalAlignment = System.Windows.VerticalAlignment.Center,
                 Name = $"tbStatement{table_row_num}",
-                Margin = new Thickness(2),
-                Width = 150
+                Margin = new Thickness(THICKNESS),
+                Width = COL_STATEMENT_WIDTH - CHILD_MARGIN
             };
             Grid.SetColumn(tbState, 1);
 
@@ -209,9 +329,10 @@ namespace LogicCalculator
                 HorizontalAlignment = HorizontalAlignment.Center,
                 VerticalAlignment = System.Windows.VerticalAlignment.Center,
                 Name = $"cmbRules{table_row_num}",
-                Margin = new Thickness(2),
-                Width = 50
+                Margin = new Thickness(THICKNESS),
+                Width = COL_SEGMENT_WIDTH-CHILD_MARGIN
             };
+            cmbRules.SelectionChanged += new SelectionChangedEventHandler(cmb_SelectedValueChanged);
             Grid.SetColumn(cmbRules, 2);
 
             //textblock - first segment
@@ -220,8 +341,8 @@ namespace LogicCalculator
                 HorizontalAlignment = HorizontalAlignment.Center,
                 VerticalAlignment = System.Windows.VerticalAlignment.Center,
                 Name = $"tbFirstSeg{table_row_num}",
-                Margin = new Thickness(2),
-                Width = 50
+                Margin = new Thickness(THICKNESS),
+                Width = COL_SEGMENT_WIDTH - CHILD_MARGIN
             };
             Grid.SetColumn(tbFirstSeg, 3);
 
@@ -231,8 +352,8 @@ namespace LogicCalculator
                 HorizontalAlignment = HorizontalAlignment.Center,
                 VerticalAlignment = System.Windows.VerticalAlignment.Center,
                 Name = $"tbSecondSeg{table_row_num}",
-                Margin = new Thickness(2),
-                Width = 50
+                Margin = new Thickness(THICKNESS),
+                Width = COL_SEGMENT_WIDTH - CHILD_MARGIN
             };
             Grid.SetColumn(tbSecondSeg, 4);
 
@@ -242,8 +363,8 @@ namespace LogicCalculator
                 HorizontalAlignment = HorizontalAlignment.Center,
                 VerticalAlignment = System.Windows.VerticalAlignment.Center,
                 Name = $"tbThirdSeg{table_row_num}",
-                Margin = new Thickness(2),
-                Width = 50
+                Margin = new Thickness(THICKNESS),
+                Width = COL_SEGMENT_WIDTH - CHILD_MARGIN
             };
             Grid.SetColumn(tbThirdSeg, 5);
 
