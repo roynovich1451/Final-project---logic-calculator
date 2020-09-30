@@ -594,12 +594,12 @@ namespace LogicCalculator
             //One less column because of the line number column
             int col_to_check = TABLE_COL_NUM - 1;
             for (int i = 0; i < text_boxes_list.Count - col_to_check; i += col_to_check)
-            {
-                String expression = text_boxes_list[i];
-                String rule = text_boxes_list[i + 1];
-                String first_segment = text_boxes_list[i + 2];
-                String second_segment = text_boxes_list[i + 3];
-                String third_segment = text_boxes_list[i + 4];
+            {   //Remove spaces
+                String expression = text_boxes_list[i].Replace(" ", String.Empty) ;
+                String rule = text_boxes_list[i + 1].Replace(" ", String.Empty); 
+                String first_segment = text_boxes_list[i + 2].Replace(" ", String.Empty); 
+                String second_segment = text_boxes_list[i + 3].Replace(" ", String.Empty);
+                String third_segment = text_boxes_list[i + 4].Replace(" ", String.Empty); 
                 int current_row = i / col_to_check + 1;
 
                 if (!IsValidStatement(expression, rule, first_segment, second_segment, third_segment, current_row))
@@ -719,7 +719,7 @@ namespace LogicCalculator
 
         private bool IsOperator(char c)
         {
-            return c == '^' || c == '>' || c == 'v' || c == '|' || c == '¬' || c == '~' ||
+            return c == '^' || c == 'v' || c == '|' || c == '¬' || c == '~' ||
                 c == '∧' || c == '→' || c == '∨' || c == '↔' || c == '⊢' || c == '⊥';
         }
 

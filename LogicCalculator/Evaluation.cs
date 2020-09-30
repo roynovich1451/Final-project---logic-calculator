@@ -13,13 +13,13 @@ namespace LogicCalculator
                 case "Data":
                     Data(statement_list, current_row);
                     break;
-                case "Copy":
-                    Copy(statement_list, current_row);
-                    break;
                 case "Assumption":
                     return;
                 case "MP":
                     MP(statement_list, current_row);
+                    break;
+                case "Copy":
+                    Copy(statement_list, current_row);
                     break;
                 case "MT":
                     MT(statement_list, current_row);
@@ -51,7 +51,7 @@ namespace LogicCalculator
                 case "¬i":
                     Not_Elimination(statement_list, current_row);
                     break;
-                case "¬¬e":                    
+                case "¬¬e":
                     Not_Not_Elimination(statement_list, current_row);
                     break;
                 case "¬¬i":
@@ -61,7 +61,7 @@ namespace LogicCalculator
                     Arrow_Introduction(statement_list, current_row);
                     break;
                 case "⊥e":
-                    Assumption(statement_list, current_row);
+                    //TODO:Assumption(statement_list, current_row);
                     break;
             }
         }
@@ -75,46 +75,81 @@ namespace LogicCalculator
             }
             return false;
         }
-        private bool Assumption(List<Statement> statement_list, int current_row) { throw new NotImplementedException(); }
         private bool Copy(List<Statement> statement_list, int current_row)
         {
             if (statement_list[Get_Row(statement_list[current_row].first_segment)].expression != statement_list[current_row].expression)
                 return false;
             return true;
         }
-        private bool MP(List<Statement> statement_list, int current_row) {
-            throw new NotImplementedException();
+        private bool MP(List<Statement> statement_list, int current_row)
+        {
+            string first_expression = statement_list[Get_Lines_From_Segment(statement_list[current_row].first_segment)[0]].expression;
+            string second_expression = statement_list[Get_Lines_From_Segment(statement_list[current_row].first_segment)[1]].expression;
+            return (first_expression == second_expression + "→" + statement_list[current_row].expression)
+                || (first_expression == second_expression + "→(" + statement_list[current_row].expression + ")")
+                || (second_expression == first_expression + "→" + statement_list[current_row].expression)
+                || (second_expression == first_expression + "→(" + statement_list[current_row].expression + ")");
         }
-        private bool MT(List<Statement> statement_list, int current_row) { throw new NotImplementedException(); }
+        private bool MT(List<Statement> statement_list, int current_row)
+        {
+            string left_part,right_part,
+                first_expression = statement_list[Get_Lines_From_Segment(statement_list[current_row].first_segment)[0]].expression,
+                second_expression = statement_list[Get_Lines_From_Segment(statement_list[current_row].first_segment)[1]].expression;
+            int index = first_expression.IndexOf("→");
+            if (index != -1)
+            {
+                left_part = first_expression.Substring(0, index);
+                right_part = first_expression.Substring(index, first_expression.Length);
+            }
+            else
+            {
+                index = second_expression.IndexOf("→");
+                if (index != -1)
+                {
+                    left_part = second_expression.Substring(0, index);
+                    right_part = second_expression.Substring(index, second_expression.Length);
+                }
+                else
+                {
+                    //TODO throw error;
+                }
+            }
+            return (first_expression == second_expression + "→" + statement_list[current_row].expression)
+                || (first_expression == second_expression + "→(" + statement_list[current_row].expression + ")")
+                || (second_expression == first_expression + "→" + statement_list[current_row].expression)
+                || (second_expression == first_expression + "→(" + statement_list[current_row].expression + ")");
+        }
         private bool PBC(List<Statement> statement_list, int current_row) { throw new NotImplementedException(); }
         private bool LEM(List<Statement> statement_list, int current_row) { throw new NotImplementedException(); }
         private bool And_Introduction(List<Statement> statement_list, int current_row)
         {
             string first = statement_list[Get_Row(statement_list[current_row].first_segment)].expression;
             string second = statement_list[Get_Row(statement_list[current_row].second_segment)].expression;
-            return statement_list[current_row].expression==first+"^"+second||
+            return statement_list[current_row].expression == first + "^" + second ||
                 statement_list[current_row].expression == first + "∧" + second ||
                 statement_list[current_row].expression == second + "^" + first ||
                 statement_list[current_row].expression == second + "∧" + first;
         }
-        private bool And_Elimination_One(List<Statement> statement_list, int current_row) {
-            string original_expression= statement_list[Get_Row(statement_list[current_row].first_segment)].expression;
-            return original_expression.Contains("^" + statement_list[current_row].expression)||
+        private bool And_Elimination_One(List<Statement> statement_list, int current_row)
+        {
+            string original_expression = statement_list[Get_Row(statement_list[current_row].first_segment)].expression;
+            return original_expression.Contains("^" + statement_list[current_row].expression) ||
             original_expression.Contains("∧" + statement_list[current_row].expression);
         }
         private bool And_Elimination_Two(List<Statement> statement_list, int current_row)
         {
             string original_expression = statement_list[Get_Row(statement_list[current_row].first_segment)].expression;
-            return statement_list[Get_Row(statement_list[current_row].first_segment)].expression.Contains(statement_list[current_row].expression+ "^" ) ||
-             statement_list[Get_Row(statement_list[current_row].first_segment)].expression.Contains(statement_list[current_row].expression+ "∧");
+            return original_expression.Contains(statement_list[current_row].expression + "^")
+                || original_expression.Contains(statement_list[current_row].expression + "∧");
         }
         private bool Or_Elimination(List<Statement> statement_list, int current_row) { throw new NotImplementedException(); }
         private bool Or_Introduction_One(List<Statement> statement_list, int current_row) { throw new NotImplementedException(); }
         private bool Or_Introduction_Two(List<Statement> statement_list, int current_row) { throw new NotImplementedException(); }
         private bool Arrow_Introduction(List<Statement> statement_list, int current_row) { throw new NotImplementedException(); }
-        private bool Not_Not_Elimination(List<Statement> statement_list, int current_row) {
+        private bool Not_Not_Elimination(List<Statement> statement_list, int current_row)
+        {
             string original_expression = statement_list[Get_Row(statement_list[current_row].first_segment)].expression;
-            return original_expression.Contains("¬¬" + statement_list[current_row].expression) 
+            return original_expression.Contains("¬¬" + statement_list[current_row].expression)
                 || original_expression.Contains("¬¬(" + statement_list[current_row].expression + ")")
                 || original_expression.Contains("~~" + statement_list[current_row].expression)
                 || original_expression.Contains("~~(" + statement_list[current_row].expression + ")");
