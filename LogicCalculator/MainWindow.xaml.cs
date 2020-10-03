@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -24,9 +26,9 @@ namespace LogicCalculator
         const int COL_SEGMENT_WIDTH = 60;
         const int CHILD_MARGIN = 4;
         const int THICKNESS = 2;
-        const int SPACES = 5;
-        const int HYPHEN = 10;
-        const int MAX_HYPHEN_CHUNKS = 8;
+        const int SPACES = 6;
+        const int HYPHEN = 8;
+        const int MAX_HYPHEN_CHUNKS = 10;
         const int MIN_HYPHEN_CHUNKS = 1;
         enum BoxState
         {
@@ -42,7 +44,7 @@ namespace LogicCalculator
         TextBox elementWithFocus;
         private readonly List<string> rules = new List<string> { "Data", "Assumption", "LEM", "PBC", "MP", "MT", "Copy"
                                                                  ,"∧i", "∧e1", "∧e2", "∨i1", "∨i2", "∨e", "¬¬e",
-                                                                 "¬¬i", "→i", "⊥e", "¬i", "→i"};
+                                                                 "¬¬i", "→i", "⊥e", "¬i", "¬e", "→i"};
         private int hyphen_chunks = MAX_HYPHEN_CHUNKS;
         private int spaces_chunks = MIN_HYPHEN_CHUNKS;
         private int box_closers = 0;
@@ -51,7 +53,6 @@ namespace LogicCalculator
         public MainWindow()
         {
             InitializeComponent();
-            CreateLine();
         }
 
         #region MENUBAR_CLICKS
@@ -59,7 +60,6 @@ namespace LogicCalculator
         {
             spGridTable.Children.Clear();
             table_row_num = 0;
-            CreateLine();
         }
         private void MenuItemOpen_Click(object sender, RoutedEventArgs e)
         {
@@ -76,7 +76,7 @@ namespace LogicCalculator
    
                 for (int i = 1; i < proof_table.Rows.Count; i++)
                 {
-                    CreateLine();
+                    createRow();
                 }
                 UIElementCollection grids = spGridTable.Children;
 
@@ -99,11 +99,21 @@ namespace LogicCalculator
         }
         private void MenuItemSave_Click(object sender, RoutedEventArgs e)
         {
-            string file_name = "wow";//TODO: get this from somewhere
-            string path = "C:\\Oren\\Final_project_logic_calculator";//TODO: get this from somewhere
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            saveFileDialog.ShowDialog();
+            string saveFileOutput = saveFileDialog.FileName;
+            if (string.IsNullOrEmpty(saveFileOutput)) return;
+            string file_name = Path.GetFileNameWithoutExtension(saveFileOutput);
+            string path = Path.GetDirectoryName(saveFileOutput);
+            
+            //string file_name = "wow";//TODO: get this from somewhere
+            //string path = "C:\\Oren\\Final_project_logic_calculator";//TODO: get this from somewhere
+
 
             //If the folder does not exist yet, it will be created.
             //If the folder exists already, the line will be ignored.
+            
             System.IO.Directory.CreateDirectory(path);
 
             if (!CheckPathAndFileName(path, file_name))
@@ -114,34 +124,44 @@ namespace LogicCalculator
             using (var document = DocX.Create(@path + "\\" + file_name))
             {
                 // Add a title.
-                document.InsertParagraph("Logic Calculator Results\n").FontSize(16d).Bold(true).UnderlineStyle(UnderlineStyle.singleLine);
-                //Add the main expression
-                document.InsertParagraph("Logical Expression: " + tbValue.Text + '\n').FontSize(14d);
+                document.InsertParagraph("Logic Tool Results\n").FontSize(16d).Bold(true).UnderlineStyle(UnderlineStyle.singleLine);
 
                 //Add the proof table
-                Table proof_table = document.AddTable(table_row_num + 1, TABLE_COL_NUM);
-                proof_table.Alignment = Alignment.center;
-
-                proof_table.Rows[0].Cells[0].Paragraphs.First().Append("Line").UnderlineStyle(UnderlineStyle.singleLine);
-                proof_table.Rows[0].Cells[1].Paragraphs.First().Append("Expression").UnderlineStyle(UnderlineStyle.singleLine);
-                proof_table.Rows[0].Cells[2].Paragraphs.First().Append("Rule").UnderlineStyle(UnderlineStyle.singleLine);
-                proof_table.Rows[0].Cells[3].Paragraphs.First().Append("First Segment").UnderlineStyle(UnderlineStyle.singleLine);
-                proof_table.Rows[0].Cells[4].Paragraphs.First().Append("Second Segment").UnderlineStyle(UnderlineStyle.singleLine);
-                proof_table.Rows[0].Cells[5].Paragraphs.First().Append("Third Segment").UnderlineStyle(UnderlineStyle.singleLine);
-
-                List<String> input_list = GetAllTableInput();
-                //Fill the proof table
-
-                for (int i = 0; i < table_row_num; i++)
+                switch (((TabItem)mainTab.SelectedItem).Header)
                 {
-                    proof_table.Rows[i + 1].Cells[0].Paragraphs.First().Append((i + 1).ToString());
-                    for (int j = 0; j < TABLE_COL_NUM - 1; j++)
-                    {
-                        proof_table.Rows[i + 1].Cells[j + 1].Paragraphs.First().Append(input_list[i * (TABLE_COL_NUM - 1) + j]);
-                    }
+                    case "Logical proof":
+                        //Add the main expression
+                        document.InsertParagraph("Logical Expression: " + tbValue.Text + '\n').FontSize(14d);
+
+                        Table proof_table = document.AddTable(table_row_num + 1, TABLE_COL_NUM);
+                        proof_table.Alignment = Alignment.center;
+
+                        proof_table.Rows[0].Cells[0].Paragraphs.First().Append("Line").UnderlineStyle(UnderlineStyle.singleLine);
+                        proof_table.Rows[0].Cells[1].Paragraphs.First().Append("Expression").UnderlineStyle(UnderlineStyle.singleLine);
+                        proof_table.Rows[0].Cells[2].Paragraphs.First().Append("Rule").UnderlineStyle(UnderlineStyle.singleLine);
+                        proof_table.Rows[0].Cells[3].Paragraphs.First().Append("First Segment").UnderlineStyle(UnderlineStyle.singleLine);
+                        proof_table.Rows[0].Cells[4].Paragraphs.First().Append("Second Segment").UnderlineStyle(UnderlineStyle.singleLine);
+                        proof_table.Rows[0].Cells[5].Paragraphs.First().Append("Third Segment").UnderlineStyle(UnderlineStyle.singleLine);
+
+                        List<String> input_list = GetAllTableInput();
+                        //Fill the proof table
+
+                        for (int i = 0; i < table_row_num; i++)
+                        {
+                            proof_table.Rows[i + 1].Cells[0].Paragraphs.First().Append((i + 1).ToString());
+                            for (int j = 0; j < TABLE_COL_NUM - 1; j++)
+                            {
+                                proof_table.Rows[i + 1].Cells[j + 1].Paragraphs.First().Append(input_list[i * (TABLE_COL_NUM - 1) + j]);
+                            }
+                        }
+                        document.InsertTable(proof_table);
+                        // Save this document to disk.
+                        break;
+
+                    case "Text editor":
+                        document.InsertParagraph(tbEditor.Text).FontSize(12d);
+                        break;
                 }
-                document.InsertTable(proof_table);
-                // Save this document to disk.
                 try
                 {
                     document.Save();
@@ -150,7 +170,8 @@ namespace LogicCalculator
                 {
                     MessageBox.Show(ex.Message);
                 }
-                MessageBox.Show("Created Document: " + path + "\\" + file_name + ".docx", "Documented Created");
+                MessageBox.Show("Created Document: " + path + "\\" + file_name + ".docx", "Documented Created"
+                    , MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
         private void MenuItemExit_Click(object sender, RoutedEventArgs e)
@@ -251,31 +272,23 @@ namespace LogicCalculator
             return false;
         }
 
-        private void handleBox(ComboBox cmb, int location)
+        private void handleBox(BoxState state)
         {
-            var rule = cmb.SelectedItem as string;
-            switch (rule)
+            if (!boxChecker(state)) return;
+            switch (state)
             {
-                case "Assumption":
-                    removeTextBlock(location + 1, BoxState.Close);
-                    spGridTable.Children.Insert(location, createBox(BoxState.Open));
-                    ++box_openers;
-                    break;
-                case "→i":
-                    if (removeTextBlock(location - 1, BoxState.Open)) --location;
-                    if (!ruleSelectionChecker(cmb, rule)) return;
-                    spGridTable.Children.Insert(location + 1, createBox(BoxState.Close));
+                case BoxState.Close:
+                    spGridTable.Children.Add(createBox(BoxState.Close));
                     ++box_closers;
                     break;
-                default:
-                    removeTextBlock(location + 1, BoxState.Close);
-                    removeTextBlock(location - 1, BoxState.Open);
+                case BoxState.Open:
+                    spGridTable.Children.Add(createBox(BoxState.Open));
+                    ++box_openers;
                     break;
-
             }
         }
 
-        private void CreateLine()
+        private void createRow()
         {
             ++table_row_num;
             //create new line and define cols
@@ -353,7 +366,8 @@ namespace LogicCalculator
                 VerticalAlignment = System.Windows.VerticalAlignment.Center,
                 Name = $"tbFirstSeg{table_row_num}",
                 Margin = new Thickness(THICKNESS),
-                Width = COL_SEGMENT_WIDTH - CHILD_MARGIN
+                Width = COL_SEGMENT_WIDTH - CHILD_MARGIN,
+                Visibility = Visibility.Hidden
             };
             Grid.SetColumn(tbFirstSeg, 3);
 
@@ -364,8 +378,9 @@ namespace LogicCalculator
                 VerticalAlignment = System.Windows.VerticalAlignment.Center,
                 Name = $"tbSecondSeg{table_row_num}",
                 Margin = new Thickness(THICKNESS),
-                Width = COL_SEGMENT_WIDTH - CHILD_MARGIN
-            };
+                Width = COL_SEGMENT_WIDTH - CHILD_MARGIN,
+                Visibility = Visibility.Hidden
+    };
             Grid.SetColumn(tbSecondSeg, 4);
 
             //textblock - third segment
@@ -375,7 +390,8 @@ namespace LogicCalculator
                 VerticalAlignment = System.Windows.VerticalAlignment.Center,
                 Name = $"tbThirdSeg{table_row_num}",
                 Margin = new Thickness(THICKNESS),
-                Width = COL_SEGMENT_WIDTH - CHILD_MARGIN
+                Width = COL_SEGMENT_WIDTH - CHILD_MARGIN,
+                Visibility = Visibility.Hidden
             };
             Grid.SetColumn(tbThirdSeg, 5);
 
@@ -393,15 +409,38 @@ namespace LogicCalculator
         #endregion
 
         #region EVENTS
-        private void makeInvisible(Grid g, int needed)
+        private void handleGridVisability(Grid g, int needed)
         {
             foreach (UIElement child in g.Children)
             {
                 switch (needed)
                 {
-                    case 0:
+                    case -1:
+                        if (child is Label)
+                        {
+                            Label lb = child as Label;
+                            lb.Visibility = Visibility.Hidden;
+                        }
                         if (child is TextBox)
                         {
+                            TextBox tbc = child as TextBox;
+                            tbc.IsEnabled = false;
+                            tbc.Visibility = Visibility.Hidden;
+                            tbc.Text = "";
+                        }
+                        break;
+                          
+                    case 0:
+                        if (Grid.GetColumn(child) == 0)
+                        {
+                            ((Label)child).Visibility = Visibility.Visible;
+                        }
+                        if (child is TextBox)
+                        {
+                            if (Grid.GetColumn(child) == 0)
+                            {
+                                ((Label)child).Visibility = Visibility.Visible;
+                            }
                             if (Grid.GetColumn(child) == 1)
                             {
                                 TextBox tbc = child as TextBox;
@@ -418,6 +457,10 @@ namespace LogicCalculator
                         }
                         break;
                     case 1:
+                        if (Grid.GetColumn(child) == 0)
+                        {
+                            ((Label)child).Visibility = Visibility.Visible;
+                        }
                         if (child is TextBox)
                         {
                             if (Grid.GetColumn(child) == 1 ||
@@ -437,6 +480,10 @@ namespace LogicCalculator
                         }
                         break;
                     case 2:
+                        if (Grid.GetColumn(child) == 0)
+                        {
+                            ((Label)child).Visibility = Visibility.Visible;
+                        }
                         if (child is TextBox)
                         {
                             if (Grid.GetColumn(child) == 1 ||
@@ -457,6 +504,10 @@ namespace LogicCalculator
                         }
                         break;
                     case 3:
+                        if (Grid.GetColumn(child) == 0)
+                        {
+                            ((Label)child).Visibility = Visibility.Visible;
+                        }
                         if (child is TextBox)
                         {
                             TextBox tbc = child as TextBox;
@@ -472,14 +523,15 @@ namespace LogicCalculator
             ComboBox cmb = sender as ComboBox;
             Grid parent = cmb.Parent as Grid;
             var location = spGridTable.Children.IndexOf(parent);
-            switch (cmb.SelectedItem)
+            string rule = cmb.SelectedItem as string;
+            switch (rule)
             {
                 //0 seg
                 case "Data":
                 case "Assumption":
                 case "LEM":
-                    makeInvisible(parent, 0);
-                    handleBox(cmb, location);
+                    handleGridVisability(parent, 0);
+                    //handleBox(cmb, location);
                     break;
                 //1 seg
                 case "PBC":
@@ -492,22 +544,27 @@ namespace LogicCalculator
                 case "∨i1":
                 case "∨i2":
                 case "⊥e":
+                case "¬e":
                 case "¬i":
-                    makeInvisible(parent, 1);
-                    handleBox(cmb, location);
+                    handleGridVisability(parent, 1);
+                    //handleBox(cmb, location);
                     break;
                 //2 seg
                 case "MP":
                 case "MT":
                 case "∧i":
-                    makeInvisible(parent, 2);
+                    handleGridVisability(parent, 2);
                     break;
                 //3 seg
                 case "∨e":
-                    makeInvisible(parent, 3);
+                    handleGridVisability(parent, 3);
+                    break;
+                case "Close Box":
+                    handleGridVisability(parent, -1);
+                    //handleBox(cmb, location);
                     break;
                 default:
-                    makeInvisible(parent, 3);
+                    handleGridVisability(parent, 0);
                     break;
             }
         }
@@ -516,7 +573,7 @@ namespace LogicCalculator
         #region BUTTON_CLICKS
         private void BtnAddLine_Click(object sender, RoutedEventArgs e)
         {
-            CreateLine();
+            createRow();
         }
         private void CheckButton_click(object sender, RoutedEventArgs e)
         {
@@ -534,13 +591,6 @@ namespace LogicCalculator
             if (elementWithFocus != null)
             {
                 AppendKeyboardChar(elementWithFocus, "∧");
-            }
-        }
-        private void Btnbothdirections_Click(object sender, RoutedEventArgs e)
-        {
-            if (elementWithFocus != null)
-            {
-                AppendKeyboardChar(elementWithFocus, "↔️");
             }
         }
         private void BtnTurnstile_Click(object sender, RoutedEventArgs e)
@@ -564,12 +614,51 @@ namespace LogicCalculator
                 AppendKeyboardChar(elementWithFocus, "¬");
             }
         }
+        private void btnPhi_Click(object sender, RoutedEventArgs e)
+        {
+            if (elementWithFocus != null)
+            {
+                AppendKeyboardChar(elementWithFocus, "φ");
+            }
+        }
+
+        private void btnChi_Click(object sender, RoutedEventArgs e)
+        {
+            if (elementWithFocus != null)
+            {
+                AppendKeyboardChar(elementWithFocus, "χ");
+            }
+        }
+
+        private void btnPsi_Click(object sender, RoutedEventArgs e)
+        {
+            if (elementWithFocus != null)
+            {
+                AppendKeyboardChar(elementWithFocus, "ψ");
+            }
+        }
+        private void btnOpenBox_Click(object sender, RoutedEventArgs e)
+        {
+            handleBox(BoxState.Open);
+        }
+
+        private void btnCloseBox_Click(object sender, RoutedEventArgs e)
+        {
+            handleBox(BoxState.Close);
+        }
+
         private void btnClear_Click(object sender, RoutedEventArgs e)
         {
+            int boxes_num = 0;
             tbValue.Text = String.Empty;
             UIElementCollection grids = spGridTable.Children;
             foreach (var row in grids)
             {
+                if (row is TextBlock)
+                {
+                    ++boxes_num;
+                    continue;
+                }
                 Grid g = row as Grid;
                 foreach (var child in g.Children)
                 {
@@ -579,10 +668,28 @@ namespace LogicCalculator
                     }
                     if (child is ComboBox)
                     {
-                        ((ComboBox)child).Text = String.Empty;
+                        ComboBox cmb = child as ComboBox;
+                        cmb.SelectedIndex = -1;
                     }
                 }
             }
+            for (int i=0; i < boxes_num; i++)
+            {
+                foreach (var row in spGridTable.Children)
+                {
+                    if (row is TextBlock)
+                    {
+                        TextBlock tb = row as TextBlock;
+                        spGridTable.Children.Remove(tb);
+                        break;
+                    }
+                }
+            }
+            //re-initial variables
+            box_closers = 0;
+            box_openers = 0;
+            hyphen_chunks = MAX_HYPHEN_CHUNKS;
+            spaces_chunks = MIN_HYPHEN_CHUNKS;
         }
         #endregion
 
@@ -614,22 +721,55 @@ namespace LogicCalculator
             MessageBox.Show(msg, title, MessageBoxButton.OK, MessageBoxImage.Error);
             return;
         }
-        private bool ruleSelectionChecker(ComboBox cmb, string rule)
+        private bool boxChecker(BoxState state)
         {
-            switch (rule)
+            switch (state)
             {
-                case "→i":
-                    if (box_closers == box_openers)
+                case BoxState.Close:
+                    if (box_closers >= box_openers)
                     {
-                        displayMsg("Error: more box closers then box openers", "Error");
-                        cmb.SelectedItem = null;
+                        displayMsg("Error: Can't be more box closers then box openers", "Error");
+                        return false;
+                    }
+                    if (!hasBoxOpen())
+                    {
+                        displayMsg("Error: no opener found", "Error");
                         return false;
                     }
                     return true;
+
+                case BoxState.Open:
+                    if (hyphen_chunks <= MIN_HYPHEN_CHUNKS)
+                    {
+                        displayMsg("Error: You reached to maximum available boxes", "Error");
+                        return false;
+                    }
+                    return true;
+
                 default:
                     return false;
             }
         }
+
+        private bool hasBoxOpen()
+        {
+            var searchIndex = spGridTable.Children.Count;
+            int openers = 0;
+            int closers = 0;
+            for (int i = searchIndex - 1; i >= 0; --i)
+            {
+                if (spGridTable.Children[i] is TextBlock)
+                {
+                    TextBlock tb = spGridTable.Children[i] as TextBlock;
+                    if (tb.Text.Contains("┌") && 
+                        tb.Text.Length == (hyphen_chunks + 1)*HYPHEN + SPACES*(spaces_chunks - 1)) break;
+                    if (tb.Text.Contains("┌")) ++openers;
+                    if (tb.Text.Contains("└")) ++closers;
+                }
+            }
+            return openers == closers ? true : false;
+        }
+
         public int FindOperator(string input, int start)
         {
             for (int i = start; i < input.Length; i++)
@@ -648,18 +788,26 @@ namespace LogicCalculator
             List<String> ret = new List<String>();
             foreach (var row in grids)
             {
-                Grid g = row as Grid;
-                foreach (var child in g.Children)
+                if (row is TextBlock)
                 {
-                    if (child is TextBox)
+                    ret.Add(((TextBlock)row).Text);
+                } 
+                else //grid
+                {
+                    Grid g = row as Grid;
+                    foreach (var child in g.Children)
                     {
-                        ret.Add(((TextBox)child).Text);
-                    }
-                    if (child is ComboBox)
-                    {
-                        ret.Add(((ComboBox)child).Text);
+                        if (child is TextBox)
+                        {
+                            ret.Add(((TextBox)child).Text);
+                        }
+                        if (child is ComboBox)
+                        {
+                            ret.Add(((ComboBox)child).Text);
+                        }
                     }
                 }
+                
             }
             return ret;
         }
@@ -671,7 +819,7 @@ namespace LogicCalculator
         {
             tb.Text += sign;
         }
-        private void SpKeyboard_MouseEnter(object sender, MouseEventArgs e)
+        private void gridKeyboard_MouseEnter(object sender, MouseEventArgs e)
         {
             if (Keyboard.FocusedElement is TextBox temp)
                 elementWithFocus = temp;

@@ -4,7 +4,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-       Title="Logic Calculator" Height="500" Width="600">
+       Title="Logic Calculator" Height="800" Width="500">
 
     <DockPanel>
         <!--MENU BAR-->
@@ -44,10 +44,10 @@
         <!--MENU BAR END-->
         <Grid Name="GridMain" Margin="5">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="470"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
+                <RowDefinition Height="550"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
             <Grid Name="GridPermanent" Grid.Column="1">
@@ -55,35 +55,26 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <!--KEYBOARD-->
-                <GroupBox Header="Keyboard" Grid.Column="1" BorderThickness="2" BorderBrush="Black">
-                    <StackPanel Name="spKeyboard" Grid.Column="1" MouseEnter="SpKeyboard_MouseEnter">
-                        <Button Name="btnNot" Margin="0,75,0,0" Content="¬" Click="BtnNot_Click"/>
-                        <Button Name="btnOr" Content="∨" Margin="0,11,0,0" Click="BtnOr_Click"/>
-                        <Button Name="btnAnd" Content="∧" Margin="0,11,0,0" Click="BtnAnd_Click"/>
-                        <Button Name="btnbothdirections" Content="↔️"  Margin="0,11,0,0" Click="Btnbothdirections_Click"/>
-                        <Button Name="btnTurnstile" Content="⊢"  Margin="0,11,0,0" Click="BtnTurnstile_Click"/>
-                        <Button Name="btnFalsum" Content="⊥"  Margin="0,11,0,0" Click="BtnFalsum_Click"/>
-                    </StackPanel>
-                </GroupBox>
+
             </Grid>
 
             <!--TABs-->
-            <TabControl>
+            <TabControl Name="mainTab">
                 <TabItem Header="Logical proof">
                     <!--LOGICAL PROOF TAB-->
                     <Grid Name="GridLogicalProof">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="6*"/>
-                            <ColumnDefinition Width="241*"/>
-                            <ColumnDefinition Width="234*"/>
+                            <ColumnDefinition Width="36*"/>
+                            <ColumnDefinition Width="204*"/>
+                            <ColumnDefinition Width="233*"/>
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="90"/>
                             <RowDefinition Height="7*"/>
                             <RowDefinition Height="50"/>
                         </Grid.RowDefinitions>
-                        <StackPanel Name="spLogicExpression" VerticalAlignment="Center" Grid.ColumnSpan="3" Margin="0,5,-0.2,5.4">
+                        <StackPanel Name="spLogicExpression" VerticalAlignment="Center" Grid.ColumnSpan="4" Margin="0,5,-0.6,5.4">
                             <TextBlock Text="Enter a valid logical expression" TextAlignment="Center" FontWeight="Bold"/>
                             <TextBox Name="tbValue" TextAlignment="Center" Margin="80,0"/>
                             <Grid Margin="0,5,0,0">
@@ -111,12 +102,12 @@
                                 </Label>
                             </Grid>
                         </StackPanel>
-                        <ScrollViewer Grid.ColumnSpan="3" Margin="0,90,-0.2,49.2" Grid.RowSpan="3">
+                        <ScrollViewer Grid.ColumnSpan="4" Margin="0,90,-0.6,49.4" Grid.RowSpan="3" ScrollViewer.VerticalScrollBarVisibility="Auto">
                             <StackPanel Name="spGridTable">
 
                             </StackPanel>
                         </ScrollViewer>
-                        <Grid Name="GridButtonsLine" Grid.Row="2" Grid.ColumnSpan="3" Margin="0,0.4,-0.2,0.2">
+                        <Grid Name="GridButtonsLine" Grid.Row="2" Grid.ColumnSpan="4" Margin="0,0.2,-0.6,0.4">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="75"/>
                                 <ColumnDefinition Width="75"/>
@@ -133,9 +124,68 @@
                 </TabItem>
                 <!--TEXT EDITOR TAB-->
                 <TabItem Header="Text editor">
-                    <TextBox Name="tbEditor" Margin="10"/>
+                    <TextBox Name="tbEditor" TextWrapping="Wrap" AcceptsReturn="True" 
+                             ScrollViewer.VerticalScrollBarVisibility="Auto" Margin="10"/>
                 </TabItem>
             </TabControl>
+            <!--KEYBOARD-->
+            <GroupBox Header="Logical Keyboard" Grid.Row="1" BorderThickness="2" BorderBrush="Black">
+                <Grid Name="gridKeyboard" MouseEnter="gridKeyboard_MouseEnter">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <!--KEYBOARD FIRST LINE-->
+                    <Button Name="btnOpenBox" Margin="2" Click="btnOpenBox_Click"
+                            Grid.ColumnSpan="2" Grid.Column="0" Grid.Row="0">
+                        <TextBlock TextWrapping="Wrap">
+                             ┌---------┐ <LineBreak /> Open Box
+                        </TextBlock>
+                    </Button>
+                    <Button Name="btnNot" Margin="2" Content="¬" Click="BtnNot_Click" 
+                            Grid.ColumnSpan="2" Grid.Column="4" Grid.Row="0"/>
+                    <Button Name="btnOr" Content="∨" Margin="2" Click="BtnOr_Click" 
+                            Grid.ColumnSpan="2" Grid.Column="2" Grid.Row="0"/>
+                    <Button Name="btnTurnstile" Content="⊢"  Margin="2" Click="BtnTurnstile_Click" 
+                            Grid.ColumnSpan="2" Grid.Column="6" Grid.Row="0"/>
+                    <Button Name="btnCloseBox"  Margin="2" Click="btnCloseBox_Click"
+                            Grid.ColumnSpan="2" Grid.Column="8" Grid.Row="0">
+                        <TextBlock TextWrapping="Wrap">
+                              Close Box <LineBreak /> └---------┘
+                        </TextBlock>
+                    </Button>
+                    
+                    <!--KEYBOARD SECOND LINE-->
+                    <Button Name="btnAnd" Content="∧" Margin="2" Click="BtnAnd_Click" 
+                            Grid.ColumnSpan="2" Grid.Column="1" Grid.Row="1"/>
+                    <Button Name="btnFalsum" Content="⊥"  Margin="2" Click="BtnFalsum_Click"
+                            Grid.ColumnSpan="2" Grid.Column="3" Grid.Row="1"/>
+                    <Button Name="free2" Content="?"  Margin="2"
+                            Grid.ColumnSpan="2" Grid.Column="5" Grid.Row="1"/>
+                    <Button Name="free3" Content="?"  Margin="2"
+                            Grid.ColumnSpan="2" Grid.Column="7" Grid.Row="1"/>
+                    <!--KEYBOARD SECOND LINE-->
+                    <Button Name="btnPhi" Content="φ"  Margin="2" Click="btnPhi_Click"
+                            Grid.ColumnSpan="2" Grid.Column="2" Grid.Row="2"/>
+                    <Button Name="btnChi" Content="χ"  Margin="2" Click="btnChi_Click"
+                            Grid.ColumnSpan="2" Grid.Column="4" Grid.Row="2"/>
+                    <Button Name="btnPsi" Content="ψ"  Margin="2" Click="btnPsi_Click"
+                            Grid.ColumnSpan="2" Grid.Column="6" Grid.Row="2"/>
+                </Grid>
+            </GroupBox>
         </Grid>
     </DockPanel>
 </Window>
