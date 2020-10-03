@@ -156,7 +156,7 @@ namespace LogicCalculator
                         proof_table.Rows[0].Cells[4].Paragraphs.First().Append("Second Segment").UnderlineStyle(UnderlineStyle.singleLine);
                         proof_table.Rows[0].Cells[5].Paragraphs.First().Append("Third Segment").UnderlineStyle(UnderlineStyle.singleLine);
 
-                        List<String> input_list = GetAllTableInput();
+                        List<string> input_list = GetAllTableInput();
                         //Fill the proof table
 
                         for (int i = 0; i < table_row_num; i++)
@@ -220,7 +220,7 @@ namespace LogicCalculator
             {
                 if (child is TextBox)
                 {
-                    ((TextBox)child).Text = String.Empty;
+                    ((TextBox)child).Text = string.Empty;
                 }
                 if (child is ComboBox)
                 {
@@ -849,7 +849,7 @@ namespace LogicCalculator
                     //}
                     if (child is TextBox)
                     {
-                        ((TextBox)child).Text = String.Empty;
+                        ((TextBox)child).Text = string.Empty;
                     }
                     if (child is ComboBox)
                     {
@@ -899,29 +899,111 @@ namespace LogicCalculator
         #endregion
 
         #region UTILITY 
+        public List<TextBox> GetAllTextBoxes()
+        {
+            UIElementCollection grids = spGridTable.Children;
+            List<TextBox> ret = new List<TextBox>();
+            foreach (var row in grids)
+            {
+                Grid g = row as Grid;
+                foreach (var child in g.Children)
+                {
+                    if (child is TextBox)
+                    {
+                        ret.Add(((TextBox)child));
+                    }
+                    if (child is ComboBox)
+                    {
+                        TextBox t = new TextBox();
+                        t.Text = ((ComboBox)child).Text;
+                        ret.Add(t);
+                    }
+                }
+            }
+            return ret;
+        }
+        private bool IsValidStatement(string expression, string rule, string first_segment,
+           string second_segment, string third_segment)
+        {
+            int row = statement_list.Count;
+            if (!IsValidExpression(expression, row))
+            {
+                return false;
+            }
+
+            if (string.IsNullOrEmpty(rule))
+            {
+                Expression_Error(row, "Rule is empty");
+                return false;
+            }
+            if (first_segment != null)
+            {
+                if (first_segment == string.Empty)
+                {
+                    Expression_Error(row, "First segment is empty");
+                    return false;
+                }
+                else if (!IsValidSegment(first_segment))
+                {
+                    Expression_Error(row, "First segment is not a positive integer number");
+                    return false;
+                }
+            }
+            if (second_segment != null)
+            {
+                if (second_segment == string.Empty)
+                {
+                    Expression_Error(row, "Second segment is empty");
+                    return false;
+                }
+                if (!IsValidSegment(second_segment))
+                {
+                    Expression_Error(row, "Second segment is not a positive integer number");
+                    return false;
+                }
+            }
+            if (third_segment != null)
+            {
+                if (third_segment == string.Empty)
+                {
+                    Expression_Error(row, "Third segment is empty");
+                    return false;
+                }
+                if (!IsValidSegment(third_segment))
+                {
+                    Expression_Error(row, "Third segment is not a positive integer number");
+                    return false;
+                }
+            }
+
+            return true;
+        }
         void HandleTableInput()
         {
-            statement_list.Add(new Statement (tbValue.Text,"first","0"));
-            List<String> text_boxes_list = GetAllTableInput();
+            statement_list.Add(new Statement(tbValue.Text, "first", "0"));
+            //List<string> text_boxes_list = GetAllTableInput();
+            List<TextBox> text_boxes_list = GetAllTextBoxes();
             //One less column because of the line number column
             int col_to_check = TABLE_COL_NUM - 1;
-            for (int i = 0; i < text_boxes_list.Count - col_to_check; i += col_to_check)
-            {   //Remove spaces
-                String expression = text_boxes_list[i].Replace(" ", String.Empty) ;
-                String rule = text_boxes_list[i + 1].Replace(" ", String.Empty); 
-                String first_segment = text_boxes_list[i + 2].Replace(" ", String.Empty); 
-                String second_segment = text_boxes_list[i + 3].Replace(" ", String.Empty);
-                String third_segment = text_boxes_list[i + 4].Replace(" ", String.Empty); 
-                int current_row = i / col_to_check + 1;
 
-                if (!IsValidStatement(expression, rule, first_segment, second_segment, third_segment, current_row))
+            for (int i = 0; i < text_boxes_list.Count - col_to_check + 1; i += col_to_check)
+            {   //Remove spaces
+                string expression = text_boxes_list[i].Text.Replace(" ", string.Empty);
+                string rule = text_boxes_list[i + 1].Text.Replace(" ", string.Empty);
+                string first_segment = text_boxes_list[i + 2].IsEnabled ? text_boxes_list[i + 2].Text.Replace(" ", string.Empty) : null;
+                string second_segment = text_boxes_list[i + 3].IsEnabled ? text_boxes_list[i + 3].Text.Replace(" ", string.Empty) : null;
+                string third_segment = text_boxes_list[i + 4].IsEnabled ? text_boxes_list[i + 4].Text.Replace(" ", string.Empty) : null;
+
+                if (!IsValidStatement(expression, rule, first_segment, second_segment, third_segment))
                     return;
                 Statement s = new Statement(expression, rule, first_segment, second_segment, third_segment);
-                statement_list.Add(s);                
-                new Evaluation(statement_list, current_row, rule); 
+                statement_list.Add(s);
+                Evaluation e = new Evaluation(statement_list, rule);
+                if (!e.is_valid)
+                    return;
             }
+            MessageBox.Show("All input is valid");
         }
-        
         private void displayMsg(string msg, string title)
         {
             MessageBox.Show(msg, title, MessageBoxButton.OK, MessageBoxImage.Error);
@@ -956,10 +1038,10 @@ namespace LogicCalculator
             }
             return -1;
         }
-        public List<String> GetAllTableInput()
+        public List<string> GetAllTableInput()
         {
             UIElementCollection grids = spGridTable.Children;
-            List<String> ret = new List<String>();
+            List<string> ret = new List<string>();
             foreach (var row in grids)
             {
                 if (row is TextBlock)
@@ -1000,8 +1082,8 @@ namespace LogicCalculator
         #endregion
 
         #region INPUT_CHECKS
-        private bool IsValidStatement(String expression, String rule, String first_segment,
-           String second_segment, String third_segment, int row)
+        private bool IsValidStatement(string expression, string rule, string first_segment,
+           string second_segment, string third_segment, int row)
         {
             if (!IsValidExpression(expression, row))
             {
@@ -1178,9 +1260,9 @@ namespace LogicCalculator
         #endregion input_check
 
         #region TESTING
-        public void PrintInputList(List<String> l)
+        public void PrintInputList(List<string> l)
         {
-            foreach (String t in l)
+            foreach (string t in l)
             {
                 Console.WriteLine(t);
             }
