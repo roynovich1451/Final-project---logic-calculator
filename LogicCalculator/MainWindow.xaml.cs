@@ -6,6 +6,7 @@ using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Web.Compilation;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -24,12 +25,21 @@ namespace LogicCalculator
         const int COL_LABEL_WIDTH = 40;
         const int COL_STATEMENT_WIDTH = 160;
         const int COL_SEGMENT_WIDTH = 60;
+        const int COL_TEXTBLOCK_WIDTH = 420;
         const int CHILD_MARGIN = 4;
         const int THICKNESS = 2;
         const int SPACES = 6;
         const int HYPHEN = 8;
         const int MAX_HYPHEN_CHUNKS = 10;
         const int MIN_HYPHEN_CHUNKS = 1;
+        const int CHECKBOX_INDEX = 0;
+        const int LABL_INDEX = 1;
+        const int STATEMENT_INDEX = 2;
+        const int COMBOBOX_INDEX = 3;
+        const int SEGMENT1_INDEX = 4;
+        const int SEGMENT2_INDEX = 5;
+        const int SEGMENT3_INDEX = 6;
+        const int TEXT_BLOCK_INDEX = 1;
         enum BoxState
         {
             Open,
@@ -38,6 +48,7 @@ namespace LogicCalculator
         #endregion
 
         #region VARIABLES
+        private int checked_checkboxes = 0;
         readonly List<Statement> statement_list = new List<Statement>();
         private int table_row_num = 0;
         private static readonly int TABLE_COL_NUM = 6;
@@ -60,6 +71,8 @@ namespace LogicCalculator
         {
             spGridTable.Children.Clear();
             table_row_num = 0;
+            hyphen_chunks = MAX_HYPHEN_CHUNKS;
+            spaces_chunks = MIN_HYPHEN_CHUNKS;
         }
         private void MenuItemOpen_Click(object sender, RoutedEventArgs e)
         {
@@ -76,7 +89,7 @@ namespace LogicCalculator
    
                 for (int i = 1; i < proof_table.Rows.Count; i++)
                 {
-                    createRow();
+                    createRow(-1);
                 }
                 UIElementCollection grids = spGridTable.Children;
 
@@ -194,6 +207,204 @@ namespace LogicCalculator
         #endregion
 
         #region DYNAMIC_GUI
+        /*
+        private void clearGridLine(int index)
+        {
+            if (spGridTable.Children[index] is TextBlock)
+            {
+                removeTextBlock(index);
+                return;
+            }
+            Grid line = spGridTable.Children[index] as Grid;
+            foreach (var child in line.Children)
+            {
+                if (child is TextBox)
+                {
+                    ((TextBox)child).Text = String.Empty;
+                }
+                if (child is ComboBox)
+                {
+                    ((ComboBox)child).SelectedIndex = -1;
+                }
+                if (child is CheckBox)
+                {
+                    ((CheckBox)child).IsChecked = false;
+                }
+            }
+        }
+        */
+        private bool boxChecker(BoxState state)
+        {
+            switch (state)
+            {
+                case BoxState.Close:
+                    if (box_closers >= box_openers)
+                    {
+                        displayMsg("Error: Can't be more box closers then box openers", "Error");
+                        return false;
+                    }
+                    if (!hasBoxOpen())
+                    {
+                        displayMsg("Error: no opener found", "Error");
+                        return false;
+                    }
+                    return true;
+
+                case BoxState.Open:
+                    if (hyphen_chunks <= MIN_HYPHEN_CHUNKS)
+                    {
+                        displayMsg("Error: You reached to maximum available boxes", "Error");
+                        return false;
+                    }
+                    return true;
+
+                default:
+                    return false;
+            }
+        }
+        private void handleGridVisability(Grid g, int needed)
+        {
+            foreach (UIElement child in g.Children)
+            {
+                switch (needed)
+                {
+                    case -1:
+                        if (child is Label)
+                        {
+                            Label lb = child as Label;
+                            lb.Visibility = Visibility.Hidden;
+                        }
+                        if (child is TextBox)
+                        {
+                            TextBox tbc = child as TextBox;
+                            tbc.IsEnabled = false;
+                            tbc.Visibility = Visibility.Hidden;
+                            tbc.Text = "";
+                        }
+                        break;
+
+                    case 0:
+                        if (Grid.GetColumn(child) == LABL_INDEX)
+                        {
+                            ((Label)child).Visibility = Visibility.Visible;
+                        }
+                        if (child is TextBox)
+                        {
+                            if (Grid.GetColumn(child) == LABL_INDEX)
+                            {
+                                ((Label)child).Visibility = Visibility.Visible;
+                            }
+                            if (Grid.GetColumn(child) == STATEMENT_INDEX)
+                            {
+                                TextBox tbc = child as TextBox;
+                                tbc.IsEnabled = true;
+                                tbc.Visibility = Visibility.Visible;
+                            }
+                            else
+                            {
+                                TextBox tbc = child as TextBox;
+                                tbc.IsEnabled = false;
+                                tbc.Visibility = Visibility.Hidden;
+                                tbc.Text = "";
+                            }
+                        }
+                        break;
+                    case 1:
+                        if (Grid.GetColumn(child) == LABL_INDEX)
+                        {
+                            ((Label)child).Visibility = Visibility.Visible;
+                        }
+                        if (child is TextBox)
+                        {
+                            if (Grid.GetColumn(child) == STATEMENT_INDEX ||
+                                Grid.GetColumn(child) == SEGMENT1_INDEX)
+                            {
+                                TextBox tbc = child as TextBox;
+                                tbc.IsEnabled = true;
+                                tbc.Visibility = Visibility.Visible;
+                            }
+                            else
+                            {
+                                TextBox tbc = child as TextBox;
+                                tbc.IsEnabled = false;
+                                tbc.Visibility = Visibility.Hidden;
+                                tbc.Text = "";
+                            }
+                        }
+                        break;
+                    case 2:
+                        if (Grid.GetColumn(child) == LABL_INDEX)
+                        {
+                            ((Label)child).Visibility = Visibility.Visible;
+                        }
+                        if (child is TextBox)
+                        {
+                            if (Grid.GetColumn(child) == STATEMENT_INDEX ||
+                                Grid.GetColumn(child) == SEGMENT1_INDEX ||
+                                Grid.GetColumn(child) == SEGMENT2_INDEX)
+                            {
+                                TextBox tbc = child as TextBox;
+                                tbc.IsEnabled = true;
+                                tbc.Visibility = Visibility.Visible;
+                            }
+                            else
+                            {
+                                TextBox tbc = child as TextBox;
+                                tbc.IsEnabled = false;
+                                tbc.Visibility = Visibility.Hidden;
+                                tbc.Text = "";
+                            }
+                        }
+                        break;
+                    case 3:
+                        if (Grid.GetColumn(child) == LABL_INDEX)
+                        {
+                            ((Label)child).Visibility = Visibility.Visible;
+                        }
+                        if (child is TextBox)
+                        {
+                            TextBox tbc = child as TextBox;
+                            tbc.IsEnabled = true;
+                            tbc.Visibility = Visibility.Visible;
+                        }
+                        break;
+                }
+            }
+        }
+        private void handleLabelsAfterCheckMode()
+        {
+            int index = 0;
+            foreach (Grid row in spGridTable.Children)
+            {
+                if (row.Children[LABL_INDEX] is Label)
+                {
+                    Label label = row.Children[LABL_INDEX] as Label;
+                    label.Content = ++index;
+                }
+            }
+            //re-initial variables
+            if (spGridTable.Children.Count == 0)
+                table_row_num = 0;
+            else
+                table_row_num = index - 1;
+        }
+        private List<Grid> getChecked()
+        {
+            List<Grid> ret = new List<Grid>();
+            foreach (var child in spGridTable.Children)
+            {
+                if (child is Grid)
+                {
+                    Grid row = child as Grid;
+                    CheckBox chb = row.Children[CHECKBOX_INDEX] as CheckBox;
+                    if (chb.IsChecked == true)
+                    {
+                        ret.Add(row);
+                    }
+                }
+            }
+            return ret;
+        }
         private string createBoxLine(BoxState state)
         {
             StringBuilder line = new StringBuilder();
@@ -224,24 +435,70 @@ namespace LogicCalculator
             }
             return line.ToString();
         }
-
-        private TextBlock createBox(BoxState state)
+        private Grid createBox(BoxState state)
         {
             //textblock - opener
+            Grid newLine = new Grid();
+            ColumnDefinition gridCol0 = new ColumnDefinition
+            {
+                Width = new GridLength(COL_LABEL_WIDTH)
+            };
+            ColumnDefinition gridCol1 = new ColumnDefinition
+            {
+                Width = new GridLength(COL_TEXTBLOCK_WIDTH)
+            };
+            newLine.ColumnDefinitions.Add(gridCol0);
+            newLine.ColumnDefinitions.Add(gridCol1);
+
+            //checkbox - clear/remove
+            CheckBox chb = new CheckBox
+            {
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = System.Windows.VerticalAlignment.Center,
+                Visibility = Visibility.Visible,
+                IsChecked = false,
+                Margin = new Thickness(THICKNESS)
+            };
+            chb.Click += new RoutedEventHandler(chb_click);
+            Grid.SetColumn(chb, CHECKBOX_INDEX);
+
             TextBlock tbline = new TextBlock
             {
                 HorizontalAlignment = HorizontalAlignment.Center,
                 VerticalAlignment = System.Windows.VerticalAlignment.Center,
-                Margin = new Thickness(2),
+                Margin = new Thickness(THICKNESS),
                 FontWeight = FontWeights.Bold,
-                Width = 420
+                Width = COL_TEXTBLOCK_WIDTH
             };
+            Grid.SetColumn(tbline, TEXT_BLOCK_INDEX);
             tbline.Text = createBoxLine(state);
-            return tbline;
-        }
 
-        private bool removeTextBlock(int location, BoxState state)
+            newLine.Children.Add(chb);
+            newLine.Children.Add(tbline);
+            return newLine;
+        }
+        private void checkMode(bool state)
         {
+            if (state == true)
+            {
+                btnAddBefore.Visibility = Visibility.Visible;
+                btnRemove.Visibility = Visibility.Visible;
+                btnClear.Visibility = Visibility.Visible;
+                btnAddLine.Visibility = Visibility.Hidden;
+                btncheckButton.Visibility = Visibility.Hidden;
+            }
+            else
+            {
+                btnAddBefore.Visibility = Visibility.Hidden;
+                btnRemove.Visibility = Visibility.Hidden;
+                btnClear.Visibility = Visibility.Hidden;
+                btnAddLine.Visibility = Visibility.Visible;
+                btncheckButton.Visibility = Visibility.Visible;
+            }
+        }
+        private bool removeTextBlock(int location)
+        {
+            /* TODO: NEED FIX TO NEW DESIGN 
             if (location < 0 || location > spGridTable.Children.Count - 1) return false;
             if (spGridTable.Children[location] is TextBlock)
             {
@@ -270,8 +527,9 @@ namespace LogicCalculator
                 }
             }
             return false;
+            */
+            return true;
         }
-
         private void handleBox(BoxState state)
         {
             if (!boxChecker(state)) return;
@@ -287,12 +545,15 @@ namespace LogicCalculator
                     break;
             }
         }
-
-        private void createRow()
+        private void createRow(int index)
         {
             ++table_row_num;
             //create new line and define cols
             Grid newLine = new Grid();
+            ColumnDefinition gridCol0 = new ColumnDefinition
+            {
+                Width = new GridLength(COL_LABEL_WIDTH)
+            };
             ColumnDefinition gridCol1 = new ColumnDefinition
             {
                 Width = new GridLength(COL_LABEL_WIDTH)
@@ -319,12 +580,25 @@ namespace LogicCalculator
             };
 
             // ADD col to new line
+            newLine.ColumnDefinitions.Add(gridCol0);
             newLine.ColumnDefinitions.Add(gridCol1);
             newLine.ColumnDefinitions.Add(gridCol2);
             newLine.ColumnDefinitions.Add(gridCol3);
             newLine.ColumnDefinitions.Add(gridCol4);
             newLine.ColumnDefinitions.Add(gridCol5);
             newLine.ColumnDefinitions.Add(gridCol6);
+
+            //checkbox - clear/remove
+            CheckBox chb = new CheckBox
+            {
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = System.Windows.VerticalAlignment.Center,
+                Visibility = Visibility.Visible,
+                IsChecked = false,
+                Margin = new Thickness(THICKNESS)
+            };
+            chb.Click += new RoutedEventHandler(chb_click);
+            Grid.SetColumn(chb, CHECKBOX_INDEX);
 
             //label
             Label lb = new Label
@@ -333,7 +607,7 @@ namespace LogicCalculator
                 Margin = new Thickness(THICKNESS),
                 HorizontalContentAlignment = HorizontalAlignment.Right
             };
-            Grid.SetColumn(lb, 0);
+            Grid.SetColumn(lb, LABL_INDEX);
 
             //textblock - statement
             TextBox tbState = new TextBox
@@ -344,7 +618,7 @@ namespace LogicCalculator
                 Margin = new Thickness(THICKNESS),
                 Width = COL_STATEMENT_WIDTH - CHILD_MARGIN
             };
-            Grid.SetColumn(tbState, 1);
+            Grid.SetColumn(tbState, STATEMENT_INDEX);
 
             //comboBox - rule
             ComboBox cmbRules = new ComboBox
@@ -357,7 +631,7 @@ namespace LogicCalculator
                 Width = COL_SEGMENT_WIDTH - CHILD_MARGIN
             };
             cmbRules.SelectionChanged += new SelectionChangedEventHandler(cmb_SelectedValueChanged);
-            Grid.SetColumn(cmbRules, 2);
+            Grid.SetColumn(cmbRules, COMBOBOX_INDEX);
 
             //textblock - first segment
             TextBox tbFirstSeg = new TextBox
@@ -369,7 +643,7 @@ namespace LogicCalculator
                 Width = COL_SEGMENT_WIDTH - CHILD_MARGIN,
                 Visibility = Visibility.Hidden
             };
-            Grid.SetColumn(tbFirstSeg, 3);
+            Grid.SetColumn(tbFirstSeg, SEGMENT1_INDEX);
 
             //textblock - second segment
             TextBox tbSecondSeg = new TextBox
@@ -381,7 +655,7 @@ namespace LogicCalculator
                 Width = COL_SEGMENT_WIDTH - CHILD_MARGIN,
                 Visibility = Visibility.Hidden
     };
-            Grid.SetColumn(tbSecondSeg, 4);
+            Grid.SetColumn(tbSecondSeg, SEGMENT2_INDEX);
 
             //textblock - third segment
             TextBox tbThirdSeg = new TextBox
@@ -393,9 +667,10 @@ namespace LogicCalculator
                 Width = COL_SEGMENT_WIDTH - CHILD_MARGIN,
                 Visibility = Visibility.Hidden
             };
-            Grid.SetColumn(tbThirdSeg, 5);
+            Grid.SetColumn(tbThirdSeg, SEGMENT3_INDEX);
 
             //add children to new line
+            newLine.Children.Add(chb);
             newLine.Children.Add(lb);
             newLine.Children.Add(tbState);
             newLine.Children.Add(cmbRules);
@@ -404,118 +679,32 @@ namespace LogicCalculator
             newLine.Children.Add(tbThirdSeg);
 
             //add new line to StackPanel
-            spGridTable.Children.Add(newLine);
+            if (index == -1) //append
+                spGridTable.Children.Add(newLine);
+            else 
+                spGridTable.Children.Insert(index, newLine);
         }
         #endregion
 
         #region EVENTS
-        private void handleGridVisability(Grid g, int needed)
+        private void chb_click(object sender, RoutedEventArgs e)
         {
-            foreach (UIElement child in g.Children)
+            CheckBox chb = sender as CheckBox;
+            if (chb.IsChecked == true)
             {
-                switch (needed)
-                {
-                    case -1:
-                        if (child is Label)
-                        {
-                            Label lb = child as Label;
-                            lb.Visibility = Visibility.Hidden;
-                        }
-                        if (child is TextBox)
-                        {
-                            TextBox tbc = child as TextBox;
-                            tbc.IsEnabled = false;
-                            tbc.Visibility = Visibility.Hidden;
-                            tbc.Text = "";
-                        }
-                        break;
-                          
-                    case 0:
-                        if (Grid.GetColumn(child) == 0)
-                        {
-                            ((Label)child).Visibility = Visibility.Visible;
-                        }
-                        if (child is TextBox)
-                        {
-                            if (Grid.GetColumn(child) == 0)
-                            {
-                                ((Label)child).Visibility = Visibility.Visible;
-                            }
-                            if (Grid.GetColumn(child) == 1)
-                            {
-                                TextBox tbc = child as TextBox;
-                                tbc.IsEnabled = true;
-                                tbc.Visibility = Visibility.Visible;
-                            }
-                            else
-                            {
-                                TextBox tbc = child as TextBox;
-                                tbc.IsEnabled = false;
-                                tbc.Visibility = Visibility.Hidden;
-                                tbc.Text = "";
-                            }
-                        }
-                        break;
-                    case 1:
-                        if (Grid.GetColumn(child) == 0)
-                        {
-                            ((Label)child).Visibility = Visibility.Visible;
-                        }
-                        if (child is TextBox)
-                        {
-                            if (Grid.GetColumn(child) == 1 ||
-                                Grid.GetColumn(child) == 3)
-                            {
-                                TextBox tbc = child as TextBox;
-                                tbc.IsEnabled = true;
-                                tbc.Visibility = Visibility.Visible;
-                            }
-                            else
-                            {
-                                TextBox tbc = child as TextBox;
-                                tbc.IsEnabled = false;
-                                tbc.Visibility = Visibility.Hidden;
-                                tbc.Text = "";
-                            }
-                        }
-                        break;
-                    case 2:
-                        if (Grid.GetColumn(child) == 0)
-                        {
-                            ((Label)child).Visibility = Visibility.Visible;
-                        }
-                        if (child is TextBox)
-                        {
-                            if (Grid.GetColumn(child) == 1 ||
-                                Grid.GetColumn(child) == 3 ||
-                                Grid.GetColumn(child) == 4)
-                            {
-                                TextBox tbc = child as TextBox;
-                                tbc.IsEnabled = true;
-                                tbc.Visibility = Visibility.Visible;
-                            }
-                            else
-                            {
-                                TextBox tbc = child as TextBox;
-                                tbc.IsEnabled = false;
-                                tbc.Visibility = Visibility.Hidden;
-                                tbc.Text = "";
-                            }
-                        }
-                        break;
-                    case 3:
-                        if (Grid.GetColumn(child) == 0)
-                        {
-                            ((Label)child).Visibility = Visibility.Visible;
-                        }
-                        if (child is TextBox)
-                        {
-                            TextBox tbc = child as TextBox;
-                            tbc.IsEnabled = true;
-                            tbc.Visibility = Visibility.Visible;
-                        }
-                        break;
-                }
+                ++checked_checkboxes;
+            }
+            else
+            {
+                --checked_checkboxes;
+            }
+            if (checked_checkboxes > 0)
+            {
+                checkMode(true);
+            }
+            else
+            {
+                checkMode(false);
             }
         }
         private void cmb_SelectedValueChanged(object sender, SelectionChangedEventArgs e)
@@ -573,7 +762,7 @@ namespace LogicCalculator
         #region BUTTON_CLICKS
         private void BtnAddLine_Click(object sender, RoutedEventArgs e)
         {
-            createRow();
+            createRow(-1);
         }
         private void CheckButton_click(object sender, RoutedEventArgs e)
         {
@@ -621,7 +810,6 @@ namespace LogicCalculator
                 AppendKeyboardChar(elementWithFocus, "φ");
             }
         }
-
         private void btnChi_Click(object sender, RoutedEventArgs e)
         {
             if (elementWithFocus != null)
@@ -629,7 +817,6 @@ namespace LogicCalculator
                 AppendKeyboardChar(elementWithFocus, "χ");
             }
         }
-
         private void btnPsi_Click(object sender, RoutedEventArgs e)
         {
             if (elementWithFocus != null)
@@ -641,55 +828,73 @@ namespace LogicCalculator
         {
             handleBox(BoxState.Open);
         }
-
         private void btnCloseBox_Click(object sender, RoutedEventArgs e)
         {
             handleBox(BoxState.Close);
         }
-
         private void btnClear_Click(object sender, RoutedEventArgs e)
         {
-            int boxes_num = 0;
-            tbValue.Text = String.Empty;
-            UIElementCollection grids = spGridTable.Children;
-            foreach (var row in grids)
+            List<Grid> checkedGrid = getChecked();
+            MessageBoxResult res = MessageBox.Show($"Warning: You are about to CLEAR {checkedGrid.Count} lines\nPlease confirm",
+                "Confirmation", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+            if (res == MessageBoxResult.Cancel)
+                return;
+            foreach (Grid row in checkedGrid)
             {
-                if (row is TextBlock)
+                foreach (var child in row.Children)
                 {
-                    ++boxes_num;
-                    continue;
-                }
-                Grid g = row as Grid;
-                foreach (var child in g.Children)
-                {
+                    //if (child is TextBlock)
+                    //{
+                    //    spGridTable.Children.Remove(row);
+                    //}
                     if (child is TextBox)
                     {
                         ((TextBox)child).Text = String.Empty;
                     }
                     if (child is ComboBox)
                     {
-                        ComboBox cmb = child as ComboBox;
-                        cmb.SelectedIndex = -1;
+                        ((ComboBox)child).SelectedIndex = -1;
                     }
-                }
-            }
-            for (int i=0; i < boxes_num; i++)
-            {
-                foreach (var row in spGridTable.Children)
-                {
-                    if (row is TextBlock)
+                    if (child is CheckBox)
                     {
-                        TextBlock tb = row as TextBlock;
-                        spGridTable.Children.Remove(tb);
-                        break;
+                        ((CheckBox)child).IsChecked = false;
                     }
                 }
             }
             //re-initial variables
-            box_closers = 0;
-            box_openers = 0;
-            hyphen_chunks = MAX_HYPHEN_CHUNKS;
-            spaces_chunks = MIN_HYPHEN_CHUNKS;
+            checked_checkboxes = 0;
+            checkMode(false);
+        }
+        private void btnRemove_Click(object sender, RoutedEventArgs e)
+        {
+            List<Grid> checkedGrid = getChecked();
+            MessageBoxResult res = MessageBox.Show($"Warning: You are about to REMOVE {checkedGrid.Count} lines\nPlease confirm",
+                "Confirmation", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+            if (res == MessageBoxResult.Cancel) return;
+            foreach (Grid row in checkedGrid)
+            {
+                spGridTable.Children.Remove(row);
+            }
+            handleLabelsAfterCheckMode();
+            //TODO: handlBoxesAfterRemove()!!
+            checkMode(false);
+        }
+        private void btnAddBefore_Click(object sender, RoutedEventArgs e)
+        {
+            List<Grid> checkedGrid = getChecked();
+            MessageBoxResult res = MessageBox.Show($"Warning: You are about to Add {checkedGrid.Count} lines\nPlease confirm",
+                "Confirmation", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+            if (res == MessageBoxResult.Cancel) return;
+            foreach (Grid row in checkedGrid)
+            {
+                ((CheckBox)row.Children[CHECKBOX_INDEX]).IsChecked = false;
+                int addToIndex = spGridTable.Children.IndexOf(row);
+                createRow(addToIndex);
+            }
+            handleLabelsAfterCheckMode();
+            //TODO: handlBoxesAfterRemove()!!
+            checkMode(false);
+            checked_checkboxes = 0;
         }
         #endregion
 
@@ -716,41 +921,12 @@ namespace LogicCalculator
                 new Evaluation(statement_list, current_row, rule); 
             }
         }
+        
         private void displayMsg(string msg, string title)
         {
             MessageBox.Show(msg, title, MessageBoxButton.OK, MessageBoxImage.Error);
             return;
         }
-        private bool boxChecker(BoxState state)
-        {
-            switch (state)
-            {
-                case BoxState.Close:
-                    if (box_closers >= box_openers)
-                    {
-                        displayMsg("Error: Can't be more box closers then box openers", "Error");
-                        return false;
-                    }
-                    if (!hasBoxOpen())
-                    {
-                        displayMsg("Error: no opener found", "Error");
-                        return false;
-                    }
-                    return true;
-
-                case BoxState.Open:
-                    if (hyphen_chunks <= MIN_HYPHEN_CHUNKS)
-                    {
-                        displayMsg("Error: You reached to maximum available boxes", "Error");
-                        return false;
-                    }
-                    return true;
-
-                default:
-                    return false;
-            }
-        }
-
         private bool hasBoxOpen()
         {
             var searchIndex = spGridTable.Children.Count;
@@ -769,7 +945,6 @@ namespace LogicCalculator
             }
             return openers == closers ? true : false;
         }
-
         public int FindOperator(string input, int start)
         {
             for (int i = start; i < input.Length; i++)
@@ -781,7 +956,6 @@ namespace LogicCalculator
             }
             return -1;
         }
-
         public List<String> GetAllTableInput()
         {
             UIElementCollection grids = spGridTable.Children;
@@ -811,7 +985,6 @@ namespace LogicCalculator
             }
             return ret;
         }
-
         #endregion
 
         #region KEYBOARD_FUNC
@@ -827,7 +1000,6 @@ namespace LogicCalculator
         #endregion
 
         #region INPUT_CHECKS
-
         private bool IsValidStatement(String expression, String rule, String first_segment,
            String second_segment, String third_segment, int row)
         {
@@ -864,13 +1036,11 @@ namespace LogicCalculator
             }
             return true;
         }
-
         private bool IsOperator(char c)
         {
             return c == '^' || c == 'v' || c == '|' || c == '¬' || c == '~' ||
                 c == '∧' || c == '→' || c == '∨' || c == '↔' || c == '⊢' || c == '⊥';
         }
-
         public void Expression_Error(int row, string error, int index = -1)
         {
             string error_message = "Error on row: " + row;
@@ -882,7 +1052,6 @@ namespace LogicCalculator
 
             MessageBox.Show(error_message, "Expression Check");
         }
-
         public bool IsValidExpression(string input, int row)
         {
             int parentheses_count = 0;
@@ -973,7 +1142,6 @@ namespace LogicCalculator
             }
             return true;
         }
-
         public bool IsValidSegment(string seg)
         {
             int index = seg.IndexOf('-');
@@ -984,7 +1152,6 @@ namespace LogicCalculator
             return Int32.TryParse(seg.Substring(0, index), out _) && Int32.TryParse(seg.Substring(index + 1, seg.Length - index), out _);
 
         }
-
         public bool CheckPathAndFileName(string path, string file_name)
         {
             //Check if the name has invalid chars
@@ -1008,7 +1175,6 @@ namespace LogicCalculator
             }*/
             return true;
         }
-
         #endregion input_check
 
         #region TESTING
@@ -1020,5 +1186,7 @@ namespace LogicCalculator
             }
         }
         #endregion testing
+
+
     }
 }
