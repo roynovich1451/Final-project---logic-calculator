@@ -120,9 +120,9 @@
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             <Button Name="btnAddLine" IsDefault="True" Click="BtnAddLine_Click" Content="New line" Margin="5"  Grid.ColumnSpan="2" Grid.Column="0"/>
-                            <Button Name="btnClear" IsDefault="True" Click="btnClear_Click" Content="Clear" Margin="5" Grid.Column="2" Visibility="Hidden"/>
-                            <Button Name="btnRemove" IsDefault="True" Click="btnRemove_Click" Content="Remove" Margin="5" Grid.Column="3"  Visibility="Hidden"/>
-                            <Button Name="btnAddBefore" IsDefault="True" Click="btnAddBefore_Click" Content="Add" Margin="5" Grid.Column="4"  Visibility="Hidden"/>
+                            <Button Name="btnClear" IsDefault="True" Click="BtnClear_Click" Content="Clear" Margin="5" Grid.Column="2" Visibility="Hidden"/>
+                            <Button Name="btnRemove" IsDefault="True" Click="BtnRemove_Click" Content="Remove" Margin="5" Grid.Column="3"  Visibility="Hidden"/>
+                            <Button Name="btnAddBefore" IsDefault="True" Click="BtnAddBefore_Click" Content="Add" Margin="5" Grid.Column="4"  Visibility="Hidden"/>
                             <Button Name="btncheckButton" IsDefault="True" Click="CheckButton_click" Content="Check" Margin="5" Grid.ColumnSpan="2" Grid.Column="5"/>
                         </Grid>
                     </Grid>
@@ -135,7 +135,7 @@
             </TabControl>
             <!--KEYBOARD-->
             <GroupBox Header="Logical Keyboard" Grid.Row="1" BorderThickness="2" BorderBrush="Black">
-                <Grid Name="gridKeyboard" MouseEnter="gridKeyboard_MouseEnter">
+                <Grid Name="gridKeyboard" MouseEnter="GridKeyboard_MouseEnter">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
@@ -154,7 +154,7 @@
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
                     <!--KEYBOARD FIRST LINE-->
-                    <Button Name="btnOpenBox" Margin="2" Click="btnOpenBox_Click"
+                    <Button Name="btnOpenBox" Margin="2" Click="BtnOpenBox_Click"
                             Grid.ColumnSpan="2" Grid.Column="0" Grid.Row="0">
                         <TextBlock TextWrapping="Wrap">
                              ┌---------┐ <LineBreak /> Open Box
@@ -166,7 +166,7 @@
                             Grid.ColumnSpan="2" Grid.Column="2" Grid.Row="0"/>
                     <Button Name="btnTurnstile" Content="⊢"  Margin="2" Click="BtnTurnstile_Click" 
                             Grid.ColumnSpan="2" Grid.Column="6" Grid.Row="0"/>
-                    <Button Name="btnCloseBox"  Margin="2" Click="btnCloseBox_Click"
+                    <Button Name="btnCloseBox"  Margin="2" Click="BtnCloseBox_Click"
                             Grid.ColumnSpan="2" Grid.Column="8" Grid.Row="0">
                         <TextBlock TextWrapping="Wrap">
                               Close Box <LineBreak /> └---------┘
@@ -178,16 +178,16 @@
                             Grid.ColumnSpan="2" Grid.Column="1" Grid.Row="1"/>
                     <Button Name="btnFalsum" Content="⊥"  Margin="2" Click="BtnFalsum_Click"
                             Grid.ColumnSpan="2" Grid.Column="3" Grid.Row="1"/>
-                    <Button Name="free2" Content="?"  Margin="2"
-                            Grid.ColumnSpan="2" Grid.Column="5" Grid.Row="1"/>
+                    <Button Name="btnArrow" Content="→"  Margin="2"
+                            Grid.ColumnSpan="2" Grid.Column="5" Grid.Row="1" Click="BtnArrow_Click"/>
                     <Button Name="free3" Content="?"  Margin="2"
                             Grid.ColumnSpan="2" Grid.Column="7" Grid.Row="1"/>
                     <!--KEYBOARD SECOND LINE-->
-                    <Button Name="btnPhi" Content="φ"  Margin="2" Click="btnPhi_Click"
+                    <Button Name="btnPhi" Content="φ"  Margin="2" Click="BtnPhi_Click"
                             Grid.ColumnSpan="2" Grid.Column="2" Grid.Row="2"/>
-                    <Button Name="btnChi" Content="χ"  Margin="2" Click="btnChi_Click"
+                    <Button Name="btnChi" Content="χ"  Margin="2" Click="BtnChi_Click"
                             Grid.ColumnSpan="2" Grid.Column="4" Grid.Row="2"/>
-                    <Button Name="btnPsi" Content="ψ"  Margin="2" Click="btnPsi_Click"
+                    <Button Name="btnPsi" Content="ψ"  Margin="2" Click="BtnPsi_Click"
                             Grid.ColumnSpan="2" Grid.Column="6" Grid.Row="2"/>
                 </Grid>
             </GroupBox>

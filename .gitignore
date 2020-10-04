@@ -12,3 +12,6 @@
 *.baml
 .vs/LogicCalculator/v16/.suo
 calc_backup.txt
+LogicCalculator/LogicCalculator.csproj
+*.csproj
+*.user
