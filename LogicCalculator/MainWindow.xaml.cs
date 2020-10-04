@@ -790,12 +790,12 @@ namespace LogicCalculator
 
         private void BtnAddLine_Click(object sender, RoutedEventArgs e)
         {
-            CreateRow(-1);
+            CreateRow(-1);            
         }
 
         private void CheckButton_click(object sender, RoutedEventArgs e)
         {
-            HandleTableInput();
+            HandleTableInput();            
         }
 
         private void BtnOr_Click(object sender, RoutedEventArgs e)
@@ -1190,7 +1190,10 @@ namespace LogicCalculator
 
             //Check if input is empty
             if (input.Length == 0)
+            {
                 Expression_Error(row, "No input", i);
+                return false;
+            }
 
             for (; i < input.Length; i++)
             {
@@ -1254,7 +1257,7 @@ namespace LogicCalculator
                 {
                     if (after_operator)
                     {
-                        if ((c == '~' && input[i - 1] == '~') || (c == '¬') && input[i - 1] == '¬')
+                        if (!((c == '~' && input[i - 1] == '~') || ((c == '¬') && input[i - 1] == '¬')))
                         {
                             Expression_Error(row, "Two operators in a row, problematic char is:" + c, i);
                             return false;
@@ -1283,7 +1286,7 @@ namespace LogicCalculator
             {
                 return Int32.TryParse(seg, out _);
             }
-            return Int32.TryParse(seg.Substring(0, index), out _) && Int32.TryParse(seg.Substring(index + 1, seg.Length - index), out _);
+            return Int32.TryParse(seg.Substring(0, index), out _) && Int32.TryParse(seg.Substring(index + 1, seg.Length - (index+1)), out _);
         }
 
         #endregion INPUT_CHECKS
