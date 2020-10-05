@@ -21,15 +21,16 @@ namespace LogicCalculator
     {
         #region DEFINES
 
-        private const int COL_LABEL_WIDTH = 40;
-        private const int COL_STATEMENT_WIDTH = 160;
+        private const int COL_LABEL_WIDTH = 35;
+        private const int COL_STATEMENT_WIDTH = 360;
         private const int COL_SEGMENT_WIDTH = 60;
-        private const int COL_TEXTBLOCK_WIDTH = 420;
+        private const int COL_COMBOBOX_WIDTH = 95;
+        private const int COL_TEXTBLOCK_WIDTH = COL_LABEL_WIDTH + COL_STATEMENT_WIDTH + COL_COMBOBOX_WIDTH + (3 * COL_SEGMENT_WIDTH);
         private const int CHILD_MARGIN = 4;
         private const int THICKNESS = 2;
         private const int SPACES = 6;
         private const int HYPHEN = 8;
-        private const int MAX_HYPHEN_CHUNKS = 10;
+        private const int MAX_HYPHEN_CHUNKS = 16;
         private const int MIN_HYPHEN_CHUNKS = 1;
         private const int CHECKBOX_INDEX = 0;
         private const int LABL_INDEX = 1;
@@ -39,6 +40,8 @@ namespace LogicCalculator
         private const int SEGMENT2_INDEX = 5;
         private const int SEGMENT3_INDEX = 6;
         private const int TEXT_BLOCK_INDEX = 1;
+        private const int TAB_PROOF_INDEX = 1;
+        private const int TAB_EDITOR_INDEX = 1;
 
         private enum BoxState
         {
@@ -76,10 +79,19 @@ namespace LogicCalculator
 
         private void MenuItemNew_Click(object sender, RoutedEventArgs e)
         {
+            newFile();
+        }
+
+        private void newFile()
+        {
+            //Proof side
+            tbValue.Text = "";
             spGridTable.Children.Clear();
             table_row_num = 0;
             hyphen_chunks = MAX_HYPHEN_CHUNKS;
             spaces_chunks = MIN_HYPHEN_CHUNKS;
+            //Editor side
+            tbEditor.Text = "";
         }
 
         private void MenuItemOpen_Click(object sender, RoutedEventArgs e)
@@ -90,8 +102,11 @@ namespace LogicCalculator
                 Filter = "doc files (*.docx)|*.docx",
                 FilterIndex = 2
             };
-            openFileDialog.ShowDialog();
+            if (openFileDialog.ShowDialog() == false)
+                return;
             string openFilePath = openFileDialog.FileName;
+            if (fileInUse(openFilePath))
+                return;
 
             using (var document = DocX.Load(openFilePath))
             {
@@ -99,13 +114,13 @@ namespace LogicCalculator
                 spGridTable.Children.Clear();
                 table_row_num = 0;
 
-                tbValue.Text=document.Paragraphs[1].Text.Substring(20).Trim(); 
+                tbValue.Text = document.Paragraphs[1].Text.Substring(20).Trim();
 
                 Table proof_table = document.Tables[0];
 
                 for (int i = 1; i < proof_table.Rows.Count; i++)
                 {
-                    CreateRow(-1); 
+                    CreateRow(-1);
                 }
                 UIElementCollection grids = spGridTable.Children;
 
@@ -114,28 +129,29 @@ namespace LogicCalculator
                     Grid g = grids[i] as Grid;
                     for (int j = 1; j < TABLE_COL_NUM; j++)
                     {
-                        if (g.Children[j] is ComboBox combobox)
+                        if (g.Children[j + 1] is ComboBox combobox)
                         {
                             combobox.SelectedItem = proof_table.Rows[i + 1].Cells[j].Paragraphs[0].Text;
                         }
-                        if (g.Children[j] is TextBox textbox)
+                        if (g.Children[j + 1] is TextBox textbox)
                         {
                             textbox.Text = proof_table.Rows[i + 1].Cells[j].Paragraphs[0].Text;
                         }
                     }
                 }
             }
+            MessageBox.Show($"Open Document: {openFilePath} opened successfully", "Document open", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private void MenuItemSave_Click(object sender, RoutedEventArgs e)
         {
             SaveFileDialog saveFileDialog = new SaveFileDialog
-            {                 
+            {
                 RestoreDirectory = true,
                 Filter = "doc files (*.docx)|*.docx",
                 FilterIndex = 2
             };
-            saveFileDialog.ShowDialog();
+            if (saveFileDialog.ShowDialog() == false) return;
             string saveFilePath = saveFileDialog.FileName;
 
             using (var document = DocX.Create(saveFilePath))
@@ -186,7 +202,7 @@ namespace LogicCalculator
                 {
                     MessageBox.Show(ex.Message);
                 }
-                MessageBox.Show("Created Document: " + saveFilePath + ".docx", "Documented Created"
+                MessageBox.Show("Created Document: " + saveFilePath, "Documented Created"
                     , MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
@@ -549,7 +565,7 @@ namespace LogicCalculator
             return true;
         }
 
-        private void HandleBox(BoxState state)
+        private void handleProofBox(BoxState state)
         {
             if (!BoxChecker(state)) return;
             switch (state)
@@ -564,7 +580,14 @@ namespace LogicCalculator
                     ++box_openers;
                     break;
             }
+            MasterCheck.Visibility = Visibility.Visible;
+
         }
+        private void handleEditorBox(BoxState state)
+        {
+            tbEditor.Text += "\n" + CreateBoxLine(state) + "\n";
+        }
+
 
         private void CreateRow(int index)
         {
@@ -585,7 +608,7 @@ namespace LogicCalculator
             };
             ColumnDefinition gridCol3 = new ColumnDefinition
             {
-                Width = new GridLength(COL_SEGMENT_WIDTH)
+                Width = new GridLength(COL_COMBOBOX_WIDTH)
             };
             ColumnDefinition gridCol4 = new ColumnDefinition
             {
@@ -649,7 +672,7 @@ namespace LogicCalculator
                 VerticalAlignment = System.Windows.VerticalAlignment.Center,
                 Name = $"cmbRules{table_row_num}",
                 Margin = new Thickness(THICKNESS),
-                Width = COL_SEGMENT_WIDTH - CHILD_MARGIN
+                Width = COL_COMBOBOX_WIDTH - CHILD_MARGIN
             };
             cmbRules.SelectionChanged += new SelectionChangedEventHandler(Cmb_SelectedValueChanged);
             Grid.SetColumn(cmbRules, COMBOBOX_INDEX);
@@ -713,21 +736,39 @@ namespace LogicCalculator
         private void Chb_click(object sender, RoutedEventArgs e)
         {
             CheckBox chb = sender as CheckBox;
-            if (chb.IsChecked == true)
+            if (chb.Name.Equals("MasterCheck"))
             {
-                ++checked_checkboxes;
+                if (chb.IsChecked == true)
+                    checkAll(true);
+                else
+                    checkAll(false);
             }
             else
             {
-                --checked_checkboxes;
+                MasterCheck.IsChecked = false;
+                if (chb.IsChecked == true)
+                {
+                    ++checked_checkboxes;
+                }
+                else
+                {
+                    --checked_checkboxes;
+                }
             }
             if (checked_checkboxes > 0)
-            {
                 CheckMode(true);
-            }
             else
-            {
                 CheckMode(false);
+        }
+
+        private void checkAll(bool state)
+        {
+            checked_checkboxes = 0;
+            foreach (Grid child in spGridTable.Children)
+            {
+                ((CheckBox)child.Children[0]).IsChecked = state;
+                if (state == true)
+                    ++checked_checkboxes;
             }
         }
 
@@ -744,7 +785,7 @@ namespace LogicCalculator
                 case "Assumption":
                 case "LEM":
                     HandleGridVisability(parent, 0);
-                    //handleBox(cmb, location);
+                    //handleProofBox(cmb, location);
                     break;
                 //1 seg
                 case "PBC":
@@ -760,7 +801,7 @@ namespace LogicCalculator
                 case "¬e":
                 case "¬i":
                     HandleGridVisability(parent, 1);
-                    //handleBox(cmb, location);
+                    //handleProofBox(cmb, location);
                     break;
                 //2 seg
                 case "MP":
@@ -775,7 +816,7 @@ namespace LogicCalculator
 
                 case "Close Box":
                     HandleGridVisability(parent, -1);
-                    //handleBox(cmb, location);
+                    //handleProofBox(cmb, location);
                     break;
 
                 default:
@@ -790,12 +831,13 @@ namespace LogicCalculator
 
         private void BtnAddLine_Click(object sender, RoutedEventArgs e)
         {
-            CreateRow(-1);            
+            CreateRow(-1);
+            MasterCheck.Visibility = Visibility.Visible;
         }
 
         private void CheckButton_click(object sender, RoutedEventArgs e)
         {
-            HandleTableInput();            
+            HandleTableInput();
         }
 
         private void BtnOr_Click(object sender, RoutedEventArgs e)
@@ -844,8 +886,8 @@ namespace LogicCalculator
             {
                 AppendKeyboardChar(elementWithFocus, "→");
                 elementWithFocus.Focus();
-                elementWithFocus.Select(elementWithFocus.Text.Length,0);
-            }            
+                elementWithFocus.Select(elementWithFocus.Text.Length, 0);
+            }
         }
         private void BtnNot_Click(object sender, RoutedEventArgs e)
         {
@@ -889,12 +931,28 @@ namespace LogicCalculator
 
         private void BtnOpenBox_Click(object sender, RoutedEventArgs e)
         {
-            HandleBox(BoxState.Open);
+            switch (mainTab.SelectedIndex)
+            {
+                case 0:
+                    handleProofBox(BoxState.Open); 
+                    break;
+                case 1:
+                    handleEditorBox(BoxState.Open);
+                    break;
+            }      
         }
 
         private void BtnCloseBox_Click(object sender, RoutedEventArgs e)
         {
-            HandleBox(BoxState.Close);
+            switch (mainTab.SelectedIndex)
+            {
+                case 0:
+                    handleProofBox(BoxState.Close);
+                    break;
+                case 1:
+                    handleEditorBox(BoxState.Close);
+                    break;
+            }
         }
 
         private void BtnClear_Click(object sender, RoutedEventArgs e)
@@ -928,6 +986,7 @@ namespace LogicCalculator
             }
             //re-initialize variables
             checked_checkboxes = 0;
+            MasterCheck.IsChecked = false;
             CheckMode(false);
         }
 
@@ -942,8 +1001,18 @@ namespace LogicCalculator
                 spGridTable.Children.Remove(row);
             }
             HandleLabelsAfterCheckMode();
-            //TODO: handlBoxesAfterRemove()!!
+            checked_checkboxes = 0;
+            MasterCheck.IsChecked = false;
+            handleMasterCheck();
             CheckMode(false);
+        }
+
+        private void handleMasterCheck()
+        {
+            if (spGridTable.Children.Count == 0)
+                MasterCheck.Visibility = Visibility.Hidden;
+            else
+                MasterCheck.Visibility = Visibility.Visible;
         }
 
         private void BtnAddBefore_Click(object sender, RoutedEventArgs e)
@@ -961,6 +1030,7 @@ namespace LogicCalculator
             HandleLabelsAfterCheckMode();
             //TODO: handlBoxesAfterRemove()!!
             CheckMode(false);
+            MasterCheck.IsChecked = false;
             checked_checkboxes = 0;
         }
 
@@ -1144,7 +1214,22 @@ namespace LogicCalculator
             }
             return ret;
         }
-
+        private bool fileInUse(string file)
+        {
+            try
+            {
+                using (FileStream stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.None))
+                {
+                    stream.Close();
+                }
+            }
+            catch (IOException)
+            {
+                DisplayMsg($"Error: Fail to open {file}\nPlease close all file instance of file and try again", "Open failed");
+                return true;
+            }
+            return false;
+        }
         #endregion UTILITY
 
         #region KEYBOARD_FUNC
@@ -1286,7 +1371,7 @@ namespace LogicCalculator
             {
                 return Int32.TryParse(seg, out _);
             }
-            return Int32.TryParse(seg.Substring(0, index), out _) && Int32.TryParse(seg.Substring(index + 1, seg.Length - (index+1)), out _);
+            return Int32.TryParse(seg.Substring(0, index), out _) && Int32.TryParse(seg.Substring(index + 1, seg.Length - (index + 1)), out _);
         }
 
         #endregion INPUT_CHECKS
@@ -1300,7 +1385,6 @@ namespace LogicCalculator
                 Console.WriteLine(t);
             }
         }
-
         #endregion TESTING       
     }
 }

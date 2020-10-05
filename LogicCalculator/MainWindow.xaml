@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         ResizeMode="NoResize"
-       Title="Logic Calculator" Height="800" Width="550">
+       Title="Logic Calculator" Height="800" Width="780">
 
     <DockPanel>
         <!--MENU BAR-->
@@ -81,15 +81,17 @@
                             <Grid Margin="0,5,0,0">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="40"/>
-                                    <ColumnDefinition Width="40"/>
-                                    <ColumnDefinition Width="160"/>
-                                    <ColumnDefinition Width="60"/>
+                                    <ColumnDefinition Width="35"/>
+                                    <ColumnDefinition Width="360"/>
+                                    <ColumnDefinition Width="95"/>
                                     <ColumnDefinition Width="60"/>
                                     <ColumnDefinition Width="60"/>
                                     <ColumnDefinition Width="60"/>
                                 </Grid.ColumnDefinitions>
 
                                 <!--TABLE HEADER-->
+                                <CheckBox Name="MasterCheck" Margin="0,0,6,0" IsChecked="False" Visibility="Hidden"
+                                          VerticalAlignment="Center" HorizontalAlignment="Center" Click="Chb_click"/>
                                 <Label Content="Line" HorizontalAlignment="Center" FontWeight="Bold" Grid.Column="1"/>
                                 <Label Content="Statement" HorizontalAlignment="Center" Grid.Column="2" FontWeight="Bold"/>
                                 <Label Content="Rule" HorizontalAlignment="Center" Grid.Column="3" FontWeight="Bold"/>
@@ -105,7 +107,7 @@
                             </Grid>
                         </StackPanel>
                         <ScrollViewer Grid.ColumnSpan="4" Margin="0,90,-0.6,49.4" Grid.RowSpan="3" ScrollViewer.VerticalScrollBarVisibility="Auto">
-                            <StackPanel Name="spGridTable">
+                            <StackPanel Name="spGridTable" >
 
                             </StackPanel>
                         </ScrollViewer>
