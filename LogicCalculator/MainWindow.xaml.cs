@@ -863,7 +863,7 @@ namespace LogicCalculator
         {
             int openers = 0;
             int closers = 0;
-            for (int i = openIndex + 1 ; i < closeIndex; i++)
+            for (int i = openIndex ; i <= closeIndex; i++)
             {
                 if (spGridTable.Children[i] is Grid grid)
                 {
@@ -877,6 +877,8 @@ namespace LogicCalculator
                         {
                             openers++;
                         }
+                        if (closers > openers)
+                            return false;
                     }
                 }
                 
