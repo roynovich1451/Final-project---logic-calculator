@@ -112,10 +112,11 @@ namespace LogicCalculator
 
         private void Copy()
         {
+            //TODO:add box checks
             int row = Get_Row(statement_list[current_line].first_segment);
             if (row == -1)
                 return;
-            is_valid = !(statement_list[row].expression != statement_list[current_line].expression);
+            is_valid = statement_list[row].expression == statement_list[current_line].expression;
             if (!is_valid)
                 MessageBox.Show("Error at row " + current_line + "\nValues should be equal");
         }
@@ -154,7 +155,13 @@ namespace LogicCalculator
             if (index != -1)
             {
                 left_part = first_expression.Substring(0, index);
-                right_part = first_expression.Substring(index, first_expression.Length - index);
+                right_part = first_expression.Substring(index + 1, first_expression.Length - (index + 1));
+                if (second_expression != "~" + right_part && second_expression != "¬" + right_part)
+                {
+                    MessageBox.Show("Error at rows: " + first_row + "-" + second_row + "\n MT missing ¬");
+                    is_valid = false;
+                    return;
+                }
             }
             else //check if the second expression contains ->
             {
@@ -162,7 +169,13 @@ namespace LogicCalculator
                 if (index != -1)
                 {
                     left_part = second_expression.Substring(0, index);
-                    right_part = second_expression.Substring(index, second_expression.Length - index);
+                    right_part = second_expression.Substring(index + 1, second_expression.Length - (index + 1));
+                    if (first_expression != "~" + right_part && first_expression != "¬" + right_part)
+                    {
+                        MessageBox.Show("Error at rows: " + first_row + "-" + second_row + "\n MT missing ¬");
+                        is_valid = false;
+                        return;
+                    }
                 }
                 else
                 {
@@ -171,32 +184,9 @@ namespace LogicCalculator
                     return;
                 }
             }
-            if (right_part.Contains("~") || right_part.Contains("¬"))
-            {
-                if (second_expression != right_part.Substring(1))
-                {
-                    MessageBox.Show("Error at rows: " + first_row + "\n" + second_row + "\n MT missing ¬");
-                    is_valid = false;
-                    return;
-                }
-            }
-            else
-            {
-                if (second_expression != "~" + right_part || second_expression != "¬" + right_part)
-                {
-                    MessageBox.Show("Error at rows: " + first_row + "\n" + second_row + "\n MT missing ¬");
-                    is_valid = false;
-                    return;
-                }
-            }
-            if (left_part.Contains("~") || left_part.Contains("¬"))
-            {
-                is_valid = current_expression == left_part.Substring(1);
-            }
-            else
-            {
-                is_valid = current_expression == "~" + left_part || current_expression == "¬" + left_part;
-            }
+
+            is_valid = current_expression == "~" + left_part || current_expression == "¬" + left_part;
+
             if (!is_valid)
                 MessageBox.Show("Error at row " + current_line + "\nMisuse of MT");
         }
@@ -383,9 +373,9 @@ namespace LogicCalculator
 
         private void Arrow_Introduction()
         {
-            List<int> lines= Get_Lines_From_Segment(statement_list[current_line].first_segment);
+            List<int> lines = Get_Lines_From_Segment(statement_list[current_line].first_segment);
             int start_row = lines[0],
-            end_row = lines[lines.Count-1];
+            end_row = lines[lines.Count - 1];
 
             //TODO: add box check
             if (!statement_list[current_line].expression.Contains("→"))
@@ -445,7 +435,7 @@ namespace LogicCalculator
                 {
                     int starting_number = (int)Char.GetNumericValue(s[index - 1]),
                         last_number = (int)Char.GetNumericValue(s[index + 1]);
-                    ret.AddRange(Enumerable.Range(starting_number, last_number));
+                    ret.AddRange(Enumerable.Range(starting_number, last_number - starting_number + 1));
                 }
                 else
                     ret.Add(Int32.Parse(s));
