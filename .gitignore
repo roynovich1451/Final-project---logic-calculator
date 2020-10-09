@@ -15,3 +15,5 @@ calc_backup.txt
 LogicCalculator/LogicCalculator.csproj
 *.csproj
 *.user
+LogicCalculator/LogicCalculator.csproj
+*.csproj

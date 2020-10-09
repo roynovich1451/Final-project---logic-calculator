@@ -140,7 +140,7 @@ namespace LogicCalculator
                     }
                 }
             }
-            MessageBox.Show($"Open Document: {openFilePath} opened successfully", "Document open", MessageBoxButton.OK, MessageBoxImage.Information);
+            DisplayInfoMsg($"Open Document: {openFilePath} opened successfully", "Document open");
         }
 
         private void MenuItemSave_Click(object sender, RoutedEventArgs e)
@@ -200,10 +200,9 @@ namespace LogicCalculator
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(ex.Message);
+                    DisplayErrorMsg(ex.Message,"Error while trying to save");
                 }
-                MessageBox.Show("Created Document: " + saveFilePath, "Documented Created"
-                    , MessageBoxButton.OK, MessageBoxImage.Information);
+                DisplayInfoMsg("Created Document: " + saveFilePath, "Documented Created");
             }
         }
 
@@ -222,7 +221,7 @@ namespace LogicCalculator
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Error");
+                DisplayErrorMsg(ex.Message, "Error while opening manual");
             }
         }
 
@@ -264,12 +263,12 @@ namespace LogicCalculator
                 case BoxState.Close:
                     if (box_closers >= box_openers)
                     {
-                        DisplayMsg("Error: Can't be more box closers then box openers", "Error");
+                        DisplayErrorMsg("Error: Can't be more box closers then box openers", "Error");
                         return false;
                     }
                     if (!HasBoxOpen())
                     {
-                        DisplayMsg("Error: no opener found", "Error");
+                        DisplayErrorMsg("Error: no opener found", "Error");
                         return false;
                     }
                     return true;
@@ -277,7 +276,7 @@ namespace LogicCalculator
                 case BoxState.Open:
                     if (hyphen_chunks <= MIN_HYPHEN_CHUNKS)
                     {
-                        DisplayMsg("Error: You reached to maximum available boxes", "Error");
+                        DisplayErrorMsg("Error: You reached to maximum available boxes", "Error");
                         return false;
                     }
                     return true;
@@ -845,8 +844,6 @@ namespace LogicCalculator
             if (elementWithFocus != null)
             {
                 AppendKeyboardChar(elementWithFocus, "∨");
-                elementWithFocus.Focus();
-                elementWithFocus.Select(elementWithFocus.Text.Length, 0);
             }
         }
 
@@ -855,8 +852,6 @@ namespace LogicCalculator
             if (elementWithFocus != null)
             {
                 AppendKeyboardChar(elementWithFocus, "∧");
-                elementWithFocus.Focus();
-                elementWithFocus.Select(elementWithFocus.Text.Length, 0);
             }
         }
 
@@ -865,8 +860,6 @@ namespace LogicCalculator
             if (elementWithFocus != null)
             {
                 AppendKeyboardChar(elementWithFocus, "⊢");
-                elementWithFocus.Focus();
-                elementWithFocus.Select(elementWithFocus.Text.Length, 0);
             }
         }
 
@@ -875,8 +868,6 @@ namespace LogicCalculator
             if (elementWithFocus != null)
             {
                 AppendKeyboardChar(elementWithFocus, "⊥");
-                elementWithFocus.Focus();
-                elementWithFocus.Select(elementWithFocus.Text.Length, 0);
             }
 
         }
@@ -885,8 +876,6 @@ namespace LogicCalculator
             if (elementWithFocus != null)
             {
                 AppendKeyboardChar(elementWithFocus, "→");
-                elementWithFocus.Focus();
-                elementWithFocus.Select(elementWithFocus.Text.Length, 0);
             }
         }
         private void BtnNot_Click(object sender, RoutedEventArgs e)
@@ -894,8 +883,6 @@ namespace LogicCalculator
             if (elementWithFocus != null)
             {
                 AppendKeyboardChar(elementWithFocus, "¬");
-                elementWithFocus.Focus();
-                elementWithFocus.Select(elementWithFocus.Text.Length, 0);
             }
         }
 
@@ -904,8 +891,6 @@ namespace LogicCalculator
             if (elementWithFocus != null)
             {
                 AppendKeyboardChar(elementWithFocus, "φ");
-                elementWithFocus.Focus();
-                elementWithFocus.Select(elementWithFocus.Text.Length, 0);
             }
         }
 
@@ -914,8 +899,7 @@ namespace LogicCalculator
             if (elementWithFocus != null)
             {
                 AppendKeyboardChar(elementWithFocus, "χ");
-                elementWithFocus.Focus();
-                elementWithFocus.Select(elementWithFocus.Text.Length, 0);
+             
             }
         }
 
@@ -923,9 +907,7 @@ namespace LogicCalculator
         {
             if (elementWithFocus != null)
             {
-                AppendKeyboardChar(elementWithFocus, "ψ");
-                elementWithFocus.Focus();
-                elementWithFocus.Select(elementWithFocus.Text.Length, 0);
+                AppendKeyboardChar(elementWithFocus, "ψ");               
             }
         }
 
@@ -1068,7 +1050,7 @@ namespace LogicCalculator
            string second_segment, string third_segment)
         {
             int row = statement_list.Count;
-            if (!IsValidExpression(expression, row))
+            if (!IsValidExpression(expression, row,false))
             {
                 return false;
             }
@@ -1123,7 +1105,7 @@ namespace LogicCalculator
 
         private void HandleTableInput()
         {
-            statement_list.Clear();
+            statement_list.Clear();            
             statement_list.Add(new Statement(tbValue.Text, "first", "0"));
             //List<string> text_boxes_list = GetAllTableInput();
             List<TextBox> text_boxes_list = GetAllTextBoxes();
@@ -1149,9 +1131,20 @@ namespace LogicCalculator
             MessageBox.Show("All input is valid");
         }
 
-        private void DisplayMsg(string msg, string title)
+        private void DisplayErrorMsg(string msg, string title)
         {
             MessageBox.Show(msg, title, MessageBoxButton.OK, MessageBoxImage.Error);
+            return;
+        }
+
+        private void DisplayWarningMsg(string msg, string title)
+        {
+            MessageBox.Show(msg, title, MessageBoxButton.OK, MessageBoxImage.Error);
+            return;
+        }
+        private void DisplayInfoMsg(string msg, string title)
+        {
+            MessageBox.Show(msg, title, MessageBoxButton.OK, MessageBoxImage.Information);
             return;
         }
 
@@ -1225,7 +1218,7 @@ namespace LogicCalculator
             }
             catch (IOException)
             {
-                DisplayMsg($"Error: Fail to open {file}\nPlease close all file instance of file and try again", "Open failed");
+                DisplayErrorMsg($"Error: Fail to open {file}\nPlease close all file instance of file and try again", "Open failed");
                 return true;
             }
             return false;
@@ -1236,7 +1229,10 @@ namespace LogicCalculator
 
         private void AppendKeyboardChar(TextBox tb, string sign)
         {
-            tb.Text += sign;
+            int cursor_location = tb.SelectionStart;
+            tb.Text=tb.Text.Insert(tb.SelectionStart, sign);
+            elementWithFocus.Focus();
+            elementWithFocus.Select(cursor_location+1,0);
         }
 
         private void GridKeyboard_MouseEnter(object sender, MouseEventArgs e)
@@ -1264,10 +1260,10 @@ namespace LogicCalculator
             }
             error_message += "\nError is: " + error;
 
-            MessageBox.Show(error_message, "Expression Check");
+            DisplayErrorMsg(error_message, "Expression Check");
         }
 
-        public bool IsValidExpression(string input, int row)
+        public bool IsValidExpression(string input, int row,bool allow_comma)
         {
             int parentheses_count = 0;
             bool after_operator = false;
@@ -1290,7 +1286,7 @@ namespace LogicCalculator
 
                 if (Char.IsNumber(c))
                 {
-                    Expression_Error(row, "Entering digits is not allowed, problematic char is:" + c, i);
+                    Expression_Error(row, "Entering digits is not allowed, problematic char is: " + c, i);
                     return false;
                 }
 
@@ -1299,7 +1295,7 @@ namespace LogicCalculator
                 {
                     if (i != 0 && input[i - 1] == ')')
                     {
-                        Expression_Error(row, "Missing an operator, problematic char is:" + c, i);
+                        Expression_Error(row, "Missing an operator, problematic char is: " + c, i);
                         return false;
                     }
                     after_operator = true;
@@ -1310,13 +1306,13 @@ namespace LogicCalculator
                 {
                     if (after_operator)
                     {
-                        Expression_Error(row, "Two operators in a row, problematic char is:" + c, i);
+                        Expression_Error(row, "Two operators in a row, problematic char is: " + c, i);
                         return false;
                     }
                     parentheses_count--;
                     if (parentheses_count < 0)
                     {
-                        Expression_Error(row, "Too many closing parentheses, problematic char is:" + c, i);
+                        Expression_Error(row, "Too many closing parentheses, problematic char is: " + c, i);
                         return false;
                     }
                 }
@@ -1324,7 +1320,7 @@ namespace LogicCalculator
                 {
                     if (!after_operator && i != 0)
                     {
-                        Expression_Error(row, "Two variables in a row, problematic char is:" + c, i);
+                        Expression_Error(row, "Two variables in a row, problematic char is: " + c, i);
                         return false;
                     }
                     int j = i + 1;
@@ -1344,15 +1340,20 @@ namespace LogicCalculator
                     {
                         if (!((c == '~' && input[i - 1] == '~') || ((c == '¬') && input[i - 1] == '¬')))
                         {
-                            Expression_Error(row, "Two operators in a row, problematic char is:" + c, i);
+                            Expression_Error(row, "Two operators in a row, problematic char is: " + c, i);
                             return false;
                         }
                     }
                     after_operator = true;
                 }
+                else if (c == ',' && !allow_comma)
+                {
+                    Expression_Error(row, "An invalid character input, problematic char is: " + c, i);
+                    return false;
+                }
                 else
                 {
-                    Expression_Error(row, "An invalid character input, problematic char is:" + c, i);
+                    Expression_Error(row, "An invalid character input, problematic char is: " + c, i);
                     return false;
                 }
             }
