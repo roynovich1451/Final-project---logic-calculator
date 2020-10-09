@@ -1128,7 +1128,7 @@ namespace LogicCalculator
                 if (!e.is_valid)
                     return;
             }
-            MessageBox.Show("All input is valid");
+            DisplayInfoMsg("All input is valid","Success!");
         }
 
         private void DisplayErrorMsg(string msg, string title)
