@@ -1,6 +1,7 @@
 ﻿using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -40,7 +41,7 @@ namespace LogicCalculator
         private const int SEGMENT2_INDEX = 5;
         private const int SEGMENT3_INDEX = 6;
         private const int TEXT_BLOCK_INDEX = 1;
-        private const int TAB_PROOF_INDEX = 1;
+        private const int TAB_PROOF_INDEX = 0;
         private const int TAB_EDITOR_INDEX = 1;
 
         private enum BoxState
@@ -58,7 +59,6 @@ namespace LogicCalculator
         private int table_row_num = 0;
         private static readonly int TABLE_COL_NUM = 6;
         private TextBox elementWithFocus;
-
         private readonly List<string> rules = new List<string> { "Data", "Assumption", "LEM", "PBC", "MP", "MT", "Copy"
                                                                  ,"∧i", "∧e1", "∧e2", "∨i1", "∨i2", "∨e", "¬¬e",
                                                                  "¬¬i", "→i", "⊥e", "¬i", "¬e", "→i"};
@@ -414,7 +414,7 @@ namespace LogicCalculator
             if (spGridTable.Children.Count == 0)
                 table_row_num = 0;
             else
-                table_row_num = index - 1;
+                table_row_num = index;
         }
 
         private List<Grid> GetChecked()
@@ -797,7 +797,6 @@ namespace LogicCalculator
                 case "∨i1":
                 case "∨i2":
                 case "⊥e":
-                case "¬e":
                 case "¬i":
                     HandleGridVisability(parent, 1);
                     //handleProofBox(cmb, location);
@@ -805,6 +804,7 @@ namespace LogicCalculator
                 //2 seg
                 case "MP":
                 case "MT":
+                case "¬e":
                 case "∧i":
                     HandleGridVisability(parent, 2);
                     break;

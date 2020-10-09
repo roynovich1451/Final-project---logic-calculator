@@ -13,23 +13,23 @@
             <MenuItem Header="_File">
                 <MenuItem Header="_New" Click="MenuItemNew_Click">
                     <MenuItem.Icon>
-                        <Image Source="new.ico"/>
+                        <Image Source="new.ico" Width="16" Height="16"/>
                     </MenuItem.Icon>
                 </MenuItem>
                 <MenuItem Header="_Open" Click="MenuItemOpen_Click">
                     <MenuItem.Icon>
-                        <Image Source="open.ico"/>
+                        <Image Source="open.ico" Width="16" Height="16"/>
                     </MenuItem.Icon>
                 </MenuItem>
                 <MenuItem Header="_Save" Click="MenuItemSave_Click">
                     <MenuItem.Icon>
-                        <Image Source="save.ico"/>
+                        <Image Source="save.ico" Width="16" Height="16"/>
                     </MenuItem.Icon>
                 </MenuItem>
                 <Separator />
                 <MenuItem Header="_Exit"  Click="MenuItemExit_Click">
                     <MenuItem.Icon>
-                        <Image Source="exit.ico"/>
+                        <Image Source="exit.ico" Width="16" Height="16"/>
                     </MenuItem.Icon>
                 </MenuItem>
             </MenuItem>
@@ -45,13 +45,14 @@
         <!--MENU BAR END-->
         <Grid Name="GridMain" Margin="5">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="73*"/>
+                <ColumnDefinition Width="691*"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="550"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
-            <Grid Name="GridPermanent" Grid.Column="1">
+            <Grid Name="GridPermanent" Grid.ColumnSpan="2">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
@@ -60,7 +61,7 @@
             </Grid>
 
             <!--TABs-->
-            <TabControl Name="mainTab">
+            <TabControl Name="mainTab" Grid.ColumnSpan="2">
                 <TabItem Header="Logical proof">
                     <!--LOGICAL PROOF TAB-->
                     <Grid Name="GridLogicalProof">
@@ -136,7 +137,7 @@
                 </TabItem>
             </TabControl>
             <!--KEYBOARD-->
-            <GroupBox Header="Logical Keyboard" Grid.Row="1" BorderThickness="2" BorderBrush="Black">
+            <GroupBox Header="Logical Keyboard" Grid.Row="1" BorderThickness="2" BorderBrush="Black" Grid.ColumnSpan="2" Margin="0,0,0,-0.4">
                 <Grid Name="gridKeyboard" MouseEnter="GridKeyboard_MouseEnter">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
@@ -174,7 +175,7 @@
                               Close Box <LineBreak /> └---------┘
                         </TextBlock>
                     </Button>
-                    
+
                     <!--KEYBOARD SECOND LINE-->
                     <Button Name="btnAnd" Content="∧" Margin="2" Click="BtnAnd_Click" 
                             Grid.ColumnSpan="2" Grid.Column="1" Grid.Row="1"/>
