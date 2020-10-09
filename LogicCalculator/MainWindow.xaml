@@ -61,7 +61,7 @@
             </Grid>
 
             <!--TABs-->
-            <TabControl Name="mainTab" Grid.ColumnSpan="2">
+            <TabControl Name="mainTab" Grid.ColumnSpan="2" SelectionChanged="mainTab_SelectionChanged">
                 <TabItem Header="Logical proof">
                     <!--LOGICAL PROOF TAB-->
                     <Grid Name="GridLogicalProof">
@@ -156,33 +156,35 @@
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
+                    <Grid.Resources>
+                        <Style TargetType="Button">
+                            <Setter Property="FontSize" Value="18"/>
+                        </Style>
+                    </Grid.Resources>
                     <!--KEYBOARD FIRST LINE-->
-                    <Button Name="btnOpenBox" Margin="2" Click="BtnOpenBox_Click"
-                            Grid.ColumnSpan="2" Grid.Column="0" Grid.Row="0">
-                        <TextBlock TextWrapping="Wrap">
-                             ┌---------┐ <LineBreak /> Open Box
-                        </TextBlock>
-                    </Button>
+                    <Button Name="btnFalsum" Content="⊥" FontSize="18"  Margin="2" Click="BtnFalsum_Click"
+                            Grid.ColumnSpan="2" Grid.Column="0" Grid.Row="0"/>
+
                     <Button Name="btnNot" Margin="2" Content="¬" Click="BtnNot_Click" 
                             Grid.ColumnSpan="2" Grid.Column="4" Grid.Row="0"/>
                     <Button Name="btnOr" Content="∨" Margin="2" Click="BtnOr_Click" 
                             Grid.ColumnSpan="2" Grid.Column="2" Grid.Row="0"/>
                     <Button Name="btnTurnstile" Content="⊢"  Margin="2" Click="BtnTurnstile_Click" 
                             Grid.ColumnSpan="2" Grid.Column="6" Grid.Row="0"/>
-                    <Button Name="btnCloseBox"  Margin="2" Click="BtnCloseBox_Click"
-                            Grid.ColumnSpan="2" Grid.Column="8" Grid.Row="0">
-                        <TextBlock TextWrapping="Wrap">
-                              Close Box <LineBreak /> └---------┘
-                        </TextBlock>
-                    </Button>
+                    <Button Name="btnArrow" Content="→"  Margin="2"
+                            Grid.ColumnSpan="2" Grid.Column="8" Grid.Row="0" Click="BtnArrow_Click"/>
+
 
                     <!--KEYBOARD SECOND LINE-->
                     <Button Name="btnAnd" Content="∧" Margin="2" Click="BtnAnd_Click" 
                             Grid.ColumnSpan="2" Grid.Column="1" Grid.Row="1"/>
-                    <Button Name="btnFalsum" Content="⊥"  Margin="2" Click="BtnFalsum_Click"
-                            Grid.ColumnSpan="2" Grid.Column="3" Grid.Row="1"/>
-                    <Button Name="btnArrow" Content="→"  Margin="2"
-                            Grid.ColumnSpan="2" Grid.Column="5" Grid.Row="1" Click="BtnArrow_Click"/>
+                    <Button Name="btnExists" Content="∃" Margin="2" Click="btnExists_Click"
+                            Grid.ColumnSpan="2" Grid.Column="5" Grid.Row="1" Visibility="Hidden"/>
+                    <Button Name="btnForAll" Content="∀"  Margin="2" Click="btnForAll_Click"
+                            Grid.ColumnSpan="2" Grid.Column="3" Grid.Row="1"  Visibility="Hidden"/>
+                    <Button Name="btnCreateBox" Content="Create Box"  Margin="2" Click="BtnCreateBox_Click"
+                            Grid.ColumnSpan="4" Grid.Column="3" Grid.Row="1"/>
+
                     <Button Name="free3" Content="?"  Margin="2"
                             Grid.ColumnSpan="2" Grid.Column="7" Grid.Row="1"/>
                     <!--KEYBOARD SECOND LINE-->
