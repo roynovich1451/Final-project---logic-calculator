@@ -47,6 +47,9 @@ namespace LogicCalculator
         private const int OPEN_BOX_LIST_INDEX = 0;
         private const int CLOSE_BOX_LIST_INDEX = 1;
         //private const int MAX_BOX_TEXT_LENGTH = 134;
+        private const int ERRMISSLINE = 1;
+        private const int ERRCOUNTBRAKETS = 2;
+        private const int SUCCESS = 0;
 
         private enum BoxState
         {
@@ -859,11 +862,11 @@ namespace LogicCalculator
                 AppendKeyboardChar(elementWithFocus, "ψ");
             }
         }
-        private bool isBoxValid(int openIndex, int closeIndex)
+        private int isBoxValid(int openIndex, int closeIndex)
         {
-            int openers = 0;
-            int closers = 0;
-            for (int i = openIndex ; i <= closeIndex; i++)
+            int braketsCnt = 0;
+            //chekc picked indexes, to see if ligal (mathematic brackets logic)
+            for (int i = openIndex; i <= closeIndex; i++)
             {
                 if (spGridTable.Children[i] is Grid grid)
                 {
@@ -871,36 +874,69 @@ namespace LogicCalculator
                     {
                         if (tblock.Text.Contains("└"))
                         {
-                            closers++;
+                            braketsCnt--;
                         }
                         if (tblock.Text.Contains("┌"))
                         {
-                            openers++;
+                            braketsCnt++;
                         }
-                        if (closers > openers)
-                            return false;
+                        if (braketsCnt < 0)
+                            return -ERRCOUNTBRAKETS;
                     }
                 }
-                
             }
-            if (openers != closers)
-                return false;
-            return true;
+            if (braketsCnt != 0)
+                return -ERRCOUNTBRAKETS;
+
+            Grid above = spGridTable.Children[openIndex] as Grid;
+            Grid below = spGridTable.Children[closeIndex] as Grid;
+            //check if the current checked rows aren't already Box
+            if (!(above.Children[LABL_INDEX] is Label) && !(below.Children[LABL_INDEX] is Label)) 
+            {
+                return -ERRMISSLINE;
+            }
+            //check if need wraping box check
+            if (openIndex != 0 || closeIndex != spGridTable.Children.Count - 1)
+            {
+                int aboveIndex = openIndex == 0 ? openIndex : openIndex - 1;
+                int belowIndex = closeIndex == spGridTable.Children.Count - 1 ? closeIndex : closeIndex + 1;
+                above = spGridTable.Children[aboveIndex] as Grid;
+                below = spGridTable.Children[belowIndex] as Grid;
+                //check if wrapped rows are Box
+                if ((above.Children[TEXT_BLOCK_INDEX] is TextBlock aboveTb) &&
+                        (below.Children[TEXT_BLOCK_INDEX] is TextBlock belowTb))
+                {
+                    if (aboveTb.Text.Contains("┌") && belowTb.Text.Contains("└"))
+                    {
+                        return -ERRMISSLINE;
+                    }
+                }
+            }
+            return SUCCESS;
         }
         private void BtnCreateBox_Click(object sender, RoutedEventArgs e)
         {
             if (checked_checkboxes != 2)
             {
                 DisplayErrorMsg("Error: Need to check exactly 2 rows if you want to create box", "Error");
+                CheckMode(false);
                 return;
             }
 
             var checkedForBox = getCheckedForBox();
             int openIndex = spGridTable.Children.IndexOf(checkedForBox[OPEN_BOX_LIST_INDEX]);
             int closeIndex = spGridTable.Children.IndexOf(checkedForBox[CLOSE_BOX_LIST_INDEX]);
-            if (!isBoxValid(openIndex, closeIndex))
+            int ret = isBoxValid(openIndex, closeIndex);
+            if (ret == -ERRCOUNTBRAKETS)
             {
                 DisplayErrorMsg("Error: Can't create box, wrong indexes", "Error");
+                CheckMode(false);
+                return;
+            }
+            else if (ret == -ERRMISSLINE)
+            {
+                DisplayErrorMsg("Error: Can't create box, must be at least one line padding between 2 boxes", "Error");
+                CheckMode(false);
                 return;
             }
             changeBoxVariables(openIndex);
