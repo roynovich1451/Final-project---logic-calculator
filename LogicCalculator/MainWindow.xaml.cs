@@ -67,8 +67,9 @@ namespace LogicCalculator
         private const int SUCCESS = 0;
         private const int ERRMISSLINE = 1;
         private const int ERRCOUNTBRAKETS = 2;
-        private const int ERRMISSOPEN = 3;
-        private const int ERRMISSCLOSE = 4;
+        private const int ERRBOXMISSOPEN = 3;
+        private const int ERRBOXMISSCLOSE = 4;
+        private const int ERRBOXPADDING = 5;
         #endregion
 
         #endregion DEFINES
@@ -1018,19 +1019,26 @@ namespace LogicCalculator
             if (res == MessageBoxResult.Cancel) return;
             int ret = checkBoxesForRemove(checkeRows);
             if (ret > 0)
+
             {
                 hyphen_chunks = MAX_HYPHEN_CHUNKS + 1;
                 spaces_chunks = MIN_HYPHEN_CHUNKS - 1;
                 checkInerBoxesSize(0, spGridTable.Children.Count - 1);  
             }
-            if (ret == -ERRMISSCLOSE)
+            if (ret == -ERRBOXMISSCLOSE)
             {
                 DisplayErrorMsg("Error: checked box missng it's closer\nPlease recheck rows", "ERROR");
                 return;
             }
-            if (ret == -ERRMISSOPEN)
+            if (ret == -ERRBOXMISSOPEN)
             {
                 DisplayErrorMsg("Error: checked box missng it's opener\nPlease recheck rows", "ERROR");
+                return;
+            }
+            ret = checkBoxPadding(checkeRows);
+            if (ret == -ERRBOXPADDING)
+            {
+                DisplayErrorMsg("Error: after remove one of the boxes will be without lines inside\nPlease recheck rows", "ERROR");
                 return;
             }
             foreach (Grid row in checkeRows)
@@ -1044,6 +1052,8 @@ namespace LogicCalculator
             CheckMode(false);
         }
 
+        
+
         private int checkBoxesForRemove(List<Grid> checkeRows)
         {
             List<Grid> verified = new List<Grid>();
@@ -1054,7 +1064,7 @@ namespace LogicCalculator
                 if ((row.Children[TEXT_BLOCK_INDEX] is TextBlock tbClose) && tbClose.Text.Contains("└"))
                 {
                     if (!verified.Contains(row))
-                        return -ERRMISSOPEN;
+                        return -ERRBOXMISSOPEN;
                     continue;
                 }
                 //if opener
@@ -1068,7 +1078,7 @@ namespace LogicCalculator
                     }
                     if (((CheckBox)closerGrid.Children[CHECKBOX_INDEX]).IsChecked == false)
                     {
-                        return -ERRMISSCLOSE;
+                        return -ERRBOXMISSCLOSE;
                     }
                     else
                     {
@@ -1078,6 +1088,51 @@ namespace LogicCalculator
                 }
             }
             return verified.Count;
+        }
+        private int checkBoxPadding(List<Grid> checkeRows)
+        {
+            foreach (Grid row in spGridTable.Children)
+            {
+                if ((row.Children[TEXT_BLOCK_INDEX] is TextBlock tbOpen) && tbOpen.Text.Contains("┌") &&
+                    !checkeRows.Contains(row))
+                {
+                    if (getLineInsideBox(row, checkeRows) == 0)
+                        return -ERRBOXPADDING;
+                }
+            }
+            return SUCCESS;
+        }
+        private int getLineInsideBox(Grid opener, List<Grid> checkeRows)
+        {
+            Grid closer = getCloserGrid(opener);
+            int startIndex = spGridTable.Children.IndexOf(opener) + 1;
+            int endIndex = spGridTable.Children.IndexOf(closer);
+            int bracketsCnt = 0;
+            int linesInBox = 0;
+            for (int i = startIndex; i < endIndex; i++)
+            {
+                Grid currentRow = spGridTable.Children[i] as Grid;
+                if (currentRow.Children[TEXT_BLOCK_INDEX] is TextBlock tbCurrnet)
+                {
+                    if (tbCurrnet.Text.Contains("┌"))
+                    {
+                        bracketsCnt++;
+                    }
+                    if (tbCurrnet.Text.Contains("└"))
+                    {
+                        bracketsCnt--;
+                    }
+                }
+                else
+                {
+                    if (bracketsCnt == 0)
+                    {
+                        if (!checkeRows.Contains(currentRow))
+                            linesInBox++;
+                    }
+                }
+            }
+            return linesInBox;
         }
 
         private Grid getCloserGrid(Grid row)
