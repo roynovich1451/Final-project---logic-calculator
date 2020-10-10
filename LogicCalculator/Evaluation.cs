@@ -311,8 +311,6 @@ namespace LogicCalculator
                    first_segment_end = statement_list[first_segment_lines[first_segment_lines.Count - 1]].expression,
                    second_segment_end = statement_list[second_segment_lines[second_segment_lines.Count - 1]].expression                   ;
 
-            //Check the base row
-
             is_valid = (base_expression == first_segment_start + second_segment_start ||
                 base_expression == "(" + first_segment_start + ")" + second_segment_start ||
                base_expression == first_segment_start + "(" + second_segment_start + ")" ||
@@ -372,7 +370,7 @@ namespace LogicCalculator
         }
 
         private void Not_Introduction()
-        {//TODO check more
+        {
             is_valid = statement_list[current_line - 1].expression == "⊥";
             if (!is_valid)
             {
