@@ -61,7 +61,7 @@
             </Grid>
 
             <!--TABs-->
-            <TabControl Name="mainTab" Grid.ColumnSpan="2" SelectionChanged="mainTab_SelectionChanged">
+            <TabControl Name="mainTab" Grid.ColumnSpan="2" SelectionChanged="MainTab_SelectionChanged">
                 <TabItem Header="Logical proof">
                     <!--LOGICAL PROOF TAB-->
                     <Grid Name="GridLogicalProof">
@@ -178,9 +178,9 @@
                     <!--KEYBOARD SECOND LINE-->
                     <Button Name="btnAnd" Content="∧" Margin="2" Click="BtnAnd_Click" 
                             Grid.ColumnSpan="2" Grid.Column="1" Grid.Row="1"/>
-                    <Button Name="btnExists" Content="∃" Margin="2" Click="btnExists_Click"
+                    <Button Name="btnExists" Content="∃" Margin="2" Click="BtnExists_Click"
                             Grid.ColumnSpan="2" Grid.Column="5" Grid.Row="1" Visibility="Hidden"/>
-                    <Button Name="btnForAll" Content="∀"  Margin="2" Click="btnForAll_Click"
+                    <Button Name="btnForAll" Content="∀"  Margin="2" Click="BtnForAll_Click"
                             Grid.ColumnSpan="2" Grid.Column="3" Grid.Row="1"  Visibility="Hidden"/>
                     <Button Name="btnCreateBox" Content="Create Box"  Margin="2" Click="BtnCreateBox_Click"
                             Grid.ColumnSpan="4" Grid.Column="3" Grid.Row="1"/>
