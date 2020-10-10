@@ -232,6 +232,13 @@ namespace LogicCalculator
             second_row = Get_Row(statement_list[current_line].second_segment);
             if (first_row == -1 || second_row == -1)
                 return;
+            is_valid = statement_list[current_line].expression.Contains("^")
+                || statement_list[current_line].expression.Contains("∧");
+            if (!is_valid)
+            {
+                DisplayErrorMsg("Missing ∧ in and introduction");
+                return;
+            }
             string first = statement_list[first_row].expression;
             string second = statement_list[second_row].expression;
             is_valid = statement_list[current_line].expression == first + "^" + second ||
@@ -251,6 +258,12 @@ namespace LogicCalculator
                 return;
             string original_expression = statement_list[row].expression,
                 current_expression = statement_list[current_line].expression;
+            is_valid = original_expression.Contains("^") || original_expression.Contains("∧");
+            if (!is_valid)
+            {
+                DisplayErrorMsg("Missing ∧ in and elimination");
+                return;
+            }
             is_valid = original_expression.Contains(current_expression + "^")
              || original_expression.Contains(current_expression + "∧")
              || original_expression.Contains("(" + current_expression + ")^")
@@ -268,6 +281,13 @@ namespace LogicCalculator
                 return;
             string original_expression = statement_list[row].expression,
                 current_expression = statement_list[current_line].expression;
+
+            is_valid = original_expression.Contains("^") || original_expression.Contains("∧");
+            if (!is_valid)
+            {
+                DisplayErrorMsg("Missing ∧ in and elimination");
+                return;
+            }
             is_valid = original_expression.Contains("^" + current_expression) ||
             original_expression.Contains("∧" + current_expression) ||
             original_expression.Contains("^(" + current_expression + ")") ||
@@ -281,23 +301,29 @@ namespace LogicCalculator
 
         private void Or_Elimination()
         {
-            int base_row = Get_Row(statement_list[current_line].first_segment), index;
+            List<int> first_segment_lines = Get_Lines_From_Segment(statement_list[current_line].second_segment),
+                      second_segment_lines = Get_Lines_From_Segment(statement_list[current_line].third_segment);
+            int base_row = Get_Row(statement_list[current_line].first_segment);
             string current_expression = statement_list[current_line].expression,
-                base_expression = statement_list[base_row].expression;
+                   base_expression = statement_list[base_row].expression,
+                   first_segment_start = statement_list[first_segment_lines[0]].expression,
+                   second_segment_start = statement_list[second_segment_lines[0]].expression,
+                   first_segment_end = statement_list[first_segment_lines[first_segment_lines.Count - 1]].expression,
+                   second_segment_end = statement_list[second_segment_lines[second_segment_lines.Count - 1]].expression                   ;
 
             //Check the base row
-            index = base_expression.IndexOf("∨");
-            if (index == -1)
-            {
-                index = base_expression.IndexOf("v");
-                if (index == -1)
-                {
-                    is_valid = false;
-                    DisplayErrorMsg("Missing ∨ at row " + base_row);
-                    return;
-                }
-            }
 
+            is_valid = (base_expression == first_segment_start + second_segment_start ||
+                base_expression == "(" + first_segment_start + ")" + second_segment_start ||
+               base_expression == first_segment_start + "(" + second_segment_start + ")" ||
+              base_expression == "(" + first_segment_start + ")" + "(" + second_segment_start + ")");
+            is_valid = first_segment_end == second_segment_end
+                    && second_segment_end == current_expression;
+            if (!is_valid)
+            {
+                DisplayErrorMsg(current_expression + " Should be equal to "+ second_segment_end+" and to "+ first_segment_end);
+                return;
+            }
         }
 
         private void Or_Introduction_One()
@@ -305,9 +331,17 @@ namespace LogicCalculator
             int row = Get_Row(statement_list[current_line].first_segment);
             if (row == -1)
                 return;
-
-            is_valid = statement_list[current_line].expression.Contains(statement_list[row].expression + "∨")
-                || statement_list[current_line].expression.Contains(statement_list[row].expression + "V");
+            string current_expression = statement_list[current_line].expression;
+            is_valid = current_expression.Contains("V") || current_expression.Contains("∨");
+            if (!is_valid)
+            {
+                DisplayErrorMsg("Missing ∨ in or introduction");
+                return;
+            }
+            is_valid = current_expression.Contains(statement_list[row].expression + "∨")
+                || current_expression.Contains(statement_list[row].expression + "V")
+                || current_expression.Contains("(" + statement_list[row].expression + ")∨")
+                || current_expression.Contains("(" + statement_list[row].expression + ")V");
             if (!is_valid)
             {
                 DisplayErrorMsg("Misuse of or1 introduction");
@@ -319,8 +353,18 @@ namespace LogicCalculator
             int row = Get_Row(statement_list[current_line].first_segment);
             if (row == -1)
                 return;
-            is_valid = statement_list[current_line].expression.Contains("∨" + statement_list[row].expression)
-                || statement_list[current_line].expression.Contains("V" + statement_list[row].expression);
+            string current_statement = statement_list[current_line].expression;
+            is_valid = current_statement.Contains("V") || current_statement.Contains("∨");
+            if (!is_valid)
+            {
+                DisplayErrorMsg("Missing ∨ in or introduction");
+                return;
+            }
+
+            is_valid = current_statement.Contains("∨" + statement_list[row].expression)
+                || current_statement.Contains("V" + statement_list[row].expression)
+                || current_statement.Contains("∨(" + statement_list[row].expression + ")")
+                || current_statement.Contains("V(" + statement_list[row].expression + ")");
             if (!is_valid)
             {
                 DisplayErrorMsg("Misuse of or2 introduction");
@@ -331,7 +375,11 @@ namespace LogicCalculator
         {//TODO check more
             is_valid = statement_list[current_line - 1].expression == "⊥";
             if (!is_valid)
+            {
                 DisplayErrorMsg("Missing ⊥ at the previous row");
+                return;
+            }
+
             is_valid &= Check_If_Not(statement_list[current_line - 2].expression, statement_list[current_line - 3].expression);
             if (!is_valid)
                 DisplayErrorMsg("Missuse of Not Introduction");
@@ -341,9 +389,13 @@ namespace LogicCalculator
         {
             is_valid = statement_list[current_line].expression == "⊥";
             if (!is_valid)
+            {
                 DisplayErrorMsg("Missing ⊥ at the current row");
+                return;
+            }
             int first_row = Get_Row(statement_list[current_line].first_segment),
                 second_row = Get_Row(statement_list[current_line].second_segment);
+
             is_valid &= Check_If_Not(statement_list[first_row].expression, statement_list[second_row].expression);
             if (!is_valid)
                 DisplayErrorMsg("Missuse of Not Elimination");
@@ -442,19 +494,16 @@ namespace LogicCalculator
         private List<int> Get_Lines_From_Segment(string seg)
         {
             List<int> ret = new List<int>();
-            string[] spli = seg.Split(',');
-            foreach (string s in spli)
+            int index = seg.IndexOf("-");
+            if (index != -1)
             {
-                int index = s.IndexOf("-");
-                if (index != -1)
-                {
-                    int starting_number = (int)Char.GetNumericValue(s[index - 1]),
-                        last_number = (int)Char.GetNumericValue(s[index + 1]);
-                    ret.AddRange(Enumerable.Range(starting_number, last_number - starting_number + 1));
-                }
-                else
-                    ret.Add(Int32.Parse(s));
+                int starting_number = Int32.Parse(seg.Substring(0, index)),
+                    last_number = Int32.Parse(seg.Substring(index + 1, seg.Length - (index + 1)));
+                ret.AddRange(Enumerable.Range(starting_number, last_number - starting_number + 1));
             }
+            else
+                ret.Add(Int32.Parse(seg));
+
             return ret;
         }
 
