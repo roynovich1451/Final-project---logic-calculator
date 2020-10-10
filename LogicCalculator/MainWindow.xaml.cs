@@ -89,9 +89,9 @@ namespace LogicCalculator
                 if (res == MessageBoxResult.Cancel)
                     return;
             }
-            NewFile();
+            newFile();
         }
-        private void NewFile()
+        private void newFile()
         {
             //Proof side
             tbValue.Text = "";
@@ -116,7 +116,7 @@ namespace LogicCalculator
             if (openFileDialog.ShowDialog() == false)
                 return;
             string openFilePath = openFileDialog.FileName;
-            if (FileInUse(openFilePath))
+            if (fileInUse(openFilePath))
                 return;
 
             using (var document = DocX.Load(openFilePath))
@@ -504,7 +504,7 @@ namespace LogicCalculator
                 btncheckButton.Visibility = Visibility.Visible;
             }
         }
-        private void HandleBox(BoxState state, int index)
+        private void handleBox(BoxState state, int index)
         {
 
             switch (state)
@@ -661,7 +661,7 @@ namespace LogicCalculator
             else
                 spGridTable.Children.Insert(index, newLine);
         }
-        private void CheckAll(bool state)
+        private void checkAll(bool state)
         {
             checked_checkboxes = 0;
             foreach (Grid child in spGridTable.Children)
@@ -674,7 +674,7 @@ namespace LogicCalculator
         #endregion DYNAMIC_GUI
 
         #region EVENTS
-        private void MainTab_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void mainTab_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (mainTab.SelectedIndex == TAB_PROOF_INDEX)
             {
@@ -695,9 +695,9 @@ namespace LogicCalculator
             if (chb.Name.Equals("MasterCheck"))
             {
                 if (chb.IsChecked == true)
-                    CheckAll(true);
+                    checkAll(true);
                 else
-                    CheckAll(false);
+                    checkAll(false);
             }
             else
             {
@@ -838,14 +838,14 @@ namespace LogicCalculator
 
             }
         }
-        private void BtnForAll_Click(object sender, RoutedEventArgs e)
+        private void btnForAll_Click(object sender, RoutedEventArgs e)
         {
             if (elementWithFocus != null)
             {
                 AppendKeyboardChar(elementWithFocus, "∀");
             }
         }
-        private void BtnExists_Click(object sender, RoutedEventArgs e)
+        private void btnExists_Click(object sender, RoutedEventArgs e)
         {
             if (elementWithFocus != null)
             {
@@ -859,7 +859,7 @@ namespace LogicCalculator
                 AppendKeyboardChar(elementWithFocus, "ψ");
             }
         }
-        private bool IsBoxValid(int openIndex, int closeIndex)
+        private bool isBoxValid(int openIndex, int closeIndex)
         {
             int openers = 0;
             int closers = 0;
@@ -895,18 +895,18 @@ namespace LogicCalculator
                 return;
             }
 
-            var checkedForBox = GetCheckedForBox();
+            var checkedForBox = getCheckedForBox();
             int openIndex = spGridTable.Children.IndexOf(checkedForBox[OPEN_BOX_LIST_INDEX]);
             int closeIndex = spGridTable.Children.IndexOf(checkedForBox[CLOSE_BOX_LIST_INDEX]);
-            if (!IsBoxValid(openIndex, closeIndex))
+            if (!isBoxValid(openIndex, closeIndex))
             {
                 DisplayErrorMsg("Error: Can't create box, wrong indexes", "Error");
                 return;
             }
-            ChangeBoxVariables(openIndex);
-            HandleBox(BoxState.Open, openIndex);
-            HandleBox(BoxState.Close, closeIndex + 2);
-            CheckInerBoxesSize(openIndex, closeIndex +3);
+            changeBoxVariables(openIndex);
+            handleBox(BoxState.Open, openIndex);
+            handleBox(BoxState.Close, closeIndex + 2);
+            checkInerBoxesSize(openIndex, closeIndex +3);
             CheckMode(false);
         }
         private void BtnClear_Click(object sender, RoutedEventArgs e)
@@ -956,7 +956,7 @@ namespace LogicCalculator
             HandleLabelsAfterCheckMode();
             checked_checkboxes = 0;
             MasterCheck.IsChecked = false;
-            HandleMasterCheck();
+            handleMasterCheck();
             CheckMode(false);
         }
         private void BtnAddBefore_Click(object sender, RoutedEventArgs e)
@@ -980,14 +980,14 @@ namespace LogicCalculator
         #endregion BUTTON_CLICKS
 
         #region UTILITY
-        private void HandleMasterCheck()
+        private void handleMasterCheck()
         {
             if (spGridTable.Children.Count == 0)
                 MasterCheck.Visibility = Visibility.Hidden;
             else
                 MasterCheck.Visibility = Visibility.Visible;
         }
-        private void CheckInerBoxesSize(int openIndex, int closeIndex)
+        private void checkInerBoxesSize(int openIndex, int closeIndex)
         {
             hyphen_chunks--;
             spaces_chunks++;
@@ -1009,7 +1009,7 @@ namespace LogicCalculator
                 }
             }
         }
-        private void ChangeBoxVariables(int openIndex)
+        private void changeBoxVariables(int openIndex)
         {
             int outerBoxcnt = 0;
             for (int i = 0; i < openIndex; i++)
@@ -1033,7 +1033,7 @@ namespace LogicCalculator
             hyphen_chunks = MAX_HYPHEN_CHUNKS - outerBoxcnt;
             spaces_chunks = MIN_HYPHEN_CHUNKS + outerBoxcnt;
         }
-        private List<Grid> GetCheckedForBox()
+        private List<Grid> getCheckedForBox()
         {
             List<Grid> gridList = new List<Grid>();
             foreach (Grid grid in spGridTable.Children)
@@ -1211,7 +1211,7 @@ namespace LogicCalculator
             }
             return ret;
         }
-        private bool FileInUse(string file)
+        private bool fileInUse(string file)
         {
             try
             {
