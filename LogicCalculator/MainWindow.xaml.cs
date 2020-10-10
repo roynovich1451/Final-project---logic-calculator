@@ -57,6 +57,7 @@ namespace LogicCalculator
         private const int SEGMENT3_INDEX = 6;
         private const int TEXT_BLOCK_INDEX = 1;
         private const int TAB_PROOF_INDEX = 0;
+        private const int TAB_EDITOR_INDEX = 1;
         private const int OPEN_BOX_LIST_INDEX = 0;
         private const int CLOSE_BOX_LIST_INDEX = 1;
         //private const int TAB_EDITOR_INDEX = 1;
@@ -137,37 +138,46 @@ namespace LogicCalculator
 
             using (var document = DocX.Load(openFilePath))
             {
-                //Clear Table
-                spGridTable.Children.Clear();
-                table_row_num = 0;
-
-                tbValue.Text = document.Paragraphs[1].Text.Substring(20).Trim();
-
-                Table proof_table = document.Tables[0];
-
-                for (int i = 1; i < proof_table.Rows.Count; i++)
+                if (document.Tables.Count == 0)
                 {
-                    CreateRow(-1);
+                    tbEditor.Text = document.Text;
+                    mainTab.SelectedIndex = TAB_EDITOR_INDEX;
+                    return;
                 }
-                UIElementCollection grids = spGridTable.Children;
-
-                for (int i = 0; i < proof_table.Rows.Count - 1; i++)
+                else
                 {
-                    Grid g = grids[i] as Grid;
-                    for (int j = 1; j < TABLE_COL_NUM; j++)
+                    mainTab.SelectedIndex = TAB_PROOF_INDEX;
+                    //Clear Table
+                    spGridTable.Children.Clear();
+                    table_row_num = 0;
+
+                    tbValue.Text = document.Paragraphs[1].Text.Substring(20).Trim();
+
+                    Table proof_table = document.Tables[0];
+
+                    for (int i = 1; i < proof_table.Rows.Count; i++)
                     {
-                        if (g.Children[j + 1] is ComboBox combobox)
+                        CreateRow(-1);
+                    }
+                    UIElementCollection grids = spGridTable.Children;
+
+                    for (int i = 0; i < proof_table.Rows.Count - 1; i++)
+                    {
+                        Grid g = grids[i] as Grid;
+                        for (int j = 1; j < TABLE_COL_NUM; j++)
                         {
-                            combobox.SelectedItem = proof_table.Rows[i + 1].Cells[j].Paragraphs[0].Text;
-                        }
-                        if (g.Children[j + 1] is TextBox textbox)
-                        {
-                            textbox.Text = proof_table.Rows[i + 1].Cells[j].Paragraphs[0].Text;
+                            if (g.Children[j + 1] is ComboBox combobox)
+                            {
+                                combobox.SelectedItem = proof_table.Rows[i + 1].Cells[j].Paragraphs[0].Text;
+                            }
+                            if (g.Children[j + 1] is TextBox textbox)
+                            {
+                                textbox.Text = proof_table.Rows[i + 1].Cells[j].Paragraphs[0].Text;
+                            }
                         }
                     }
                 }
             }
-            DisplayInfoMsg($"Open Document: {openFilePath} opened successfully", "Document open");
         }
         private void MenuItemSave_Click(object sender, RoutedEventArgs e)
         {
@@ -182,43 +192,50 @@ namespace LogicCalculator
 
             using (var document = DocX.Create(saveFilePath))
             {
-                // Add a title.
-                document.InsertParagraph("Logic Tool Results\n").FontSize(16d).Bold(true).UnderlineStyle(UnderlineStyle.singleLine);
-
-                //Add the proof table
-                switch (((TabItem)mainTab.SelectedItem).Header)
+                if (mainTab.SelectedIndex == TAB_EDITOR_INDEX)
                 {
-                    case "Logical proof":
-                        //Add the main expression
-                        document.InsertParagraph("Logical Expression: " + tbValue.Text + '\n').FontSize(14d);
+                    document.InsertParagraph(tbEditor.Text);
+                }
+                else
+                {
+                    // Add a title.
+                    document.InsertParagraph("Logic Tool Results\n").FontSize(16d).Bold(true).UnderlineStyle(UnderlineStyle.singleLine);
 
-                        Table proof_table = document.AddTable(table_row_num + 1, TABLE_COL_NUM);
-                        proof_table.Alignment = Alignment.center;
-                        proof_table.Rows[0].Cells[0].Paragraphs.First().Append("Line").UnderlineStyle(UnderlineStyle.singleLine);
-                        proof_table.Rows[0].Cells[1].Paragraphs.First().Append("Expression").UnderlineStyle(UnderlineStyle.singleLine);
-                        proof_table.Rows[0].Cells[2].Paragraphs.First().Append("Rule").UnderlineStyle(UnderlineStyle.singleLine);
-                        proof_table.Rows[0].Cells[3].Paragraphs.First().Append("First Segment").UnderlineStyle(UnderlineStyle.singleLine);
-                        proof_table.Rows[0].Cells[4].Paragraphs.First().Append("Second Segment").UnderlineStyle(UnderlineStyle.singleLine);
-                        proof_table.Rows[0].Cells[5].Paragraphs.First().Append("Third Segment").UnderlineStyle(UnderlineStyle.singleLine);
+                    //Add the proof table
+                    switch (((TabItem)mainTab.SelectedItem).Header)
+                    {
+                        case "Logical proof":
+                            //Add the main expression
+                            document.InsertParagraph("Logical Expression: " + tbValue.Text + '\n').FontSize(14d);
 
-                        List<string> input_list = GetAllTableInput();
-                        //Fill the proof table
+                            Table proof_table = document.AddTable(table_row_num + 1, TABLE_COL_NUM);
+                            proof_table.Alignment = Alignment.center;
+                            proof_table.Rows[0].Cells[0].Paragraphs.First().Append("Line").UnderlineStyle(UnderlineStyle.singleLine);
+                            proof_table.Rows[0].Cells[1].Paragraphs.First().Append("Expression").UnderlineStyle(UnderlineStyle.singleLine);
+                            proof_table.Rows[0].Cells[2].Paragraphs.First().Append("Rule").UnderlineStyle(UnderlineStyle.singleLine);
+                            proof_table.Rows[0].Cells[3].Paragraphs.First().Append("First Segment").UnderlineStyle(UnderlineStyle.singleLine);
+                            proof_table.Rows[0].Cells[4].Paragraphs.First().Append("Second Segment").UnderlineStyle(UnderlineStyle.singleLine);
+                            proof_table.Rows[0].Cells[5].Paragraphs.First().Append("Third Segment").UnderlineStyle(UnderlineStyle.singleLine);
 
-                        for (int i = 0; i < table_row_num; i++)
-                        {
-                            proof_table.Rows[i + 1].Cells[0].Paragraphs.First().Append((i + 1).ToString());
-                            for (int j = 0; j < TABLE_COL_NUM - 1; j++)
+                            List<string> input_list = GetAllTableInput();
+                            //Fill the proof table
+
+                            for (int i = 0; i < table_row_num; i++)
                             {
-                                proof_table.Rows[i + 1].Cells[j + 1].Paragraphs.First().Append(input_list[i * (TABLE_COL_NUM - 1) + j]);
+                                proof_table.Rows[i + 1].Cells[0].Paragraphs.First().Append((i + 1).ToString());
+                                for (int j = 0; j < TABLE_COL_NUM - 1; j++)
+                                {
+                                    proof_table.Rows[i + 1].Cells[j + 1].Paragraphs.First().Append(input_list[i * (TABLE_COL_NUM - 1) + j]);
+                                }
                             }
-                        }
-                        document.InsertTable(proof_table);
-                        // Save this document to disk.
-                        break;
+                            document.InsertTable(proof_table);
+                            // Save this document to disk.
+                            break;
 
-                    case "Text editor":
-                        document.InsertParagraph(tbEditor.Text).FontSize(12d);
-                        break;
+                        case "Text editor":
+                            document.InsertParagraph(tbEditor.Text).FontSize(12d);
+                            break;
+                    }
                 }
                 try
                 {
@@ -883,6 +900,7 @@ namespace LogicCalculator
             {
                 if (spGridTable.Children[i] is Grid grid)
                 {
+
                     if (grid.Children[1] is TextBlock tblock)
                     {
                         if (tblock.Text.Contains("└"))
