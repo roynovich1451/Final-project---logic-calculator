@@ -23,6 +23,7 @@ namespace LogicCalculator
     {
         #region DEFINES
 
+        #region GUI_DEFINES
         private const int COL_LABEL_WIDTH = 35;
         private const int COL_STATEMENT_WIDTH = 360;
         private const int COL_SEGMENT_WIDTH = 60;
@@ -30,10 +31,23 @@ namespace LogicCalculator
         private const int COL_TEXTBLOCK_WIDTH = COL_LABEL_WIDTH + COL_STATEMENT_WIDTH + COL_COMBOBOX_WIDTH + (3 * COL_SEGMENT_WIDTH);
         private const int CHILD_MARGIN = 4;
         private const int THICKNESS = 2;
+        #endregion
+
+        #region BOX_DEFINES
+        private enum BoxState
+        {
+            Open,
+            Close
+        }
+
         private const int SPACES = 6;
         private const int HYPHEN = 8;
         private const int MAX_HYPHEN_CHUNKS = 16;
         private const int MIN_HYPHEN_CHUNKS = 1;
+        //private const int MAX_BOX_TEXT_LENGTH = 134;
+        #endregion
+
+        #region INDEX_DEFINES
         private const int CHECKBOX_INDEX = 0;
         private const int LABL_INDEX = 1;
         private const int STATEMENT_INDEX = 2;
@@ -43,19 +57,18 @@ namespace LogicCalculator
         private const int SEGMENT3_INDEX = 6;
         private const int TEXT_BLOCK_INDEX = 1;
         private const int TAB_PROOF_INDEX = 0;
-        //private const int TAB_EDITOR_INDEX = 1;
         private const int OPEN_BOX_LIST_INDEX = 0;
         private const int CLOSE_BOX_LIST_INDEX = 1;
-        //private const int MAX_BOX_TEXT_LENGTH = 134;
+        //private const int TAB_EDITOR_INDEX = 1;
+        #endregion
+
+        #region ERROR_DEFINES
+        private const int SUCCESS = 0;
         private const int ERRMISSLINE = 1;
         private const int ERRCOUNTBRAKETS = 2;
-        private const int SUCCESS = 0;
-
-        private enum BoxState
-        {
-            Open,
-            Close
-        }
+        private const int ERRMISSOPEN = 3;
+        private const int ERRMISSCLOSE = 4;
+        #endregion
 
         #endregion DEFINES
 
@@ -947,12 +960,12 @@ namespace LogicCalculator
         }
         private void BtnClear_Click(object sender, RoutedEventArgs e)
         {
-            List<Grid> checkedGrid = GetChecked();
-            MessageBoxResult res = MessageBox.Show($"Warning: You are about to CLEAR {checkedGrid.Count} lines\nPlease confirm",
+            List<Grid> checkeRows = GetChecked();
+            MessageBoxResult res = MessageBox.Show($"Warning: You are about to CLEAR {checkeRows.Count} lines\nPlease confirm",
                 "Confirmation", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
             if (res == MessageBoxResult.Cancel)
                 return;
-            foreach (Grid row in checkedGrid)
+            foreach (Grid row in checkeRows)
             {
                 foreach (var child in row.Children)
                 {
@@ -981,11 +994,28 @@ namespace LogicCalculator
         }
         private void BtnRemove_Click(object sender, RoutedEventArgs e)
         {
-            List<Grid> checkedGrid = GetChecked();
-            MessageBoxResult res = MessageBox.Show($"Warning: You are about to REMOVE {checkedGrid.Count} lines\nPlease confirm",
+            List<Grid> checkeRows = GetChecked();
+            MessageBoxResult res = MessageBox.Show($"Warning: You are about to REMOVE {checkeRows.Count} lines\nPlease confirm",
                 "Confirmation", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
             if (res == MessageBoxResult.Cancel) return;
-            foreach (Grid row in checkedGrid)
+            int ret = checkBoxesForRemove(checkeRows);
+            if (ret > 0)
+            {
+                hyphen_chunks = MAX_HYPHEN_CHUNKS + 1;
+                spaces_chunks = MIN_HYPHEN_CHUNKS - 1;
+                checkInerBoxesSize(0, spGridTable.Children.Count - 1);  
+            }
+            if (ret == -ERRMISSCLOSE)
+            {
+                DisplayErrorMsg("Error: checked box missng it's closer\nPlease recheck rows", "ERROR");
+                return;
+            }
+            if (ret == -ERRMISSOPEN)
+            {
+                DisplayErrorMsg("Error: checked box missng it's opener\nPlease recheck rows", "ERROR");
+                return;
+            }
+            foreach (Grid row in checkeRows)
             {
                 spGridTable.Children.Remove(row);
             }
@@ -995,13 +1025,69 @@ namespace LogicCalculator
             handleMasterCheck();
             CheckMode(false);
         }
+
+        private int checkBoxesForRemove(List<Grid> checkeRows)
+        {
+            List<Grid> verified = new List<Grid>();
+
+            foreach(Grid row in checkeRows)
+            {
+                //if closer, must be varified already
+                if ((row.Children[TEXT_BLOCK_INDEX] is TextBlock tbClose) && tbClose.Text.Contains("└"))
+                {
+                    if (!verified.Contains(row))
+                        return -ERRMISSOPEN;
+                    continue;
+                }
+                //if opener
+                if ((row.Children[TEXT_BLOCK_INDEX] is TextBlock tbOpen) && tbOpen.Text.Contains("┌"))
+                { 
+                    int startSearchIndex = spGridTable.Children.IndexOf(row);
+                    Grid closerGrid = getCloserGrid(row);
+                    if (closerGrid == null)
+                    {
+                        DisplayErrorMsg("something went wrong", "ERROR");
+                    }
+                    if (((CheckBox)closerGrid.Children[CHECKBOX_INDEX]).IsChecked == false)
+                    {
+                        return -ERRMISSCLOSE;
+                    }
+                    else
+                    {
+                        verified.Add(closerGrid);
+                    }
+                   
+                }
+            }
+            return verified.Count;
+        }
+
+        private Grid getCloserGrid(Grid row)
+        {
+            TextBlock tbOpener = row.Children[TEXT_BLOCK_INDEX] as TextBlock;
+
+            for (int i = spGridTable.Children.IndexOf(row); i < spGridTable.Children.Count; i++)
+            {
+                if (((Grid)spGridTable.Children[i]).Children[TEXT_BLOCK_INDEX] is TextBlock tbCurrent)
+                {
+                    if (tbCurrent.Text.Contains("└") && (tbCurrent.Text.Length == tbOpener.Text.Length))
+                    {
+                        return tbCurrent.Parent as Grid;
+                    }
+                }
+            }
+            return null;
+        }
+
+
+
         private void BtnAddBefore_Click(object sender, RoutedEventArgs e)
         {
-            List<Grid> checkedGrid = GetChecked();
-            MessageBoxResult res = MessageBox.Show($"Warning: You are about to Add {checkedGrid.Count} lines\nPlease confirm",
+            List<Grid> checkeRows = GetChecked();
+            MessageBoxResult res = MessageBox.Show($"Warning: You are about to Add {checkeRows.Count} lines\nPlease confirm",
                 "Confirmation", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
             if (res == MessageBoxResult.Cancel) return;
-            foreach (Grid row in checkedGrid)
+            foreach (Grid row in checkeRows)
             {
                 ((CheckBox)row.Children[CHECKBOX_INDEX]).IsChecked = false;
                 int addToIndex = spGridTable.Children.IndexOf(row);
