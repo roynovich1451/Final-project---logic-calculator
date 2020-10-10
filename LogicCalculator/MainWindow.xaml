@@ -37,7 +37,12 @@
             <MenuItem Header="_Help">
                 <MenuItem Header="_User Manual" Click="MenuItemManual_Click">
                     <MenuItem.Icon>
-                        <Image Source="help.ico"/>
+                        <Image Source="help.ico" Width="16" Height="16"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="_About" Click="MenuItem_About_Click">
+                    <MenuItem.Icon>
+                        <Image Source="help.ico" Width="16" Height="16"/>
                     </MenuItem.Icon>
                 </MenuItem>
             </MenuItem>
@@ -62,8 +67,8 @@
             </Grid>
 
             <!--TABs-->
-            <TabControl Name="mainTab" Grid.ColumnSpan="2" SelectionChanged="mainTab_SelectionChanged">
-                <TabItem Header="Logical proof">
+            <TabControl Name="mainTab" Grid.ColumnSpan="2" SelectionChanged="MainTab_SelectionChanged">
+                <TabItem Header="Logical Proof">
                     <!--LOGICAL PROOF TAB-->
                     <Grid Name="GridLogicalProof">
                         <Grid.ColumnDefinitions>
@@ -132,7 +137,7 @@
                     </Grid>
                 </TabItem>
                 <!--TEXT EDITOR TAB-->
-                <TabItem Header="Text editor">
+                <TabItem Header="Text Editor">
                     <TextBox Name="tbEditor" TextWrapping="Wrap" AcceptsReturn="True" 
                              ScrollViewer.VerticalScrollBarVisibility="Auto" Margin="10"/>
                 </TabItem>
@@ -179,9 +184,9 @@
                     <!--KEYBOARD SECOND LINE-->
                     <Button Name="btnAnd" Content="∧" Margin="2" Click="BtnAnd_Click" 
                             Grid.ColumnSpan="2" Grid.Column="1" Grid.Row="1"/>
-                    <Button Name="btnExists" Content="∃" Margin="2" Click="btnExists_Click"
+                    <Button Name="btnExists" Content="∃" Margin="2" Click="BtnExists_Click"
                             Grid.ColumnSpan="2" Grid.Column="5" Grid.Row="1" Visibility="Hidden"/>
-                    <Button Name="btnForAll" Content="∀"  Margin="2" Click="btnForAll_Click"
+                    <Button Name="btnForAll" Content="∀"  Margin="2" Click="BtnForAll_Click"
                             Grid.ColumnSpan="2" Grid.Column="3" Grid.Row="1"  Visibility="Hidden"/>
                     <Button Name="btnCreateBox" Content="Create Box"  Margin="2" Click="BtnCreateBox_Click"
                             Grid.ColumnSpan="4" Grid.Column="3" Grid.Row="1"/>
