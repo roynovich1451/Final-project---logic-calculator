@@ -94,6 +94,24 @@ namespace LogicCalculator
                 case "→i":
                     Arrow_Introduction();
                     break;
+                case "=i":
+                    Equal_Introduction();
+                    break;
+                case "=e":
+                    Equal_Elimination();
+                    break;
+                case "∀i":
+                    All_Introduction();
+                    break;
+                case "∀e":
+                    All_Elimination();
+                    break;
+                case "∃i":
+                    Exists_Introduction();
+                    break;
+                case "∃e":
+                    Exists_Elimination();
+                    break;
             }
         }
 
@@ -463,6 +481,45 @@ namespace LogicCalculator
                 DisplayErrorMsg("Misuse of Arrow Introduction");
             }
         }
+
+        private void Equal_Introduction()        {
+            string current_expression = statement_list[current_line].Expression;
+            int index = current_expression.IndexOf('=');
+            if (index == -1)
+            {
+                DisplayErrorMsg("Missing = in row");
+                Is_Valid = false;
+                return;
+            }
+            Is_Valid = current_expression.Substring(0, index) ==
+                current_expression.Substring(index + 1, current_expression.Length - (index + 1));
+            if(!Is_Valid)
+                DisplayErrorMsg("Equal introduction format is t1=t1");
+        }
+        private void Equal_Elimination()        {
+            int index, first_line = Get_Row(statement_list[current_line].First_segment)
+            ,second_line = Get_Row(statement_list[current_line].Second_segment);
+            
+
+            string current_expression = statement_list[current_line].Expression,
+                first_left,first_right,second_left,second_right;            
+            index = current_expression.IndexOf('=');
+            if (index == -1)
+            {
+                DisplayErrorMsg("Missing = in row");
+                Is_Valid = false;
+                return;
+            }
+            Is_Valid = current_expression ==
+                current_expression.Substring(index + 1, current_expression.Length - (index + 1));
+            if (!Is_Valid)
+                DisplayErrorMsg("Equal introduction format is t1=t1");
+        }
+        private void All_Introduction() { throw new NotImplementedException(); }
+        private void All_Elimination() { throw new NotImplementedException(); }
+        private void Exists_Introduction() { throw new NotImplementedException(); }
+        private void Exists_Elimination() { throw new NotImplementedException(); }
+
 
         #region UTILITY
 

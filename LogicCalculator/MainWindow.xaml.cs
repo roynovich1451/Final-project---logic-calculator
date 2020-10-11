@@ -875,7 +875,7 @@ namespace LogicCalculator
             }
         }
 
-        private void btnCapPsi_Click(object sender, RoutedEventArgs e)
+        private void BtnCapPsi_Click(object sender, RoutedEventArgs e)
         {
             if (elementWithFocus != null)
             {
@@ -883,7 +883,7 @@ namespace LogicCalculator
             }
         }
    
-        private void btnCapPhi_Click(object sender, RoutedEventArgs e)
+        private void BtnCapPhi_Click(object sender, RoutedEventArgs e)
         {
             if (elementWithFocus != null)
             {
@@ -891,14 +891,14 @@ namespace LogicCalculator
             }
         }
 
-        private void btnCapChi_Click(object sender, RoutedEventArgs e)
+        private void BtnCapChi_Click(object sender, RoutedEventArgs e)
         {
             if (elementWithFocus != null)
             {
                 AppendKeyboardChar(elementWithFocus, "Χ");
             }
         }
-        private void btnCapBeta_Click(object sender, RoutedEventArgs e)
+        private void BtnCapBeta_Click(object sender, RoutedEventArgs e)
         {
             if (elementWithFocus != null)
             {
@@ -906,7 +906,7 @@ namespace LogicCalculator
             }
         }
 
-        private void btnCapGama_Click(object sender, RoutedEventArgs e)
+        private void BtnCapGama_Click(object sender, RoutedEventArgs e)
         {
             if (elementWithFocus != null)
             {
@@ -914,7 +914,7 @@ namespace LogicCalculator
             }
         }
 
-        private void btnCapDelta_Click(object sender, RoutedEventArgs e)
+        private void BtnCapDelta_Click(object sender, RoutedEventArgs e)
         {
             if (elementWithFocus != null)
             {
@@ -922,7 +922,7 @@ namespace LogicCalculator
             }
         }
 
-        private void btnCapEpsilon_Click(object sender, RoutedEventArgs e)
+        private void BtnCapEpsilon_Click(object sender, RoutedEventArgs e)
         {
             if (elementWithFocus != null)
             {
@@ -930,7 +930,7 @@ namespace LogicCalculator
             }
         }
 
-        private void btnCapTeta_Click(object sender, RoutedEventArgs e)
+        private void BtnCapTeta_Click(object sender, RoutedEventArgs e)
         {
             if (elementWithFocus != null)
             {
@@ -938,7 +938,7 @@ namespace LogicCalculator
             }
         }
 
-        private void btnCapPai_Click(object sender, RoutedEventArgs e)
+        private void BtnCapPai_Click(object sender, RoutedEventArgs e)
         {
             if (elementWithFocus != null)
             {
@@ -946,7 +946,7 @@ namespace LogicCalculator
             }
         }
 
-        private void btnCapOmega_Click(object sender, RoutedEventArgs e)
+        private void BtnCapOmega_Click(object sender, RoutedEventArgs e)
         {
             if (elementWithFocus != null)
             {
@@ -954,7 +954,7 @@ namespace LogicCalculator
             }
         }
 
-        private void btnBeta_Click(object sender, RoutedEventArgs e)
+        private void BtnBeta_Click(object sender, RoutedEventArgs e)
         {
             if (elementWithFocus != null)
             {
@@ -962,7 +962,7 @@ namespace LogicCalculator
             }
         }
 
-        private void btnGama_Click(object sender, RoutedEventArgs e)
+        private void BtnGama_Click(object sender, RoutedEventArgs e)
         {
             if (elementWithFocus != null)
             {
@@ -970,7 +970,7 @@ namespace LogicCalculator
             }
         }
 
-        private void btnDelta_Click(object sender, RoutedEventArgs e)
+        private void BtnDelta_Click(object sender, RoutedEventArgs e)
         {
             if (elementWithFocus != null)
             {
@@ -978,7 +978,7 @@ namespace LogicCalculator
             }
         }
 
-        private void btnEpsilon_Click(object sender, RoutedEventArgs e)
+        private void BtnEpsilon_Click(object sender, RoutedEventArgs e)
         {
             if (elementWithFocus != null)
             {
@@ -986,7 +986,7 @@ namespace LogicCalculator
             }
         }
 
-        private void btnTeta_Click(object sender, RoutedEventArgs e)
+        private void BtnTeta_Click(object sender, RoutedEventArgs e)
         {
             if (elementWithFocus != null)
             {
@@ -994,14 +994,14 @@ namespace LogicCalculator
             }
         }
 
-        private void btnPai_Click(object sender, RoutedEventArgs e)
+        private void BtnPai_Click(object sender, RoutedEventArgs e)
         {
             if (elementWithFocus != null)
             {
                 AppendKeyboardChar(elementWithFocus, "π");
             }
         }
-        private void btnPhi_Click(object sender, RoutedEventArgs e)
+        private void BtnPhi_Click(object sender, RoutedEventArgs e)
         {
             if (elementWithFocus != null)
             {
@@ -1009,7 +1009,7 @@ namespace LogicCalculator
             }
         }
 
-        private void btnChi_Click(object sender, RoutedEventArgs e)
+        private void BtnChi_Click(object sender, RoutedEventArgs e)
         {
             if (elementWithFocus != null)
             {
@@ -1018,21 +1018,21 @@ namespace LogicCalculator
             }
         }
 
-        private void btnPsi_Click(object sender, RoutedEventArgs e)
+        private void BtnPsi_Click(object sender, RoutedEventArgs e)
         {
             if (elementWithFocus != null)
             {
                 AppendKeyboardChar(elementWithFocus, "ψ");
             }
         }
-        private void btnOmega_Click(object sender, RoutedEventArgs e)
+        private void BtnOmega_Click(object sender, RoutedEventArgs e)
         {
             if (elementWithFocus != null)
             {
                 AppendKeyboardChar(elementWithFocus, "ω");
             }
         }
-        private void btnX_Click(object sender, RoutedEventArgs e)
+        private void BtnX_Click(object sender, RoutedEventArgs e)
         {
             if (elementWithFocus != null)
             {
@@ -1040,7 +1040,7 @@ namespace LogicCalculator
             }
         }
 
-        private void btnY_Click(object sender, RoutedEventArgs e)
+        private void BtnY_Click(object sender, RoutedEventArgs e)
         {
             if (elementWithFocus != null)
             {
@@ -1401,10 +1401,9 @@ namespace LogicCalculator
         {
             UIElementCollection grids = spGridTable.Children;
             List<TextBox> ret = new List<TextBox>();
-            foreach (var row in grids)
+            foreach (Grid row in grids)
             {
-                Grid g = row as Grid;
-                foreach (var child in g.Children)
+                foreach (var child in row.Children)
                 {
                     if (child is TextBox textbox)
                     {
@@ -1422,6 +1421,22 @@ namespace LogicCalculator
             }
             return ret;
         }
+        public List<Tuple<int, string>> GetBoxPairs()
+        {
+            UIElementCollection grids = spGridTable.Children;
+            List<Tuple<int, string>> ret = new List<Tuple<int, string>>();
+            int index = 0;
+            foreach (Grid row in grids)
+            {
+                if (row.Children[TEXT_BLOCK_INDEX] is TextBlock block)
+                {
+                    ret.Add(new Tuple<int, string>(index, block.Text));
+                }
+                index++;
+            }
+            return ret;
+        }
+
         private bool IsValidStatement(string expression, string rule, string first_segment,
            string second_segment, string third_segment)
         {
@@ -1478,12 +1493,15 @@ namespace LogicCalculator
 
             return true;
         }
+
+        //OREN
         private void HandleTableInput()
         {
             statement_list.Clear();
             statement_list.Add(new Statement(tbValue.Text, "first", "0"));
-            //List<string> text_boxes_list = GetAllTableInput();
             List<TextBox> text_boxes_list = GetAllTextBoxes();
+            List<Tuple<int, string>> box_pairs_list = GetBoxPairs();
+
             //One less column because of the line number column
             int col_to_check = TABLE_COL_NUM - 1;
 
@@ -1499,7 +1517,7 @@ namespace LogicCalculator
                     return;
                 Statement s = new Statement(expression, rule, first_segment, second_segment, third_segment);
                 statement_list.Add(s);
-                Evaluation e = new Evaluation(statement_list, rule);
+                Evaluation e = new Evaluation(statement_list, rule, box_pairs_list);
                 if (!e.Is_Valid)
                     return;
             }
