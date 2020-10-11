@@ -191,50 +191,43 @@ namespace LogicCalculator
 
             using (var document = DocX.Create(saveFilePath))
             {
-                if (mainTab.SelectedIndex == TAB_EDITOR_INDEX)
+                // Add a title.
+                document.InsertParagraph("Logic Tool Results\n").FontSize(16d).Bold(true).UnderlineStyle(UnderlineStyle.singleLine);
+
+                //Add the proof table
+                switch (mainTab.SelectedIndex)
                 {
-                    document.InsertParagraph(tbEditor.Text);
-                }
-                else
-                {
-                    // Add a title.
-                    document.InsertParagraph("Logic Tool Results\n").FontSize(16d).Bold(true).UnderlineStyle(UnderlineStyle.singleLine);
+                    case TAB_PROOF_INDEX:
+                        //Add the main expression
+                        document.InsertParagraph("Logical Expression: " + tbValue.Text + '\n').FontSize(14d);
 
-                    //Add the proof table
-                    switch (((TabItem)mainTab.SelectedItem).Header)
-                    {
-                        case "Logical proof":
-                            //Add the main expression
-                            document.InsertParagraph("Logical Expression: " + tbValue.Text + '\n').FontSize(14d);
+                        Table proof_table = document.AddTable(table_row_num + 1, TABLE_COL_NUM);
+                        proof_table.Alignment = Alignment.center;
+                        proof_table.Rows[0].Cells[0].Paragraphs.First().Append("Line").UnderlineStyle(UnderlineStyle.singleLine);
+                        proof_table.Rows[0].Cells[1].Paragraphs.First().Append("Expression").UnderlineStyle(UnderlineStyle.singleLine);
+                        proof_table.Rows[0].Cells[2].Paragraphs.First().Append("Rule").UnderlineStyle(UnderlineStyle.singleLine);
+                        proof_table.Rows[0].Cells[3].Paragraphs.First().Append("First Segment").UnderlineStyle(UnderlineStyle.singleLine);
+                        proof_table.Rows[0].Cells[4].Paragraphs.First().Append("Second Segment").UnderlineStyle(UnderlineStyle.singleLine);
+                        proof_table.Rows[0].Cells[5].Paragraphs.First().Append("Third Segment").UnderlineStyle(UnderlineStyle.singleLine);
 
-                            Table proof_table = document.AddTable(table_row_num + 1, TABLE_COL_NUM);
-                            proof_table.Alignment = Alignment.center;
-                            proof_table.Rows[0].Cells[0].Paragraphs.First().Append("Line").UnderlineStyle(UnderlineStyle.singleLine);
-                            proof_table.Rows[0].Cells[1].Paragraphs.First().Append("Expression").UnderlineStyle(UnderlineStyle.singleLine);
-                            proof_table.Rows[0].Cells[2].Paragraphs.First().Append("Rule").UnderlineStyle(UnderlineStyle.singleLine);
-                            proof_table.Rows[0].Cells[3].Paragraphs.First().Append("First Segment").UnderlineStyle(UnderlineStyle.singleLine);
-                            proof_table.Rows[0].Cells[4].Paragraphs.First().Append("Second Segment").UnderlineStyle(UnderlineStyle.singleLine);
-                            proof_table.Rows[0].Cells[5].Paragraphs.First().Append("Third Segment").UnderlineStyle(UnderlineStyle.singleLine);
+                        List<string> input_list = GetAllTableInput();
+                        //Fill the proof table
 
-                            List<string> input_list = GetAllTableInput();
-                            //Fill the proof table
-
-                            for (int i = 0; i < table_row_num; i++)
+                        for (int i = 0; i < table_row_num; i++)
+                        {
+                            proof_table.Rows[i + 1].Cells[0].Paragraphs.First().Append((i + 1).ToString());
+                            for (int j = 0; j < TABLE_COL_NUM - 1; j++)
                             {
-                                proof_table.Rows[i + 1].Cells[0].Paragraphs.First().Append((i + 1).ToString());
-                                for (int j = 0; j < TABLE_COL_NUM - 1; j++)
-                                {
-                                    proof_table.Rows[i + 1].Cells[j + 1].Paragraphs.First().Append(input_list[i * (TABLE_COL_NUM - 1) + j]);
-                                }
+                                proof_table.Rows[i + 1].Cells[j + 1].Paragraphs.First().Append(input_list[i * (TABLE_COL_NUM - 1) + j]);
                             }
-                            document.InsertTable(proof_table);
-                            // Save this document to disk.
-                            break;
+                        }
+                        document.InsertTable(proof_table);
+                        // Save this document to disk.
+                        break;
 
-                        case "Text editor":
-                            document.InsertParagraph(tbEditor.Text).FontSize(12d);
-                            break;
-                    }
+                    case TAB_EDITOR_INDEX:
+                        document.InsertParagraph(tbEditor.Text).FontSize(12d);
+                        break;
                 }
                 try
                 {
@@ -267,7 +260,7 @@ namespace LogicCalculator
 
         private void MenuItem_About_Click(object sender, RoutedEventArgs e)
         {
-            DisplayInfoMsg("This software was made by Roy Novich and Oren Or","About");
+            DisplayInfoMsg("This software was made by Roy Novich and Oren Or", "About");
         }
 
         #endregion MENUBAR_CLICKS
@@ -719,12 +712,16 @@ namespace LogicCalculator
                 btnCreateBox.Visibility = Visibility.Visible;
                 btnExists.Visibility = Visibility.Hidden;
                 btnForAll.Visibility = Visibility.Hidden;
+                btnX.Visibility = Visibility.Hidden;
+                btnY.Visibility = Visibility.Hidden;
             }
             else
             {
                 btnCreateBox.Visibility = Visibility.Hidden;
                 btnExists.Visibility = Visibility.Visible;
                 btnForAll.Visibility = Visibility.Visible;
+                btnX.Visibility = Visibility.Visible;
+                btnY.Visibility = Visibility.Visible;
             }
         }
         private void Chb_click(object sender, RoutedEventArgs e)
@@ -861,21 +858,7 @@ namespace LogicCalculator
                 AppendKeyboardChar(elementWithFocus, "¬");
             }
         }
-        private void BtnPhi_Click(object sender, RoutedEventArgs e)
-        {
-            if (elementWithFocus != null)
-            {
-                AppendKeyboardChar(elementWithFocus, "φ");
-            }
-        }
-        private void BtnChi_Click(object sender, RoutedEventArgs e)
-        {
-            if (elementWithFocus != null)
-            {
-                AppendKeyboardChar(elementWithFocus, "χ");
 
-            }
-        }
         private void BtnForAll_Click(object sender, RoutedEventArgs e)
         {
             if (elementWithFocus != null)
@@ -883,6 +866,7 @@ namespace LogicCalculator
                 AppendKeyboardChar(elementWithFocus, "∀");
             }
         }
+
         private void BtnExists_Click(object sender, RoutedEventArgs e)
         {
             if (elementWithFocus != null)
@@ -890,11 +874,177 @@ namespace LogicCalculator
                 AppendKeyboardChar(elementWithFocus, "∃");
             }
         }
-        private void BtnPsi_Click(object sender, RoutedEventArgs e)
+
+        private void btnCapPsi_Click(object sender, RoutedEventArgs e)
+        {
+            if (elementWithFocus != null)
+            {
+                AppendKeyboardChar(elementWithFocus, "Ψ");
+            }
+        }
+   
+        private void btnCapPhi_Click(object sender, RoutedEventArgs e)
+        {
+            if (elementWithFocus != null)
+            {
+                AppendKeyboardChar(elementWithFocus, "Φ");
+            }
+        }
+
+        private void btnCapChi_Click(object sender, RoutedEventArgs e)
+        {
+            if (elementWithFocus != null)
+            {
+                AppendKeyboardChar(elementWithFocus, "Χ");
+            }
+        }
+        private void btnCapBeta_Click(object sender, RoutedEventArgs e)
+        {
+            if (elementWithFocus != null)
+            {
+                AppendKeyboardChar(elementWithFocus, "Β");
+            }
+        }
+
+        private void btnCapGama_Click(object sender, RoutedEventArgs e)
+        {
+            if (elementWithFocus != null)
+            {
+                AppendKeyboardChar(elementWithFocus, "Γ");
+            }
+        }
+
+        private void btnCapDelta_Click(object sender, RoutedEventArgs e)
+        {
+            if (elementWithFocus != null)
+            {
+                AppendKeyboardChar(elementWithFocus, "Δ");
+            }
+        }
+
+        private void btnCapEpsilon_Click(object sender, RoutedEventArgs e)
+        {
+            if (elementWithFocus != null)
+            {
+                AppendKeyboardChar(elementWithFocus, "Ε");
+            }
+        }
+
+        private void btnCapTeta_Click(object sender, RoutedEventArgs e)
+        {
+            if (elementWithFocus != null)
+            {
+                AppendKeyboardChar(elementWithFocus, "Θ");
+            }
+        }
+
+        private void btnCapPai_Click(object sender, RoutedEventArgs e)
+        {
+            if (elementWithFocus != null)
+            {
+                AppendKeyboardChar(elementWithFocus, "Π");
+            }
+        }
+
+        private void btnCapOmega_Click(object sender, RoutedEventArgs e)
+        {
+            if (elementWithFocus != null)
+            {
+                AppendKeyboardChar(elementWithFocus, "Ω");
+            }
+        }
+
+        private void btnBeta_Click(object sender, RoutedEventArgs e)
+        {
+            if (elementWithFocus != null)
+            {
+                AppendKeyboardChar(elementWithFocus, "β");
+            }
+        }
+
+        private void btnGama_Click(object sender, RoutedEventArgs e)
+        {
+            if (elementWithFocus != null)
+            {
+                AppendKeyboardChar(elementWithFocus, "γ");
+            }
+        }
+
+        private void btnDelta_Click(object sender, RoutedEventArgs e)
+        {
+            if (elementWithFocus != null)
+            {
+                AppendKeyboardChar(elementWithFocus, "δ");
+            }
+        }
+
+        private void btnEpsilon_Click(object sender, RoutedEventArgs e)
+        {
+            if (elementWithFocus != null)
+            {
+                AppendKeyboardChar(elementWithFocus, "ε");
+            }
+        }
+
+        private void btnTeta_Click(object sender, RoutedEventArgs e)
+        {
+            if (elementWithFocus != null)
+            {
+                AppendKeyboardChar(elementWithFocus, "θ");
+            }
+        }
+
+        private void btnPai_Click(object sender, RoutedEventArgs e)
+        {
+            if (elementWithFocus != null)
+            {
+                AppendKeyboardChar(elementWithFocus, "π");
+            }
+        }
+        private void btnPhi_Click(object sender, RoutedEventArgs e)
+        {
+            if (elementWithFocus != null)
+            {
+                AppendKeyboardChar(elementWithFocus, "φ");
+            }
+        }
+
+        private void btnChi_Click(object sender, RoutedEventArgs e)
+        {
+            if (elementWithFocus != null)
+            {
+                AppendKeyboardChar(elementWithFocus, "χ");
+
+            }
+        }
+
+        private void btnPsi_Click(object sender, RoutedEventArgs e)
         {
             if (elementWithFocus != null)
             {
                 AppendKeyboardChar(elementWithFocus, "ψ");
+            }
+        }
+        private void btnOmega_Click(object sender, RoutedEventArgs e)
+        {
+            if (elementWithFocus != null)
+            {
+                AppendKeyboardChar(elementWithFocus, "ω");
+            }
+        }
+        private void btnX_Click(object sender, RoutedEventArgs e)
+        {
+            if (elementWithFocus != null)
+            {
+                AppendKeyboardChar(elementWithFocus, "X0");
+            }
+        }
+
+        private void btnY_Click(object sender, RoutedEventArgs e)
+        {
+            if (elementWithFocus != null)
+            {
+                AppendKeyboardChar(elementWithFocus, "Y0");
             }
         }
         private int IsBoxValid(int openIndex, int closeIndex)
@@ -927,7 +1077,7 @@ namespace LogicCalculator
             Grid above = spGridTable.Children[openIndex] as Grid;
             Grid below = spGridTable.Children[closeIndex] as Grid;
             //check if the current checked rows aren't already Box
-            if (!(above.Children[LABL_INDEX] is Label) && !(below.Children[LABL_INDEX] is Label)) 
+            if (!(above.Children[LABL_INDEX] is Label) && !(below.Children[LABL_INDEX] is Label))
             {
                 return -ERRMISSLINE;
             }
@@ -979,6 +1129,7 @@ namespace LogicCalculator
             HandleBox(BoxState.Open, openIndex);
             HandleBox(BoxState.Close, closeIndex + 2);
             CheckInnerBoxesSize(openIndex, closeIndex +3);
+            CheckInnerBoxesSize(openIndex, closeIndex + 3);
             CheckMode(false);
         }
         private void BtnClear_Click(object sender, RoutedEventArgs e)
@@ -1023,7 +1174,6 @@ namespace LogicCalculator
             if (res == MessageBoxResult.Cancel) return;
             int ret = CheckBoxesForRemove(checkeRows);
             if (ret > 0)
-
             {
                 hyphen_chunks = MAX_HYPHEN_CHUNKS + 1;
                 spaces_chunks = MIN_HYPHEN_CHUNKS - 1;
@@ -1056,13 +1206,12 @@ namespace LogicCalculator
             CheckMode(false);
         }
 
-        
 
         private int CheckBoxesForRemove(List<Grid> checkeRows)
         {
             List<Grid> verified = new List<Grid>();
 
-            foreach(Grid row in checkeRows)
+            foreach (Grid row in checkeRows)
             {
                 //if closer, must be varified already
                 if ((row.Children[TEXT_BLOCK_INDEX] is TextBlock tbClose) && tbClose.Text.Contains("└"))
@@ -1073,7 +1222,7 @@ namespace LogicCalculator
                 }
                 //if opener
                 if ((row.Children[TEXT_BLOCK_INDEX] is TextBlock tbOpen) && tbOpen.Text.Contains("┌"))
-                { 
+                {
                     int startSearchIndex = spGridTable.Children.IndexOf(row);
                     Grid closerGrid = GetCloserGrid(row);
                     if (closerGrid == null)
@@ -1088,7 +1237,7 @@ namespace LogicCalculator
                     {
                         verified.Add(closerGrid);
                     }
-                   
+
                 }
             }
             return verified.Count;
@@ -1434,7 +1583,7 @@ namespace LogicCalculator
             int cursor_location = tb.SelectionStart;
             tb.Text = tb.Text.Insert(tb.SelectionStart, sign);
             elementWithFocus.Focus();
-            elementWithFocus.Select(cursor_location + 1, 0);
+            elementWithFocus.Select(cursor_location + sign.Length, 0);
         }
         private void GridKeyboard_MouseEnter(object sender, MouseEventArgs e)
         {
@@ -1535,7 +1684,7 @@ namespace LogicCalculator
                 {
                     if (after_operator)
                     {
-                        if(c != '~' && c != '¬')
+                        if (c != '~' && c != '¬')
                         {
                             Expression_Error(row, "Two operators in a row, problematic char is: " + c, i);
                             return false;
@@ -1580,6 +1729,9 @@ namespace LogicCalculator
                 Console.WriteLine(t);
             }
         }
+
         #endregion TESTING       
+
+ 
     }
 }
