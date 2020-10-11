@@ -11,8 +11,9 @@ namespace LogicCalculator
         private readonly List<Statement> statement_list;
         private readonly int current_line;
 
-        public Evaluation(List<Statement> statement_list, string rule)
+        public Evaluation(List<Statement> statement_list, string rule, List<Tuple<int, string>> box_pairs_list)
         {
+          
             this.statement_list = statement_list;
             current_line = statement_list.Count - 1;
             Is_Valid = false;
