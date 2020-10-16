@@ -13,7 +13,7 @@ namespace LogicCalculator
 
         public Evaluation(List<Statement> statement_list, string rule, List<Tuple<int, string>> box_pairs_list)
         {
-          
+
             this.statement_list = statement_list;
             current_line = statement_list.Count - 1;
             Is_Valid = false;
@@ -328,7 +328,7 @@ namespace LogicCalculator
                    first_segment_start = statement_list[first_segment_lines[0]].Expression,
                    second_segment_start = statement_list[second_segment_lines[0]].Expression,
                    first_segment_end = statement_list[first_segment_lines[first_segment_lines.Count - 1]].Expression,
-                   second_segment_end = statement_list[second_segment_lines[second_segment_lines.Count - 1]].Expression                   ;
+                   second_segment_end = statement_list[second_segment_lines[second_segment_lines.Count - 1]].Expression;
 
             Is_Valid = (base_expression == first_segment_start + second_segment_start ||
                 base_expression == "(" + first_segment_start + ")" + second_segment_start ||
@@ -338,7 +338,7 @@ namespace LogicCalculator
                     && second_segment_end == current_expression;
             if (!Is_Valid)
             {
-                DisplayErrorMsg(current_expression + " Should be equal to "+ second_segment_end+" and to "+ first_segment_end);
+                DisplayErrorMsg(current_expression + " Should be equal to " + second_segment_end + " and to " + first_segment_end);
                 return;
             }
         }
@@ -398,7 +398,7 @@ namespace LogicCalculator
                 return;
             }
 
-            
+
             Is_Valid &= Check_If_Not(statement_list[current_line - 2].Expression, statement_list[current_line - 3].Expression);
             if (!Is_Valid)
                 DisplayErrorMsg("Missuse of Not Introduction");
@@ -483,7 +483,8 @@ namespace LogicCalculator
             }
         }
 
-        private void Equal_Introduction()        {
+        private void Equal_Introduction()
+        {
             string current_expression = statement_list[current_line].Expression;
             int index = current_expression.IndexOf('=');
             if (index == -1)
@@ -494,16 +495,17 @@ namespace LogicCalculator
             }
             Is_Valid = current_expression.Substring(0, index) ==
                 current_expression.Substring(index + 1, current_expression.Length - (index + 1));
-            if(!Is_Valid)
+            if (!Is_Valid)
                 DisplayErrorMsg("Equal introduction format is t1=t1");
         }
-        private void Equal_Elimination()        {
+        private void Equal_Elimination()
+        {
             int index, first_line = Get_Row(statement_list[current_line].First_segment)
-            ,second_line = Get_Row(statement_list[current_line].Second_segment);
-            
+            , second_line = Get_Row(statement_list[current_line].Second_segment);
+
 
             string current_expression = statement_list[current_line].Expression,
-                first_left,first_right,second_left,second_right;            
+                first_left, first_right, second_left, second_right;
             index = current_expression.IndexOf('=');
             if (index == -1)
             {

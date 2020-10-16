@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -40,8 +41,8 @@ namespace LogicCalculator
 
         private const int SPACES = 6;
         private const int HYPHEN = 8;
-        private const int MAX_HYPHEN_CHUNKS = 16;
-        private const int MIN_HYPHEN_CHUNKS = 1;
+        private const int MAX_HYPHEN_CHUNKS = 14;
+        private const int MIN_HYPHEN_CHUNKS = 3;
         //private const int MAX_BOX_TEXT_LENGTH = 134;
         #endregion
 
@@ -146,34 +147,36 @@ namespace LogicCalculator
                 else
                 {
                     mainTab.SelectedIndex = TAB_PROOF_INDEX;
+                    string expression, rule, first_segment, second_segment, third_segment;
                     //Clear Table
+
                     spGridTable.Children.Clear();
                     table_row_num = 0;
-
                     tbValue.Text = document.Paragraphs[1].Text.Substring(20).Trim();
-
                     Table proof_table = document.Tables[0];
 
-                    for (int i = 1; i < proof_table.Rows.Count; i++)
+                    for (int i = 1; i < proof_table.Rows.Count - 1; i++)
                     {
-                        CreateRow(-1);
-                    }
-                    UIElementCollection grids = spGridTable.Children;
-
-                    for (int i = 0; i < proof_table.Rows.Count - 1; i++)
-                    {
-                        Grid g = grids[i] as Grid;
-                        for (int j = 1; j < TABLE_COL_NUM; j++)
+                        if (proof_table.Rows[i].Cells[0].Paragraphs.First().Text.Contains("┌")
+                           || proof_table.Rows[i].Cells[0].Paragraphs.First().Text.Contains("┐"))
                         {
-                            if (g.Children[j + 1] is ComboBox combobox)
-                            {
-                                combobox.SelectedItem = proof_table.Rows[i + 1].Cells[j].Paragraphs[0].Text;
-                            }
-                            if (g.Children[j + 1] is TextBox textbox)
-                            {
-                                textbox.Text = proof_table.Rows[i + 1].Cells[j].Paragraphs[0].Text;
-                            }
+                            //Grid g = CreateBox(BoxState.Close);
+                            //((TextBlock)g.Children[TEXT_BLOCK_INDEX]).Text=proof_table()
+                            //spGridTable.Children.Add();  
+                            continue;
                         }
+                        Grid current_row = CreateRow(-1);
+
+                        expression = proof_table.Rows[i].Cells[0].Paragraphs.First().Text.Replace(" ", string.Empty);
+                        rule = proof_table.Rows[i].Cells[0].Paragraphs.First().Text.Replace(" ", string.Empty);
+                        first_segment = proof_table.Rows[i].Cells[0].Paragraphs.First().Text.Replace(" ", string.Empty);
+                        second_segment = proof_table.Rows[i].Cells[0].Paragraphs.First().Text.Replace(" ", string.Empty);
+                        third_segment = proof_table.Rows[i].Cells[0].Paragraphs.First().Text.Replace(" ", string.Empty);
+                        ((TextBox)current_row.Children[STATEMENT_INDEX]).Text = expression;
+                        ((ComboBox)current_row.Children[COMBOBOX_INDEX]).SelectedItem = rule;
+                        ((TextBox)current_row.Children[SEGMENT1_INDEX]).Text = first_segment;
+                        ((TextBox)current_row.Children[SEGMENT2_INDEX]).Text = second_segment;
+                        ((TextBox)current_row.Children[SEGMENT3_INDEX]).Text = third_segment;
                     }
                 }
             }
@@ -200,27 +203,48 @@ namespace LogicCalculator
                     case TAB_PROOF_INDEX:
                         //Add the main expression
                         document.InsertParagraph("Logical Expression: " + tbValue.Text + '\n').FontSize(14d);
-
-                        Table proof_table = document.AddTable(table_row_num + 1, TABLE_COL_NUM);
+                        int row_num = spGridTable.Children.Count;
+                        Table proof_table = document.AddTable(row_num + 1, TABLE_COL_NUM);
+                        proof_table.AutoFit = AutoFit.Contents;
                         proof_table.Alignment = Alignment.center;
-                        proof_table.Rows[0].Cells[0].Paragraphs.First().Append("Line").UnderlineStyle(UnderlineStyle.singleLine);
-                        proof_table.Rows[0].Cells[1].Paragraphs.First().Append("Expression").UnderlineStyle(UnderlineStyle.singleLine);
-                        proof_table.Rows[0].Cells[2].Paragraphs.First().Append("Rule").UnderlineStyle(UnderlineStyle.singleLine);
-                        proof_table.Rows[0].Cells[3].Paragraphs.First().Append("First Segment").UnderlineStyle(UnderlineStyle.singleLine);
-                        proof_table.Rows[0].Cells[4].Paragraphs.First().Append("Second Segment").UnderlineStyle(UnderlineStyle.singleLine);
-                        proof_table.Rows[0].Cells[5].Paragraphs.First().Append("Third Segment").UnderlineStyle(UnderlineStyle.singleLine);
+                        proof_table.Design = TableDesign.None;
+                        Xceed.Document.NET.Border b = new Xceed.Document.NET.Border(BorderStyle.Tcbs_double, BorderSize.one, 1, Color.Transparent);
+                        proof_table.SetBorder(TableBorderType.InsideH, b);
 
-                        List<string> input_list = GetAllTableInput();
+
+                        proof_table.Rows[0].Cells[0].Paragraphs.First().Append("Line").UnderlineStyle(UnderlineStyle.singleLine).Alignment = Alignment.center;
+                        proof_table.Rows[0].Cells[1].Paragraphs.First().Append("Expression").UnderlineStyle(UnderlineStyle.singleLine).Alignment = Alignment.center;
+                        proof_table.Rows[0].Cells[2].Paragraphs.First().Append("Rule").UnderlineStyle(UnderlineStyle.singleLine).Alignment = Alignment.center;
+                        proof_table.Rows[0].Cells[3].Paragraphs.First().Append("First Segment").UnderlineStyle(UnderlineStyle.singleLine).Alignment = Alignment.center;
+                        proof_table.Rows[0].Cells[4].Paragraphs.First().Append("Second Segment").UnderlineStyle(UnderlineStyle.singleLine).Alignment = Alignment.center;
+                        proof_table.Rows[0].Cells[5].Paragraphs.First().Append("Third Segment").UnderlineStyle(UnderlineStyle.singleLine).Alignment = Alignment.center;
+
+                        string expression, rule, first_segment, second_segment, third_segment;
                         //Fill the proof table
 
-                        for (int i = 0; i < table_row_num; i++)
+                        for (int i = 1; i < row_num + 1; i++)
                         {
-                            proof_table.Rows[i + 1].Cells[0].Paragraphs.First().Append((i + 1).ToString());
-                            for (int j = 0; j < TABLE_COL_NUM - 1; j++)
+                            Grid row = spGridTable.Children[i - 1] as Grid;
+                            if (!(row.Children[TEXT_BLOCK_INDEX] is TextBlock))
                             {
-                                proof_table.Rows[i + 1].Cells[j + 1].Paragraphs.First().Append(input_list[i * (TABLE_COL_NUM - 1) + j]);
+                                expression = ((TextBox)row.Children[STATEMENT_INDEX]).Text.Replace(" ", string.Empty);
+                                rule = ((ComboBox)row.Children[COMBOBOX_INDEX]).Text.Replace(" ", string.Empty);
+                                first_segment = ((TextBox)row.Children[SEGMENT1_INDEX]).IsEnabled ? ((TextBox)row.Children[SEGMENT1_INDEX]).Text.Replace(" ", string.Empty) : null;
+                                second_segment = ((TextBox)row.Children[SEGMENT2_INDEX]).IsEnabled ? ((TextBox)row.Children[SEGMENT2_INDEX]).Text.Replace(" ", string.Empty) : null;
+                                third_segment = ((TextBox)row.Children[SEGMENT3_INDEX]).IsEnabled ? ((TextBox)row.Children[SEGMENT3_INDEX]).Text.Replace(" ", string.Empty) : null;
+                                proof_table.Rows[i].Cells[0].Paragraphs.First().Append(expression).Alignment = Alignment.center;
+                                proof_table.Rows[i].Cells[1].Paragraphs.First().Append(rule).Alignment = Alignment.center;
+                                proof_table.Rows[i].Cells[2].Paragraphs.First().Append(first_segment).Alignment = Alignment.center;
+                                proof_table.Rows[i].Cells[3].Paragraphs.First().Append(second_segment).Alignment = Alignment.center;
+                                proof_table.Rows[i].Cells[4].Paragraphs.First().Append(third_segment).Alignment = Alignment.center;
+                            }
+                            else
+                            {
+                                proof_table.Rows[i].MergeCells(0, TABLE_COL_NUM - 1);
+                                proof_table.Rows[i].Cells[0].Paragraphs.First().Append(Reverse(((TextBlock)row.Children[TEXT_BLOCK_INDEX]).Text)).Alignment = Alignment.center;
                             }
                         }
+
                         document.InsertTable(proof_table);
                         // Save this document to disk.
                         break;
@@ -553,7 +577,7 @@ namespace LogicCalculator
             MasterCheck.Visibility = Visibility.Visible;
 
         }
-        private void CreateRow(int index)
+        private Grid CreateRow(int index)
         {
             ++table_row_num;
             //create new line and define cols
@@ -691,6 +715,8 @@ namespace LogicCalculator
                 spGridTable.Children.Add(newLine);
             else
                 spGridTable.Children.Insert(index, newLine);
+
+            return newLine;
         }
         private void CheckAll(bool state)
         {
@@ -882,7 +908,7 @@ namespace LogicCalculator
                 AppendKeyboardChar(elementWithFocus, "Ψ");
             }
         }
-   
+
         private void BtnCapPhi_Click(object sender, RoutedEventArgs e)
         {
             if (elementWithFocus != null)
@@ -1128,7 +1154,7 @@ namespace LogicCalculator
             ChangeBoxVariables(openIndex);
             HandleBox(BoxState.Open, openIndex);
             HandleBox(BoxState.Close, closeIndex + 2);
-            CheckInnerBoxesSize(openIndex, closeIndex +3);
+            CheckInnerBoxesSize(openIndex, closeIndex + 3);
             CheckInnerBoxesSize(openIndex, closeIndex + 3);
             CheckMode(false);
         }
@@ -1177,7 +1203,7 @@ namespace LogicCalculator
             {
                 hyphen_chunks = MAX_HYPHEN_CHUNKS + 1;
                 spaces_chunks = MIN_HYPHEN_CHUNKS - 1;
-                CheckInnerBoxesSize(0, spGridTable.Children.Count - 1);  
+                CheckInnerBoxesSize(0, spGridTable.Children.Count - 1);
             }
             if (ret == -ERRBOXMISSCLOSE)
             {
@@ -1328,6 +1354,12 @@ namespace LogicCalculator
         #endregion BUTTON_CLICKS
 
         #region UTILITY
+        public static string Reverse(string s)
+        {
+            char[] charArray = s.ToCharArray();
+            Array.Reverse(charArray);
+            return new string(charArray);
+        }
         private void HandleMasterCheck()
         {
             if (spGridTable.Children.Count == 0)
@@ -1499,27 +1531,28 @@ namespace LogicCalculator
         {
             statement_list.Clear();
             statement_list.Add(new Statement(tbValue.Text, "first", "0"));
-            List<TextBox> text_boxes_list = GetAllTextBoxes();
             List<Tuple<int, string>> box_pairs_list = GetBoxPairs();
+            string expression, rule, first_segment, second_segment, third_segment;
 
             //One less column because of the line number column
-            int col_to_check = TABLE_COL_NUM - 1;
 
-            for (int i = 0; i < text_boxes_list.Count - col_to_check + 1; i += col_to_check)
-            {   //Remove spaces
-                string expression = text_boxes_list[i].Text.Replace(" ", string.Empty);
-                string rule = text_boxes_list[i + 1].Text.Replace(" ", string.Empty);
-                string first_segment = text_boxes_list[i + 2].IsEnabled ? text_boxes_list[i + 2].Text.Replace(" ", string.Empty) : null;
-                string second_segment = text_boxes_list[i + 3].IsEnabled ? text_boxes_list[i + 3].Text.Replace(" ", string.Empty) : null;
-                string third_segment = text_boxes_list[i + 4].IsEnabled ? text_boxes_list[i + 4].Text.Replace(" ", string.Empty) : null;
 
-                if (!IsValidStatement(expression, rule, first_segment, second_segment, third_segment))
-                    return;
-                Statement s = new Statement(expression, rule, first_segment, second_segment, third_segment);
-                statement_list.Add(s);
-                Evaluation e = new Evaluation(statement_list, rule, box_pairs_list);
-                if (!e.Is_Valid)
-                    return;
+            foreach (Grid row in spGridTable.Children)
+            {
+                if (row.Children[STATEMENT_INDEX] is TextBox)
+                {
+                    expression = ((TextBox)row.Children[STATEMENT_INDEX]).Text.Replace(" ", string.Empty);
+                    rule = ((ComboBox)row.Children[COMBOBOX_INDEX]).Text.Replace(" ", string.Empty);
+                    first_segment = ((TextBox)row.Children[SEGMENT1_INDEX]).IsEnabled ? ((TextBox)row.Children[SEGMENT1_INDEX]).Text.Replace(" ", string.Empty) : null;
+                    second_segment = ((TextBox)row.Children[SEGMENT2_INDEX]).IsEnabled ? ((TextBox)row.Children[SEGMENT2_INDEX]).Text.Replace(" ", string.Empty) : null;
+                    third_segment = ((TextBox)row.Children[SEGMENT3_INDEX]).IsEnabled ? ((TextBox)row.Children[SEGMENT3_INDEX]).Text.Replace(" ", string.Empty) : null;
+                    if (!IsValidStatement(expression, rule, first_segment, second_segment, third_segment))
+                        return;
+                    statement_list.Add(new Statement(expression, rule, first_segment, second_segment, third_segment));
+                    Evaluation e = new Evaluation(statement_list, rule, box_pairs_list);
+                    if (!e.Is_Valid)
+                        return;
+                }
             }
             DisplayInfoMsg("All input is valid", "Success!");
         }
@@ -1750,6 +1783,6 @@ namespace LogicCalculator
 
         #endregion TESTING       
 
- 
+
     }
 }

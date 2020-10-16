@@ -7,7 +7,7 @@
         public string First_segment { get; set; }
         public string Second_segment { get; set; }
         public string Third_segment { get; set; }
-        public Statement(string expression, string rule, string first_segment, string second_segment="", string third_segment="")
+        public Statement(string expression, string rule, string first_segment, string second_segment = "", string third_segment = "")
         {
             this.Expression = expression;
             this.Rule = rule;
