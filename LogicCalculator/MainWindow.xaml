@@ -153,6 +153,7 @@
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
                     <Grid.Resources>
                         <Style TargetType="Button">
@@ -261,16 +262,23 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <Button Name="btnExists" Content="∃" Margin="2" Click="BtnExists_Click"
-                            Grid.ColumnSpan="2" Grid.Column="5"  Visibility="Hidden"/>
+                            Grid.ColumnSpan="2" Grid.Column="5"/>
                         <Button Name="btnForAll" Content="∀"  Margin="2" Click="BtnForAll_Click"
-                            Grid.ColumnSpan="2" Grid.Column="7"   Visibility="Hidden"/>
+                            Grid.ColumnSpan="2" Grid.Column="7"/>
                         <Button Name="btnX" Content="X_0"  Margin="2" Click="BtnX_Click"
-                            Grid.ColumnSpan="2" Grid.Column="3" Visibility="Hidden"/>
+                            Grid.ColumnSpan="2" Grid.Column="3"/>
                         <Button Name="btnY" Content="Y_0"  Margin="2" Click="BtnY_Click"
-                            Grid.ColumnSpan="2" Grid.Column="9" Visibility="Hidden"/>
-                        <!--OR-->
+                            Grid.ColumnSpan="2" Grid.Column="9"/>
+                    </Grid>
+                    <Grid Grid.Row="4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
                         <Button Name="btnCreateBox" Content="Create Box"  Margin="2" Click="BtnCreateBox_Click"
-                            Grid.ColumnSpan="8" Grid.Column="3"/>
+                            Grid.ColumnSpan="2" Grid.Column="1"/>
                     </Grid>
                 </Grid>
             </GroupBox>

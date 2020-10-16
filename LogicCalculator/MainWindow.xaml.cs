@@ -83,7 +83,8 @@ namespace LogicCalculator
         private TextBox elementWithFocus;
         private readonly List<string> rules = new List<string> { "Data", "Assumption", "LEM", "PBC", "MP", "MT", "Copy"
                                                                  ,"∧i", "∧e1", "∧e2", "∨i1", "∨i2", "∨e", "¬¬e",
-                                                                 "¬¬i", "→i", "⊥e", "¬i", "¬e", "→i","=i","=e","∀i","∀e","∃i","∃e"};
+                                                                 "¬¬i", "→i", "⊥e", "¬i", "¬e", "→i",
+                                                                 "=i","=e","∀i","∀e","∃i","∃e" };
 
         private int hyphen_chunks = MAX_HYPHEN_CHUNKS;
         private int spaces_chunks = MIN_HYPHEN_CHUNKS;
@@ -740,21 +741,9 @@ namespace LogicCalculator
         private void MainTab_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (mainTab.SelectedIndex == TAB_PROOF_INDEX)
-            {
                 btnCreateBox.Visibility = Visibility.Visible;
-                btnExists.Visibility = Visibility.Hidden;
-                btnForAll.Visibility = Visibility.Hidden;
-                btnX.Visibility = Visibility.Hidden;
-                btnY.Visibility = Visibility.Hidden;
-            }
             else
-            {
                 btnCreateBox.Visibility = Visibility.Hidden;
-                btnExists.Visibility = Visibility.Visible;
-                btnForAll.Visibility = Visibility.Visible;
-                btnX.Visibility = Visibility.Visible;
-                btnY.Visibility = Visibility.Visible;
-            }
         }
         private void Chb_click(object sender, RoutedEventArgs e)
         {
@@ -795,6 +784,7 @@ namespace LogicCalculator
                 case "Data":
                 case "Assumption":
                 case "LEM":
+                case "=i":
                     HandleGridVisability(parent, 0);
                     //handleBox(cmb, location);
                     break;
@@ -810,6 +800,9 @@ namespace LogicCalculator
                 case "∨i2":
                 case "⊥e":
                 case "¬i":
+                case "∀i":
+                case "∀e":
+                case "∃i":
                     HandleGridVisability(parent, 1);
                     //handleBox(cmb, location);
                     break;
@@ -818,6 +811,8 @@ namespace LogicCalculator
                 case "MT":
                 case "¬e":
                 case "∧i":
+                case "∃e":
+                case "=e":
                     HandleGridVisability(parent, 2);
                     break;
                 //3 seg
