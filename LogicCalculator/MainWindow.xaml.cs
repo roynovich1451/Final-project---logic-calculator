@@ -36,7 +36,8 @@ namespace LogicCalculator
         private enum BoxState
         {
             Open,
-            Close
+            Close,
+            None
         }
 
         private const int SPACES = 6;
@@ -155,28 +156,31 @@ namespace LogicCalculator
                     tbValue.Text = document.Paragraphs[1].Text.Substring(20).Trim();
                     Table proof_table = document.Tables[0];
 
-                    for (int i = 1; i < proof_table.Rows.Count - 1; i++)
+                    for (int i = 1; i < proof_table.Rows.Count; i++)
                     {
-                        if (proof_table.Rows[i].Cells[0].Paragraphs.First().Text.Contains("┌")
-                           || proof_table.Rows[i].Cells[0].Paragraphs.First().Text.Contains("┐"))
+                        if (proof_table.Rows[i].Cells[0].Paragraphs.First().Text.Contains("┌"))
                         {
-                            //Grid g = CreateBox(BoxState.Close);
-                            //((TextBlock)g.Children[TEXT_BLOCK_INDEX]).Text=proof_table()
-                            //spGridTable.Children.Add();  
-                            continue;
+                            spGridTable.Children.Add(CreateBox(BoxState.Open));
                         }
-                        Grid current_row = CreateRow(-1);
+                        else if (proof_table.Rows[i].Cells[0].Paragraphs.First().Text.Contains("┘"))
+                        {
+                            spGridTable.Children.Add(CreateBox(BoxState.Close));
+                        }
+                        else
+                        {
+                            Grid current_row = CreateRow(-1);
 
-                        expression = proof_table.Rows[i].Cells[0].Paragraphs.First().Text.Replace(" ", string.Empty);
-                        rule = proof_table.Rows[i].Cells[0].Paragraphs.First().Text.Replace(" ", string.Empty);
-                        first_segment = proof_table.Rows[i].Cells[0].Paragraphs.First().Text.Replace(" ", string.Empty);
-                        second_segment = proof_table.Rows[i].Cells[0].Paragraphs.First().Text.Replace(" ", string.Empty);
-                        third_segment = proof_table.Rows[i].Cells[0].Paragraphs.First().Text.Replace(" ", string.Empty);
-                        ((TextBox)current_row.Children[STATEMENT_INDEX]).Text = expression;
-                        ((ComboBox)current_row.Children[COMBOBOX_INDEX]).SelectedItem = rule;
-                        ((TextBox)current_row.Children[SEGMENT1_INDEX]).Text = first_segment;
-                        ((TextBox)current_row.Children[SEGMENT2_INDEX]).Text = second_segment;
-                        ((TextBox)current_row.Children[SEGMENT3_INDEX]).Text = third_segment;
+                            expression = proof_table.Rows[i].Cells[1].Paragraphs.First().Text.Replace(" ", string.Empty);
+                            rule = proof_table.Rows[i].Cells[2].Paragraphs.First().Text.Replace(" ", string.Empty);
+                            first_segment = proof_table.Rows[i].Cells[3].Paragraphs.First().Text.Replace(" ", string.Empty);
+                            second_segment = proof_table.Rows[i].Cells[4].Paragraphs.First().Text.Replace(" ", string.Empty);
+                            third_segment = proof_table.Rows[i].Cells[5].Paragraphs.First().Text.Replace(" ", string.Empty);
+                            ((TextBox)current_row.Children[STATEMENT_INDEX]).Text = expression;
+                            ((ComboBox)current_row.Children[COMBOBOX_INDEX]).SelectedItem = rule;
+                            ((TextBox)current_row.Children[SEGMENT1_INDEX]).Text = first_segment;
+                            ((TextBox)current_row.Children[SEGMENT2_INDEX]).Text = second_segment;
+                            ((TextBox)current_row.Children[SEGMENT3_INDEX]).Text = third_segment;
+                        }
                     }
                 }
             }
@@ -232,11 +236,12 @@ namespace LogicCalculator
                                 first_segment = ((TextBox)row.Children[SEGMENT1_INDEX]).IsEnabled ? ((TextBox)row.Children[SEGMENT1_INDEX]).Text.Replace(" ", string.Empty) : null;
                                 second_segment = ((TextBox)row.Children[SEGMENT2_INDEX]).IsEnabled ? ((TextBox)row.Children[SEGMENT2_INDEX]).Text.Replace(" ", string.Empty) : null;
                                 third_segment = ((TextBox)row.Children[SEGMENT3_INDEX]).IsEnabled ? ((TextBox)row.Children[SEGMENT3_INDEX]).Text.Replace(" ", string.Empty) : null;
-                                proof_table.Rows[i].Cells[0].Paragraphs.First().Append(expression).Alignment = Alignment.center;
-                                proof_table.Rows[i].Cells[1].Paragraphs.First().Append(rule).Alignment = Alignment.center;
-                                proof_table.Rows[i].Cells[2].Paragraphs.First().Append(first_segment).Alignment = Alignment.center;
-                                proof_table.Rows[i].Cells[3].Paragraphs.First().Append(second_segment).Alignment = Alignment.center;
-                                proof_table.Rows[i].Cells[4].Paragraphs.First().Append(third_segment).Alignment = Alignment.center;
+                                proof_table.Rows[i].Cells[0].Paragraphs.First().Append(i.ToString()).Alignment = Alignment.center;
+                                proof_table.Rows[i].Cells[1].Paragraphs.First().Append(expression).Alignment = Alignment.center;
+                                proof_table.Rows[i].Cells[2].Paragraphs.First().Append(rule).Alignment = Alignment.center;
+                                proof_table.Rows[i].Cells[3].Paragraphs.First().Append(first_segment).Alignment = Alignment.center;
+                                proof_table.Rows[i].Cells[4].Paragraphs.First().Append(second_segment).Alignment = Alignment.center;
+                                proof_table.Rows[i].Cells[5].Paragraphs.First().Append(third_segment).Alignment = Alignment.center;
                             }
                             else
                             {
@@ -534,7 +539,8 @@ namespace LogicCalculator
                 Width = COL_TEXTBLOCK_WIDTH
             };
             Grid.SetColumn(tbline, TEXT_BLOCK_INDEX);
-            tbline.Text = CreateBoxLine(state);
+            if(state != BoxState.None)
+                tbline.Text = CreateBoxLine(state);
 
             newLine.Children.Add(chb);
             newLine.Children.Add(tbline);
