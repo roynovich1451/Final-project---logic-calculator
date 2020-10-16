@@ -81,7 +81,7 @@ namespace LogicCalculator
         private TextBox elementWithFocus;
         private readonly List<string> rules = new List<string> { "Data", "Assumption", "LEM", "PBC", "MP", "MT", "Copy"
                                                                  ,"∧i", "∧e1", "∧e2", "∨i1", "∨i2", "∨e", "¬¬e",
-                                                                 "¬¬i", "→i", "⊥e", "¬i", "¬e", "→i"};
+                                                                 "¬¬i", "→i", "⊥e", "¬i", "¬e", "→i","=i","=e","∀i","∀e","∃i","∃e"};
 
         private int hyphen_chunks = MAX_HYPHEN_CHUNKS;
         private int spaces_chunks = MIN_HYPHEN_CHUNKS;

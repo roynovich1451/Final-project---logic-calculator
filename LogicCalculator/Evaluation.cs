@@ -388,6 +388,7 @@ namespace LogicCalculator
             }
         }
 
+        //TODO check not intro
         private void Not_Introduction()
         {
             Is_Valid = statement_list[current_line - 1].Expression == "⊥";
@@ -397,7 +398,7 @@ namespace LogicCalculator
                 return;
             }
 
-            //TODO check
+            
             Is_Valid &= Check_If_Not(statement_list[current_line - 2].Expression, statement_list[current_line - 3].Expression);
             if (!Is_Valid)
                 DisplayErrorMsg("Missuse of Not Introduction");
