@@ -224,7 +224,7 @@ namespace LogicCalculator
                         proof_table.Rows[0].Cells[4].Paragraphs.First().Append("Second Segment").UnderlineStyle(UnderlineStyle.singleLine).Alignment = Alignment.center;
                         proof_table.Rows[0].Cells[5].Paragraphs.First().Append("Third Segment").UnderlineStyle(UnderlineStyle.singleLine).Alignment = Alignment.center;
 
-                        string expression, rule, first_segment, second_segment, third_segment;
+                        string expression, rule, first_segment, second_segment, third_segment, line_num;
                         //Fill the proof table
 
                         for (int i = 1; i < row_num + 1; i++)
@@ -232,12 +232,13 @@ namespace LogicCalculator
                             Grid row = spGridTable.Children[i - 1] as Grid;
                             if (!(row.Children[TEXT_BLOCK_INDEX] is TextBlock))
                             {
+                                line_num = ((Label)row.Children[LABL_INDEX]).Content.ToString(); 
                                 expression = ((TextBox)row.Children[STATEMENT_INDEX]).Text.Replace(" ", string.Empty);
                                 rule = ((ComboBox)row.Children[COMBOBOX_INDEX]).Text.Replace(" ", string.Empty);
                                 first_segment = ((TextBox)row.Children[SEGMENT1_INDEX]).IsEnabled ? ((TextBox)row.Children[SEGMENT1_INDEX]).Text.Replace(" ", string.Empty) : null;
                                 second_segment = ((TextBox)row.Children[SEGMENT2_INDEX]).IsEnabled ? ((TextBox)row.Children[SEGMENT2_INDEX]).Text.Replace(" ", string.Empty) : null;
                                 third_segment = ((TextBox)row.Children[SEGMENT3_INDEX]).IsEnabled ? ((TextBox)row.Children[SEGMENT3_INDEX]).Text.Replace(" ", string.Empty) : null;
-                                proof_table.Rows[i].Cells[0].Paragraphs.First().Append(i.ToString()).Alignment = Alignment.center;
+                                proof_table.Rows[i].Cells[0].Paragraphs.First().Append(line_num).Alignment = Alignment.center;
                                 proof_table.Rows[i].Cells[1].Paragraphs.First().Append(expression).Alignment = Alignment.center;
                                 proof_table.Rows[i].Cells[2].Paragraphs.First().Append(rule).Alignment = Alignment.center;
                                 proof_table.Rows[i].Cells[3].Paragraphs.First().Append(first_segment).Alignment = Alignment.center;
@@ -247,7 +248,7 @@ namespace LogicCalculator
                             else
                             {
                                 proof_table.Rows[i].MergeCells(0, TABLE_COL_NUM - 1);
-                                proof_table.Rows[i].Cells[0].Paragraphs.First().Append(Reverse(((TextBlock)row.Children[TEXT_BLOCK_INDEX]).Text)).Alignment = Alignment.center;
+                                proof_table.Rows[i].Cells[0].Paragraphs.First().Append(((TextBlock)row.Children[TEXT_BLOCK_INDEX]).Text).Alignment = Alignment.center;
                             }
                         }
 
