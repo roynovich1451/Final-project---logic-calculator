@@ -6,6 +6,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -88,7 +89,7 @@ namespace LogicCalculator
         private readonly List<string> rules = new List<string> { "Data", "Assumption", "LEM", "PBC", "MP", "MT", "Copy"
                                                                  ,"∧i", "∧e1", "∧e2", "∨i1", "∨i2", "∨e", "¬¬e",
                                                                  "¬¬i", "→i", "⊥e", "¬i", "¬e", "→i",
-                                                                 "=i","=e","∀i","∀e","∃i","∃e" };
+                                                                 "=i","=e","∀x i","∀x e","∃x i","∃x e","∀y i","∀y e","∃y i","∃y e" };
 
         private int hyphen_chunks = MAX_HYPHEN_CHUNKS;
         private int spaces_chunks = MIN_HYPHEN_CHUNKS;
@@ -806,8 +807,9 @@ namespace LogicCalculator
                 case "⊥e":
                 case "¬i":
                 case "∀i":
-                case "∀e":
-                case "∃i":
+                case var ai when new Regex(@"∀.*i").IsMatch(ai):
+                case var ae when new Regex(@"∀.*e").IsMatch(ae):
+                case var ei when new Regex(@"∃.*i").IsMatch(ei):
                     HandleGridVisability(parent, 1);
                     //handleBox(cmb, location);
                     break;
@@ -818,6 +820,7 @@ namespace LogicCalculator
                 case "∧i":
                 case "∃e":
                 case "=e":
+                case var ee when new Regex(@"∃.*e").IsMatch(ee):
                     HandleGridVisability(parent, 2);
                     break;
                 //3 seg
@@ -1204,7 +1207,14 @@ namespace LogicCalculator
             MessageBoxResult res = MessageBox.Show($"Warning: You are about to REMOVE {checkeRows.Count} lines\nPlease confirm",
                 "Confirmation", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
             if (res == MessageBoxResult.Cancel) return;
-            int ret = CheckBoxesForRemove(checkeRows);
+            int ret = CheckBoxPadding(checkeRows);
+            if (ret == -ERRBOXPADDING)
+            {
+                DisplayErrorMsg("Error: after remove one of the boxes will be without lines inside\nPlease recheck rows", "ERROR");
+                removeBackgroundColor();
+                return;
+            }
+            ret = CheckBoxesForRemove(checkeRows);
             if (ret > 0)
             {
                 hyphen_chunks = MAX_HYPHEN_CHUNKS + 1;
@@ -1220,13 +1230,6 @@ namespace LogicCalculator
             if (ret == -ERRBOXMISSOPEN)
             {
                 DisplayErrorMsg("Error: checked box missng it's opener\nPlease recheck rows", "ERROR");
-                removeBackgroundColor();
-                return;
-            }
-            ret = CheckBoxPadding(checkeRows);
-            if (ret == -ERRBOXPADDING)
-            {
-                DisplayErrorMsg("Error: after remove one of the boxes will be without lines inside\nPlease recheck rows", "ERROR");
                 removeBackgroundColor();
                 return;
             }
@@ -1512,7 +1515,6 @@ namespace LogicCalculator
             {
                 return false;
             }
-
             if (string.IsNullOrEmpty(rule))
             {
                 Expression_Error(row, "Rule is empty");
@@ -1604,14 +1606,16 @@ namespace LogicCalculator
                 case "Assumption":
                     if (!haveAboveOpener(spGridTable.Children.IndexOf(row)))
                     {
-                        DisplayErrorMsg($"Error: assumption at row {((Label)row.Children[LABEL_INDEX]).Content.ToString()},\nmissing box opener above", "Error");
+                        DisplayErrorMsg($"Error: assumption at row {((Label)row.Children[LABEL_INDEX]).Content.ToString()}," +
+                            $"\nmissing box opener above", "Error");
                         return false;
                     }
                     return true;
                 case "Copy":
                     if (!copyFromLegalBox(row, first_segment))
                     {
-                        DisplayErrorMsg($"Error: Copy  at row {((Label)row.Children[LABEL_INDEX]).Content.ToString()},\ncan use only for variable from current or upper box", "Error");
+                        DisplayErrorMsg($"Error: Copy  at row {((Label)row.Children[LABEL_INDEX]).Content.ToString()}," +
+                            $"\ncan use only for variable from current or upper box", "Error");
                         return false;
                     }
                     return true;
@@ -1621,21 +1625,42 @@ namespace LogicCalculator
                     if(!hasWrapBox(firstbox[0], firstbox[firstbox.Count-1]) ||
                         !hasWrapBox(secondBox[0], secondBox[secondBox.Count - 1]))
                     {
-                        DisplayErrorMsg($"Error: Or elimination at line {((Label)row.Children[LABEL_INDEX]).Content.ToString()},\nlines mentioned in second and third segments must be wrapped with boxes", "Error");
+                        DisplayErrorMsg($"Error: Or elimination at line {((Label)row.Children[LABEL_INDEX]).Content.ToString()}," +
+                            $"\nlines mentioned in second and third segments must be wrapped with boxes", "Error");
                         return false;
                     }
                     return true;
                 case "¬i":
-                    List<int> box = Evaluation.Get_Lines_From_Segment(first_segment);
+                case "→i":
+                case var a when new Regex(@"∀.*i").IsMatch(a):
+                case var e when new Regex(@"∃.*e").IsMatch(e):
+                    string segment = "first";
+                    List<int> box;
+                    if (new Regex(@"∃.*e").IsMatch(rule))
+                    {
+                        box = Evaluation.Get_Lines_From_Segment(second_segment);
+                        segment = "second";
+                    }
+                    else
+                        box = Evaluation.Get_Lines_From_Segment(first_segment);
                     if (!hasWrapBox(box[0], box[box.Count - 1]))
                     {
-                        DisplayErrorMsg($"Error: Not introduction at line {((Label)row.Children[LABEL_INDEX]).Content.ToString()},\nlines mentioned in first segment must be wrapped with box", "Error");
+                        string messageRule = "rule";
+                        if (rule.Equals("¬i"))
+                            messageRule = "Not introduction";
+                        else if (rule.Equals("→i"))
+                            messageRule = "Arrow introducstion";
+                        else if (new Regex(@"∀.*i").IsMatch(rule))
+                            messageRule = "All introdution";
+                        else if (new Regex(@"∃.*e").IsMatch(rule))
+                            messageRule = "Exist elimination";
+                        DisplayErrorMsg($"Error: {messageRule} at line {((Label)row.Children[LABEL_INDEX]).Content.ToString()}," +
+                            $"\nlines mentioned in {segment} segment must be wrapped with box", "Error");
                         return false;
                     }
                     return true;
                 default:
                     return true;
-
             }
         }
 
