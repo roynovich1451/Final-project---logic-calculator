@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Windows;
 
 namespace LogicCalculator
@@ -10,13 +11,18 @@ namespace LogicCalculator
         public bool Is_Valid { get; set; }
         private readonly List<Statement> statement_list;
         private readonly int current_line;
+        private Regex predicate_regex;
+        private static int PREDICATE_LENGTH=4;
+
+        //([a-z]*)+[∧,∨,¬,=,∀,∃][a-z]* \/ ([a-z]*)+[∧,∨,¬,=,∀,∃]([a-z]*)
 
         public Evaluation(List<Statement> statement_list, string rule, List<Tuple<int, string>> box_pairs_list)
         {
-
+            Is_Valid = false;
             this.statement_list = statement_list;
             current_line = statement_list.Count - 1;
-            Is_Valid = false;
+            predicate_regex = new Regex("[a-z|A-Z]+([a-z])"); 
+
             switch (rule)
             {
                 case "Data":
@@ -129,6 +135,7 @@ namespace LogicCalculator
             DisplayErrorMsg("Data doesn't exist in the original expression");
         }
 
+        //TODO add box checks (also for assumption)
         private void Copy()
         {
             //TODO:add box checks
@@ -318,6 +325,7 @@ namespace LogicCalculator
             }
         }
 
+        //TODO add box checks
         private void Or_Elimination()
         {
             List<int> first_segment_lines = Get_Lines_From_Segment(statement_list[current_line].Second_segment),
@@ -389,6 +397,7 @@ namespace LogicCalculator
         }
 
         //TODO check not intro
+        //TODO add box checks
         private void Not_Introduction()
         {
             Is_Valid = statement_list[current_line - 1].Expression == "⊥";
@@ -404,6 +413,7 @@ namespace LogicCalculator
                 DisplayErrorMsg("Missuse of Not Introduction");
         }
 
+        //TODO add box checks
         private void Not_Elimination()
         {
             Is_Valid = statement_list[current_line].Expression == "⊥";
@@ -420,6 +430,7 @@ namespace LogicCalculator
                 DisplayErrorMsg("Missuse of Not Elimination");
         }
 
+        //TODO add box checks
         private void Contradiction_Elimination()
         {
             Is_Valid = statement_list[current_line - 1].Expression == "⊥";
@@ -467,7 +478,6 @@ namespace LogicCalculator
             if (!current_expression.Contains("→"))
             {
                 DisplayErrorMsg("Missing → in row");
-                Is_Valid = false;
                 return;
             }
 
@@ -490,7 +500,6 @@ namespace LogicCalculator
             if (index == -1)
             {
                 DisplayErrorMsg("Missing = in row");
-                Is_Valid = false;
                 return;
             }
             Is_Valid = current_expression.Substring(0, index) ==
@@ -505,26 +514,95 @@ namespace LogicCalculator
 
 
             string current_expression = statement_list[current_line].Expression,
-                first_left, first_right, second_left, second_right;
+                first_left, first_right, second_left, second_right,current_left,current_right;
             index = current_expression.IndexOf('=');
             if (index == -1)
             {
                 DisplayErrorMsg("Missing = in row");
-                Is_Valid = false;
                 return;
             }
+            current_left = current_expression.Substring(0,index);
+            current_right = current_expression.Substring(index + 1, current_expression.Length - (index + 1));
+            //if()
             Is_Valid = current_expression ==
                 current_expression.Substring(index + 1, current_expression.Length - (index + 1));
             if (!Is_Valid)
                 DisplayErrorMsg("Equal introduction format is t1=t1");
         }
-        private void All_Introduction() { throw new NotImplementedException(); }
-        private void All_Elimination() { throw new NotImplementedException(); }
-        private void Exists_Introduction() { throw new NotImplementedException(); }
+
+        //TODO add box checks
+        private void All_Introduction() {
+            Regex all_regex = new Regex("∀[a-z]+[a-z|A-Z]*([a-z])");
+            int index;
+            List < int > line_numbers= Get_Lines_From_Segment(statement_list[current_line].First_segment);
+            string current_expression = statement_list[current_line].Expression,
+                last_expression= statement_list[line_numbers[line_numbers.Count-1]].Expression;
+            char letter = Find_Letter(last_expression);
+            current_expression.Replace(current_expression[4], letter);
+            Is_Valid = current_expression.Substring(2) == last_expression;
+        }
+        private void All_Elimination() {
+            int index, previous_line = Get_Row(statement_list[current_line].First_segment);
+            string current_expression = statement_list[current_line].Expression,
+                previous_expression= statement_list[previous_line].Expression;
+
+            index = statement_list[current_line].Rule[previous_expression.IndexOf("∀")]+1;
+            char letter = statement_list[current_line].Rule[index];
+            string all = "∀" + letter;
+
+            index = previous_expression.IndexOf(all)+2;
+            if (index == -1)
+            {
+                DisplayErrorMsg("Missing "+all+" in row");
+                return;
+            }
+
+            current_expression.Replace(Find_Letter(current_expression), letter);
+            Is_Valid = My_Equal(current_expression, previous_expression);
+            if (!Is_Valid)
+            {
+                DisplayErrorMsg("Misuse of all elimination");
+            }
+        }
+        private void Exists_Introduction() {
+            int previous_line = Get_Row(statement_list[current_line].First_segment);
+            string current_expression = statement_list[current_line].Expression,
+                previous_expression = statement_list[previous_line].Expression;
+            Is_Valid = current_expression == previous_expression;
+        }
         private void Exists_Elimination() { throw new NotImplementedException(); }
 
 
         #region UTILITY
+
+        private char Find_Letter(string to_search)
+        {
+            char letter='%';
+            for (int i = 0; i < to_search.Length- PREDICATE_LENGTH; i++)
+            {
+                if(predicate_regex.IsMatch(to_search.Substring(i, PREDICATE_LENGTH)))              
+                {
+                    letter = to_search[i + 2];
+                    break;
+                }
+            }
+            return letter;
+        }
+
+        private int Find_Closer_Paranthesis(string to_check)
+        {
+            int paranthesis_number = 0;
+            for(int i=0;i<to_check.Length;i++)
+            {
+                if (to_check[i] == ')')
+                    paranthesis_number--;
+                if (to_check[i] == '(')
+                    paranthesis_number++;
+                if(paranthesis_number==0)
+                    return i;
+            }
+            return -1;
+        }
 
         private int Get_Row(string s)
         {
@@ -574,10 +652,15 @@ namespace LogicCalculator
 
         private void DisplayErrorMsg(string msg)
         {
+            Is_Valid = false;
             MessageBox.Show("Error at row " + current_line + "\n" + msg, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             return;
         }
 
+        private bool My_Equal(string first, string second)
+        {
+            return first == second ||'('+ first + ')' == second ||  first == '(' + second + ')' || '(' + first + ')' == '(' + second + ')';
+        }
         #endregion UTILITY
     }
 }
