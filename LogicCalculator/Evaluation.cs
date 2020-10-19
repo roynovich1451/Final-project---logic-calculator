@@ -107,15 +107,16 @@ namespace LogicCalculator
                     Equal_Elimination();
                     break;
                 case "∀i":
+                case var ai when new Regex(@"∀.*i").IsMatch(ai):
                     All_Introduction();
                     break;
-                case "∀e":
+                case var ae when new Regex(@"∀.*e").IsMatch(ae):
                     All_Elimination();
                     break;
-                case "∃i":
+                case var ei when new Regex(@"∃.*i").IsMatch(ei):
                     Exists_Introduction();
                     break;
-                case "∃e":
+                case var ee when new Regex(@"∃.*i").IsMatch(ee):
                     Exists_Elimination();
                     break;
             }
