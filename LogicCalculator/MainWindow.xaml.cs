@@ -9,8 +9,11 @@ using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using Xceed.Document.NET;
 using Xceed.Words.NET;
+using Brushes = System.Windows.Media.Brushes;
+using Color = System.Drawing.Color;
 
 namespace LogicCalculator
 {
@@ -49,7 +52,7 @@ namespace LogicCalculator
 
         #region INDEX_DEFINES
         private const int CHECKBOX_INDEX = 0;
-        private const int LABL_INDEX = 1;
+        private const int LABEL_INDEX = 1;
         private const int STATEMENT_INDEX = 2;
         private const int COMBOBOX_INDEX = 3;
         private const int SEGMENT1_INDEX = 4;
@@ -232,7 +235,7 @@ namespace LogicCalculator
                             Grid row = spGridTable.Children[i - 1] as Grid;
                             if (!(row.Children[TEXT_BLOCK_INDEX] is TextBlock))
                             {
-                                line_num = ((Label)row.Children[LABL_INDEX]).Content.ToString(); 
+                                line_num = ((Label)row.Children[LABEL_INDEX]).Content.ToString(); 
                                 expression = ((TextBox)row.Children[STATEMENT_INDEX]).Text.Replace(" ", string.Empty);
                                 rule = ((ComboBox)row.Children[COMBOBOX_INDEX]).Text.Replace(" ", string.Empty);
                                 first_segment = ((TextBox)row.Children[SEGMENT1_INDEX]).IsEnabled ? ((TextBox)row.Children[SEGMENT1_INDEX]).Text.Replace(" ", string.Empty) : null;
@@ -351,13 +354,13 @@ namespace LogicCalculator
                         break;
 
                     case 0:
-                        if (Grid.GetColumn(child) == LABL_INDEX)
+                        if (Grid.GetColumn(child) == LABEL_INDEX)
                         {
                             ((Label)child).Visibility = Visibility.Visible;
                         }
                         if (child is TextBox)
                         {
-                            if (Grid.GetColumn(child) == LABL_INDEX)
+                            if (Grid.GetColumn(child) == LABEL_INDEX)
                             {
                                 ((Label)child).Visibility = Visibility.Visible;
                             }
@@ -378,7 +381,7 @@ namespace LogicCalculator
                         break;
 
                     case 1:
-                        if (Grid.GetColumn(child) == LABL_INDEX)
+                        if (Grid.GetColumn(child) == LABEL_INDEX)
                         {
                             ((Label)child).Visibility = Visibility.Visible;
                         }
@@ -402,7 +405,7 @@ namespace LogicCalculator
                         break;
 
                     case 2:
-                        if (Grid.GetColumn(child) == LABL_INDEX)
+                        if (Grid.GetColumn(child) == LABEL_INDEX)
                         {
                             ((Label)child).Visibility = Visibility.Visible;
                         }
@@ -427,7 +430,7 @@ namespace LogicCalculator
                         break;
 
                     case 3:
-                        if (Grid.GetColumn(child) == LABL_INDEX)
+                        if (Grid.GetColumn(child) == LABEL_INDEX)
                         {
                             ((Label)child).Visibility = Visibility.Visible;
                         }
@@ -446,9 +449,9 @@ namespace LogicCalculator
             int index = 0;
             foreach (Grid row in spGridTable.Children)
             {
-                if (row.Children[LABL_INDEX] is Label)
+                if (row.Children[LABEL_INDEX] is Label)
                 {
-                    Label label = row.Children[LABL_INDEX] as Label;
+                    Label label = row.Children[LABEL_INDEX] as Label;
                     label.Content = ++index;
                 }
             }
@@ -647,7 +650,7 @@ namespace LogicCalculator
                 Margin = new Thickness(THICKNESS),
                 HorizontalContentAlignment = HorizontalAlignment.Right
             };
-            Grid.SetColumn(lb, LABL_INDEX);
+            Grid.SetColumn(lb, LABEL_INDEX);
 
             //textblock - statement
             TextBox tbState = new TextBox
@@ -1105,7 +1108,7 @@ namespace LogicCalculator
             Grid above = spGridTable.Children[openIndex] as Grid;
             Grid below = spGridTable.Children[closeIndex] as Grid;
             //check if the current checked rows aren't already Box
-            if (!(above.Children[LABL_INDEX] is Label) && !(below.Children[LABL_INDEX] is Label))
+            if (!(above.Children[LABEL_INDEX] is Label) && !(below.Children[LABEL_INDEX] is Label))
             {
                 return -ERRMISSLINE;
             }
@@ -1143,13 +1146,13 @@ namespace LogicCalculator
             int ret = IsBoxValid(openIndex, closeIndex);
             if (ret == -ERRCOUNTBRAKETS)
             {
-                DisplayErrorMsg("Error: Can't create box, wrong indexes", "Error");
+                DisplayErrorMsg($"Error: Can't create box, given indexes are illegal parenthesis Validity", "Error");
                 CheckMode(false);
                 return;
             }
             else if (ret == -ERRMISSLINE)
             {
-                DisplayErrorMsg("Error: Can't create box, must be at least one line padding between 2 boxes", "Error");
+                DisplayErrorMsg($"Error: Can't create box, must be at least one line padding between 2 boxes", "Error");
                 CheckMode(false);
                 return;
             }
@@ -1210,17 +1213,20 @@ namespace LogicCalculator
             if (ret == -ERRBOXMISSCLOSE)
             {
                 DisplayErrorMsg("Error: checked box missng it's closer\nPlease recheck rows", "ERROR");
+                removeBackgroundColor();
                 return;
             }
             if (ret == -ERRBOXMISSOPEN)
             {
                 DisplayErrorMsg("Error: checked box missng it's opener\nPlease recheck rows", "ERROR");
+                removeBackgroundColor();
                 return;
             }
             ret = CheckBoxPadding(checkeRows);
             if (ret == -ERRBOXPADDING)
             {
                 DisplayErrorMsg("Error: after remove one of the boxes will be without lines inside\nPlease recheck rows", "ERROR");
+                removeBackgroundColor();
                 return;
             }
             foreach (Grid row in checkeRows)
@@ -1245,7 +1251,11 @@ namespace LogicCalculator
                 if ((row.Children[TEXT_BLOCK_INDEX] is TextBlock tbClose) && tbClose.Text.Contains("└"))
                 {
                     if (!verified.Contains(row))
+                    {
+                        tbClose.Background = Brushes.Red;
                         return -ERRBOXMISSOPEN;
+                    }
+      
                     continue;
                 }
                 //if opener
@@ -1259,6 +1269,7 @@ namespace LogicCalculator
                     }
                     if (((CheckBox)closerGrid.Children[CHECKBOX_INDEX]).IsChecked == false)
                     {
+                        tbOpen.Background = Brushes.Red;
                         return -ERRBOXMISSCLOSE;
                     }
                     else
@@ -1278,7 +1289,12 @@ namespace LogicCalculator
                     !checkeRows.Contains(row))
                 {
                     if (GetLineInsideBox(row, checkeRows) == 0)
+                    {
+                        Grid closer = GetCloserGrid(tbOpen.Parent as Grid);
+                        ((TextBlock)closer.Children[TEXT_BLOCK_INDEX]).Background = Brushes.Red;
+                        tbOpen.Background = Brushes.Red;
                         return -ERRBOXPADDING;
+                    }
                 }
             }
             return SUCCESS;
@@ -1333,7 +1349,23 @@ namespace LogicCalculator
             return null;
         }
 
-
+        private void removeBackgroundColor()
+        {
+            foreach (Grid row in spGridTable.Children)
+            {
+                foreach(var child in row.Children)
+                {
+                    if(child is TextBlock tBlock)
+                    {
+                        tBlock.Background = null;
+                    }
+                    if(child is TextBox tBox)
+                    {
+                        tBox.Background = null;
+                    }
+                }
+            }
+        }
 
         private void BtnAddBefore_Click(object sender, RoutedEventArgs e)
         {
@@ -1535,13 +1567,15 @@ namespace LogicCalculator
             statement_list.Add(new Statement(tbValue.Text, "first", "0"));
             List<Tuple<int, string>> box_pairs_list = GetBoxPairs();
             string expression, rule, first_segment, second_segment, third_segment;
+            int index;
 
             //One less column because of the line number column
 
 
             foreach (Grid row in spGridTable.Children)
             {
-                if (row.Children[STATEMENT_INDEX] is TextBox)
+                index = spGridTable.Children.IndexOf(row);
+                if (row.Children[LABEL_INDEX] is Label)
                 {
                     expression = ((TextBox)row.Children[STATEMENT_INDEX]).Text.Replace(" ", string.Empty);
                     rule = ((ComboBox)row.Children[COMBOBOX_INDEX]).Text.Replace(" ", string.Empty);
@@ -1549,6 +1583,8 @@ namespace LogicCalculator
                     second_segment = ((TextBox)row.Children[SEGMENT2_INDEX]).IsEnabled ? ((TextBox)row.Children[SEGMENT2_INDEX]).Text.Replace(" ", string.Empty) : null;
                     third_segment = ((TextBox)row.Children[SEGMENT3_INDEX]).IsEnabled ? ((TextBox)row.Children[SEGMENT3_INDEX]).Text.Replace(" ", string.Empty) : null;
                     if (!IsValidStatement(expression, rule, first_segment, second_segment, third_segment))
+                        return;
+                    if (!IsValidBox(row, rule, first_segment, second_segment, third_segment))
                         return;
                     statement_list.Add(new Statement(expression, rule, first_segment, second_segment, third_segment));
                     Evaluation e = new Evaluation(statement_list, rule, box_pairs_list);
@@ -1558,6 +1594,74 @@ namespace LogicCalculator
             }
             DisplayInfoMsg("All input is valid", "Success!");
         }
+
+        private bool IsValidBox(Grid row,string rule, string first_segment, string second_segment, string third_segment)
+        {
+            switch (rule)
+            {
+                case "Assumption":
+                    if (!haveAboveOpener(spGridTable.Children.IndexOf(row)))
+                    {
+                        DisplayErrorMsg($"Error: assumption at row {((Label)row.Children[LABEL_INDEX]).Content.ToString()} missing box opener above", "Error");
+                        return false;
+                    }
+                    return true;
+                case "Copy":
+                    if (!copyFromLegalBox(row, first_segment))
+                    {
+                        DisplayErrorMsg($"Error: Copy can use only for variable from current or upper box", "Error");
+                        return false;
+                    }
+                    return true;
+                /*case:
+                    return true;
+                */
+                default:
+                    return true;
+
+            }
+        }
+
+        private bool copyFromLegalBox(Grid row, string first_segment)
+        {
+            int start = spGridTable.Children.IndexOf(row);
+            bool isValid = true;
+            for (int i = start - 1; i >= 0; i--)
+            {
+                Grid currentRow = spGridTable.Children[i] as Grid;
+                if (currentRow.Children[LABEL_INDEX] is Label lb)
+                {
+                    if (lb.Content.ToString() == first_segment)
+                        break;
+                }
+                else
+                {
+                    TextBlock tb = currentRow.Children[TEXT_BLOCK_INDEX] as TextBlock;
+                    if (tb.Text.Contains("┌"))
+                        isValid = true;
+                    else
+                        isValid = false;
+                }
+
+            }
+            return isValid;
+        }
+
+        private bool haveAboveOpener(int index)
+        {
+            if (index == 0)
+                return false;
+            if (((Grid)spGridTable.Children[index - 1]).Children[TEXT_BLOCK_INDEX] is TextBlock tBlock)
+            {
+                if (tBlock.Text.Contains("┌"))
+                    return true;
+            }
+            return false;
+            
+ 
+
+        }
+
         private void DisplayErrorMsg(string msg, string title)
         {
             MessageBox.Show(msg, title, MessageBoxButton.OK, MessageBoxImage.Error);
