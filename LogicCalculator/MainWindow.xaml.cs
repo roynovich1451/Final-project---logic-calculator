@@ -73,6 +73,7 @@ namespace LogicCalculator
         private const int ERRBOXMISSOPEN = 3;
         private const int ERRBOXMISSCLOSE = 4;
         private const int ERRBOXPADDING = 5;
+        private const int ERRNOTFOUND = 6;
         #endregion
 
         #endregion DEFINES
@@ -1584,11 +1585,11 @@ namespace LogicCalculator
                     third_segment = ((TextBox)row.Children[SEGMENT3_INDEX]).IsEnabled ? ((TextBox)row.Children[SEGMENT3_INDEX]).Text.Replace(" ", string.Empty) : null;
                     if (!IsValidStatement(expression, rule, first_segment, second_segment, third_segment))
                         return;
-                    if (!IsValidBox(row, rule, first_segment, second_segment, third_segment))
-                        return;
                     statement_list.Add(new Statement(expression, rule, first_segment, second_segment, third_segment));
                     Evaluation e = new Evaluation(statement_list, rule, box_pairs_list);
                     if (!e.Is_Valid)
+                        return;
+                    if (!IsValidBox(row, rule, first_segment, second_segment, third_segment))
                         return;
                 }
             }
@@ -1597,29 +1598,85 @@ namespace LogicCalculator
 
         private bool IsValidBox(Grid row,string rule, string first_segment, string second_segment, string third_segment)
         {
+
             switch (rule)
             {
                 case "Assumption":
                     if (!haveAboveOpener(spGridTable.Children.IndexOf(row)))
                     {
-                        DisplayErrorMsg($"Error: assumption at row {((Label)row.Children[LABEL_INDEX]).Content.ToString()} missing box opener above", "Error");
+                        DisplayErrorMsg($"Error: assumption at row {((Label)row.Children[LABEL_INDEX]).Content.ToString()},\nmissing box opener above", "Error");
                         return false;
                     }
                     return true;
                 case "Copy":
                     if (!copyFromLegalBox(row, first_segment))
                     {
-                        DisplayErrorMsg($"Error: Copy can use only for variable from current or upper box", "Error");
+                        DisplayErrorMsg($"Error: Copy  at row {((Label)row.Children[LABEL_INDEX]).Content.ToString()},\ncan use only for variable from current or upper box", "Error");
                         return false;
                     }
                     return true;
-                /*case:
+                case "∨e":
+                    List<int> firstbox = Evaluation.Get_Lines_From_Segment(second_segment),
+                        secondBox = Evaluation.Get_Lines_From_Segment(third_segment);
+                    if(!hasWrapBox(firstbox[0], firstbox[firstbox.Count-1]) ||
+                        !hasWrapBox(secondBox[0], secondBox[secondBox.Count - 1]))
+                    {
+                        DisplayErrorMsg($"Error: Or elimination at line {((Label)row.Children[LABEL_INDEX]).Content.ToString()},\nlines mentioned in second and third segments must be wrapped with boxes", "Error");
+                        return false;
+                    }
                     return true;
-                */
+                case "¬i":
+                    List<int> box = Evaluation.Get_Lines_From_Segment(first_segment);
+                    if (!hasWrapBox(box[0], box[box.Count - 1]))
+                    {
+                        DisplayErrorMsg($"Error: Not introduction at line {((Label)row.Children[LABEL_INDEX]).Content.ToString()},\nlines mentioned in first segment must be wrapped with box", "Error");
+                        return false;
+                    }
+                    return true;
                 default:
                     return true;
 
             }
+        }
+
+        private bool hasWrapBox(int open, int close)
+        {
+            int realOpenIndex = getspGridIndex(open),
+                realCloseIndex = getspGridIndex(close);
+            if (realOpenIndex <= 0 || realCloseIndex < 0 || realCloseIndex == spGridTable.Children.Count - 1)
+                return false;
+            if (!isCorrectBox(realOpenIndex - 1, BoxState.Open) || !isCorrectBox(realCloseIndex + 1, BoxState.Close))
+                return false;
+            return true;
+        }
+        bool isCorrectBox(int index, BoxState state)
+        {
+            Grid row = spGridTable.Children[index] as Grid;
+
+            if (row.Children[LABEL_INDEX] is Label)
+                return false;
+            else
+            {
+                string search = "┌";
+                if (state == BoxState.Close)
+                    search = "└";
+                if (!((TextBlock)row.Children[TEXT_BLOCK_INDEX]).Text.Contains(search))
+                    return false;
+            }
+            return true;
+        }
+        private int getspGridIndex(int labelNumber)
+        {
+            for(int i = labelNumber; i < spGridTable.Children.Count; i++)
+            {
+                Grid row = spGridTable.Children[i] as Grid;
+                if (row.Children[LABEL_INDEX] is Label lb)
+                {
+                    if (Int32.Parse(lb.Content.ToString()) == labelNumber)
+                        return i;
+                }
+            }
+            return -ERRNOTFOUND;
         }
 
         private bool copyFromLegalBox(Grid row, string first_segment)
@@ -1657,9 +1714,6 @@ namespace LogicCalculator
                     return true;
             }
             return false;
-            
- 
-
         }
 
         private void DisplayErrorMsg(string msg, string title)
