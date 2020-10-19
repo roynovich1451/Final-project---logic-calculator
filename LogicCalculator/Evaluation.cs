@@ -135,10 +135,8 @@ namespace LogicCalculator
             DisplayErrorMsg("Data doesn't exist in the original expression");
         }
 
-        //TODO add box checks (also for assumption)
         private void Copy()
         {
-            //TODO:add box checks
             int row = Get_Row(statement_list[current_line].First_segment);
             if (row == -1)
                 return;
@@ -325,7 +323,6 @@ namespace LogicCalculator
             }
         }
 
-        //TODO add box checks
         private void Or_Elimination()
         {
             List<int> first_segment_lines = Get_Lines_From_Segment(statement_list[current_line].Second_segment),
@@ -396,8 +393,6 @@ namespace LogicCalculator
             }
         }
 
-        //TODO check not intro
-        //TODO add box checks
         private void Not_Introduction()
         {
             Is_Valid = statement_list[current_line - 1].Expression == "⊥";
@@ -629,7 +624,7 @@ namespace LogicCalculator
             return ret;
         }
 
-        private List<int> Get_Lines_From_Segment(string seg)
+        static public List<int> Get_Lines_From_Segment(string seg)
         {
             List<int> ret = new List<int>();
             int index = seg.IndexOf("-");
