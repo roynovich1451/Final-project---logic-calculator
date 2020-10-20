@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -302,37 +303,6 @@ namespace LogicCalculator
         #endregion MENUBAR_CLICKS
 
         #region DYNAMIC_GUI
-
-        /*private bool BoxChecker(BoxState state)
-        {
-            switch (state)
-            {
-                case BoxState.Close:
-                    if (box_closers >= box_openers)
-                    {
-                        DisplayErrorMsg("Error: Can't be more box closers then box openers", "Error");
-                        return false;
-                    }
-                    if (!HasBoxOpen())
-                    {
-                        DisplayErrorMsg("Error: no opener found", "Error");
-                        return false;
-                    }
-                    return true;
-
-                case BoxState.Open:
-                    if (hyphen_chunks <= MIN_HYPHEN_CHUNKS)
-                    {
-                        DisplayErrorMsg("Error: You reached to maximum available boxes", "Error");
-                        return false;
-                    }
-                    return true;
-
-                default:
-                    return false;
-            }
-        }
-        */
 
         private void HandleGridVisability(Grid g, int needed)
         {
@@ -1082,10 +1052,11 @@ namespace LogicCalculator
                 AppendKeyboardChar(elementWithFocus, "Y0");
             }
         }
-        private int IsBoxValid(int openIndex, int closeIndex)
+        private int isBracketsLogic(Grid uperRow, Grid lowerRow)
         {
             int braketsCnt = 0;
-            //chekc picked indexes, to see if ligal (mathematic brackets logic)
+            int openIndex = spGridTable.Children.IndexOf(uperRow),
+                closeIndex = spGridTable.Children.IndexOf(lowerRow);
             for (int i = openIndex; i <= closeIndex; i++)
             {
                 if (spGridTable.Children[i] is Grid grid)
@@ -1108,24 +1079,33 @@ namespace LogicCalculator
             }
             if (braketsCnt != 0)
                 return -ERRCOUNTBRAKETS;
+            return SUCCESS;
+        }
+        private int IsBoxValid(Grid upperRow, Grid lowerRow)
+        {
 
-            Grid above = spGridTable.Children[openIndex] as Grid;
-            Grid below = spGridTable.Children[closeIndex] as Grid;
+            //chekc picked indexes, to see if ligal (mathematic brackets logic)
+            int ret = isBracketsLogic(upperRow, lowerRow);
+            if (ret != 0)
+                return ret;
+
             //check if the current checked rows aren't already Box
-            if (!(above.Children[LABEL_INDEX] is Label) && !(below.Children[LABEL_INDEX] is Label))
+            if (!(upperRow.Children[LABEL_INDEX] is Label) && !(lowerRow.Children[LABEL_INDEX] is Label))
             {
                 return -ERRMISSLINE;
             }
+            int upperRowIndex = spGridTable.Children.IndexOf(upperRow);
+            int lowerRowIndex = spGridTable.Children.IndexOf(lowerRow);
             //check if need wraping box check
-            if (openIndex != 0 || closeIndex != spGridTable.Children.Count - 1)
+            if (upperRowIndex != 0 || lowerRowIndex != spGridTable.Children.Count - 1)
             {
-                int aboveIndex = openIndex == 0 ? openIndex : openIndex - 1;
-                int belowIndex = closeIndex == spGridTable.Children.Count - 1 ? closeIndex : closeIndex + 1;
-                above = spGridTable.Children[aboveIndex] as Grid;
-                below = spGridTable.Children[belowIndex] as Grid;
+                int aboveIndex = upperRowIndex == 0 ? upperRowIndex : upperRowIndex - 1;
+                int belowIndex = lowerRowIndex == spGridTable.Children.Count - 1 ? lowerRowIndex : lowerRowIndex + 1;
+                Grid aboveRow = spGridTable.Children[aboveIndex] as Grid;
+                Grid belowRow = spGridTable.Children[belowIndex] as Grid;
                 //check if wrapped rows are Box
-                if ((above.Children[TEXT_BLOCK_INDEX] is TextBlock aboveTb) &&
-                        (below.Children[TEXT_BLOCK_INDEX] is TextBlock belowTb))
+                if ((aboveRow.Children[TEXT_BLOCK_INDEX] is TextBlock aboveTb) &&
+                        (belowRow.Children[TEXT_BLOCK_INDEX] is TextBlock belowTb))
                 {
                     if (aboveTb.Text.Contains("┌") && belowTb.Text.Contains("└"))
                     {
@@ -1133,8 +1113,60 @@ namespace LogicCalculator
                     }
                 }
             }
-            return SUCCESS;
+            //check outerbox padding
+            ret = SUCCESS;
+            List<Grid> outerBox = getOuterBox(spGridTable, upperRow, lowerRow);
+            if (outerBox.Count != 0)
+            {
+                List<Grid> ignoreLines = new List<Grid>();
+                for (int i = upperRowIndex; i <= lowerRowIndex; i++){
+                    ignoreLines.Add(spGridTable.Children[i] as Grid);
+                }
+                int openerIndex = spGridTable.Children.IndexOf(outerBox[OPEN_BOX_LIST_INDEX]) + 1,
+                   closerIndex = spGridTable.Children.IndexOf(outerBox[CLOSE_BOX_LIST_INDEX]);
+
+                ret = checkBoxPadding(spGridTable, openerIndex, closerIndex, ignoreLines);
+            }  
+            return ret;
         }
+
+        private List<Grid> getOuterBox(StackPanel spRows, Grid upperRow, Grid lowerRow)
+        {
+            List<Grid> ret = new List<Grid>();
+            int upperRowIndex = spRows.Children.IndexOf(upperRow),
+                lowerRowIndex = spRows.Children.IndexOf(lowerRow);
+            int parCnt = 0;
+            bool hasOuter = false;
+            if (upperRowIndex != 0) //if upperRowindex = 0 no way there is outer box
+            {
+                for (int i = upperRowIndex - 1; i >= 0; i--)
+                {
+                    Grid currentRow = spRows.Children[i] as Grid;
+                    if (currentRow.Children[TEXT_BLOCK_INDEX] is TextBlock tBlock)
+                    {
+                        if (tBlock.Text.Contains("┌")){
+                            if (parCnt == 0)
+                            {
+                                ret.Add(currentRow);
+                                hasOuter = true;
+                                break;
+                            }
+                            else
+                                parCnt++;
+                                
+                        }
+                        if (tBlock.Text.Contains("└"))
+                            parCnt--;
+                    }
+                }
+                if (hasOuter)
+                {
+                    ret.Add(GetCloserGrid(spRows, ret[OPEN_BOX_LIST_INDEX]));
+                }
+            }
+            return ret;
+        }
+
         private void BtnCreateBox_Click(object sender, RoutedEventArgs e)
         {
             if (checked_checkboxes != 2)
@@ -1145,9 +1177,7 @@ namespace LogicCalculator
             }
 
             var checkedForBox = GetCheckedForBox();
-            int openIndex = spGridTable.Children.IndexOf(checkedForBox[OPEN_BOX_LIST_INDEX]);
-            int closeIndex = spGridTable.Children.IndexOf(checkedForBox[CLOSE_BOX_LIST_INDEX]);
-            int ret = IsBoxValid(openIndex, closeIndex);
+            int ret = IsBoxValid(checkedForBox[OPEN_BOX_LIST_INDEX], checkedForBox[CLOSE_BOX_LIST_INDEX]);
             if (ret == -ERRCOUNTBRAKETS)
             {
                 DisplayErrorMsg($"Error: Can't create box, given indexes are illegal parenthesis Validity", "Error");
@@ -1160,10 +1190,18 @@ namespace LogicCalculator
                 CheckMode(false);
                 return;
             }
+            else if (ret == -ERRBOXPADDING)
+            {
+                DisplayErrorMsg($"Error: Can't create box, outer box must have at least one line padding", "Error");
+                removeBackgroundColor();
+                CheckMode(false);
+                return;
+            }
+            int openIndex = spGridTable.Children.IndexOf(checkedForBox[OPEN_BOX_LIST_INDEX]);
+            int closeIndex = spGridTable.Children.IndexOf(checkedForBox[CLOSE_BOX_LIST_INDEX]);
             ChangeBoxVariables(openIndex);
             HandleBox(BoxState.Open, openIndex);
             HandleBox(BoxState.Close, closeIndex + 2);
-            CheckInnerBoxesSize(openIndex, closeIndex + 3);
             CheckInnerBoxesSize(openIndex, closeIndex + 3);
             CheckMode(false);
         }
@@ -1207,7 +1245,7 @@ namespace LogicCalculator
             MessageBoxResult res = MessageBox.Show($"Warning: You are about to REMOVE {checkeRows.Count} lines\nPlease confirm",
                 "Confirmation", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
             if (res == MessageBoxResult.Cancel) return;
-            int ret = CheckBoxPadding(checkeRows);
+            int ret = checkAllBoxesPadding(checkeRows);
             if (ret == -ERRBOXPADDING)
             {
                 DisplayErrorMsg("Error: after remove one of the boxes will be without lines inside\nPlease recheck rows", "ERROR");
@@ -1266,7 +1304,7 @@ namespace LogicCalculator
                 if ((row.Children[TEXT_BLOCK_INDEX] is TextBlock tbOpen) && tbOpen.Text.Contains("┌"))
                 {
                     int startSearchIndex = spGridTable.Children.IndexOf(row);
-                    Grid closerGrid = GetCloserGrid(row);
+                    Grid closerGrid = GetCloserGrid(spGridTable, row);
                     if (closerGrid == null)
                     {
                         DisplayErrorMsg("something went wrong", "ERROR");
@@ -1285,34 +1323,38 @@ namespace LogicCalculator
             }
             return verified.Count;
         }
-        private int CheckBoxPadding(List<Grid> checkeRows)
+        private int checkAllBoxesPadding(List<Grid> checkedRows)
         {
             foreach (Grid row in spGridTable.Children)
             {
                 if ((row.Children[TEXT_BLOCK_INDEX] is TextBlock tbOpen) && tbOpen.Text.Contains("┌") &&
-                    !checkeRows.Contains(row))
+                    !checkedRows.Contains(row))
                 {
-                    if (GetLineInsideBox(row, checkeRows) == 0)
-                    {
-                        Grid closer = GetCloserGrid(tbOpen.Parent as Grid);
-                        ((TextBlock)closer.Children[TEXT_BLOCK_INDEX]).Background = Brushes.Red;
-                        tbOpen.Background = Brushes.Red;
+                    int boxCloserIndex = spGridTable.Children.IndexOf(GetCloserGrid(spGridTable, row)),
+                        boxOpenerIndex = spGridTable.Children.IndexOf(row);
+                    if (checkBoxPadding(spGridTable, boxOpenerIndex, boxCloserIndex, checkedRows) == -ERRBOXPADDING)
                         return -ERRBOXPADDING;
-                    }
                 }
             }
             return SUCCESS;
         }
-        private int GetLineInsideBox(Grid opener, List<Grid> checkeRows)
+
+        private int checkBoxPadding(StackPanel sp, int boxOpenerIndex, int boxCloserIndex, List<Grid> checkedRows)
         {
-            Grid closer = GetCloserGrid(opener);
-            int startIndex = spGridTable.Children.IndexOf(opener) + 1;
-            int endIndex = spGridTable.Children.IndexOf(closer);
+            int ret = GetLineInsideBox(spGridTable, boxOpenerIndex, boxCloserIndex, checkedRows);
+            if (ret == 0)
+            {
+                return -ERRBOXPADDING;
+            }
+            return ret;
+        }
+        private int GetLineInsideBox(StackPanel sp,int from, int to, List<Grid> checkeRows)
+        {
             int bracketsCnt = 0;
             int linesInBox = 0;
-            for (int i = startIndex; i < endIndex; i++)
+            for (int i = from; i < to; i++)
             {
-                Grid currentRow = spGridTable.Children[i] as Grid;
+                Grid currentRow = sp.Children[i] as Grid;
                 if (currentRow.Children[TEXT_BLOCK_INDEX] is TextBlock tbCurrnet)
                 {
                     if (tbCurrnet.Text.Contains("┌"))
@@ -1328,21 +1370,26 @@ namespace LogicCalculator
                 {
                     if (bracketsCnt == 0)
                     {
-                        if (!checkeRows.Contains(currentRow))
+                        if (checkeRows == null)
                             linesInBox++;
+                        else
+                        {
+                            if (!checkeRows.Contains(currentRow))
+                                linesInBox++;
+                        }
                     }
                 }
             }
             return linesInBox;
         }
 
-        private Grid GetCloserGrid(Grid row)
+        private Grid GetCloserGrid(StackPanel sp, Grid row)
         {
             TextBlock tbOpener = row.Children[TEXT_BLOCK_INDEX] as TextBlock;
 
-            for (int i = spGridTable.Children.IndexOf(row); i < spGridTable.Children.Count; i++)
+            for (int i = sp.Children.IndexOf(row); i < sp.Children.Count; i++)
             {
-                if (((Grid)spGridTable.Children[i]).Children[TEXT_BLOCK_INDEX] is TextBlock tbCurrent)
+                if (((Grid)sp.Children[i]).Children[TEXT_BLOCK_INDEX] is TextBlock tbCurrent)
                 {
                     if (tbCurrent.Text.Contains("└") && (tbCurrent.Text.Length == tbOpener.Text.Length))
                     {
@@ -1430,6 +1477,7 @@ namespace LogicCalculator
         private void ChangeBoxVariables(int openIndex)
         {
             int outerBoxcnt = 0;
+
             for (int i = 0; i < openIndex; i++)
             {
                 if (spGridTable.Children[i] is Grid grid)
