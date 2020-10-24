@@ -1126,6 +1126,12 @@ namespace LogicCalculator
                    closerIndex = spGridTable.Children.IndexOf(outerBox[CLOSE_BOX_LIST_INDEX]);
 
                 ret = checkBoxPadding(spGridTable, openerIndex, closerIndex, ignoreLines);
+                if (ret == -ERRBOXPADDING)
+                {
+                    brushBackgroundRed(outerBox[OPEN_BOX_LIST_INDEX].Children[TEXT_BLOCK_INDEX]);
+                    brushBackgroundRed(outerBox[CLOSE_BOX_LIST_INDEX].Children[TEXT_BLOCK_INDEX]);
+                }
+
             }  
             return ret;
         }
@@ -1166,7 +1172,13 @@ namespace LogicCalculator
             }
             return ret;
         }
-
+        private void brushBackgroundRed(UIElement elem)
+        {
+            if (elem is TextBox)
+                ((TextBox)elem).Background = Brushes.Red;
+            else
+                ((TextBlock)elem).Background = Brushes.Red;
+        }
         private void BtnCreateBox_Click(object sender, RoutedEventArgs e)
         {
             if (checked_checkboxes != 2)
@@ -1180,7 +1192,7 @@ namespace LogicCalculator
             int ret = IsBoxValid(checkedForBox[OPEN_BOX_LIST_INDEX], checkedForBox[CLOSE_BOX_LIST_INDEX]);
             if (ret == -ERRCOUNTBRAKETS)
             {
-                DisplayErrorMsg($"Error: Can't create box, given indexes are illegal parenthesis Validity", "Error");
+                DisplayErrorMsg($"Error: Can't create box, checked rows are illegal parenthesis Validity", "Error");
                 CheckMode(false);
                 return;
             }
@@ -1294,7 +1306,7 @@ namespace LogicCalculator
                 {
                     if (!verified.Contains(row))
                     {
-                        tbClose.Background = Brushes.Red;
+                        brushBackgroundRed(tbClose);
                         return -ERRBOXMISSOPEN;
                     }
       
@@ -1311,7 +1323,7 @@ namespace LogicCalculator
                     }
                     if (((CheckBox)closerGrid.Children[CHECKBOX_INDEX]).IsChecked == false)
                     {
-                        tbOpen.Background = Brushes.Red;
+                        brushBackgroundRed(tbOpen);
                         return -ERRBOXMISSCLOSE;
                     }
                     else
@@ -1330,10 +1342,16 @@ namespace LogicCalculator
                 if ((row.Children[TEXT_BLOCK_INDEX] is TextBlock tbOpen) && tbOpen.Text.Contains("┌") &&
                     !checkedRows.Contains(row))
                 {
-                    int boxCloserIndex = spGridTable.Children.IndexOf(GetCloserGrid(spGridTable, row)),
+                    Grid boxCloser = GetCloserGrid(spGridTable, row);
+                    int boxCloserIndex = spGridTable.Children.IndexOf(boxCloser),
                         boxOpenerIndex = spGridTable.Children.IndexOf(row);
                     if (checkBoxPadding(spGridTable, boxOpenerIndex, boxCloserIndex, checkedRows) == -ERRBOXPADDING)
+                    {
+                        brushBackgroundRed(row);
+                        brushBackgroundRed(boxCloser);
                         return -ERRBOXPADDING;
+                    }
+                        
                 }
             }
             return SUCCESS;
