@@ -1096,23 +1096,6 @@ namespace LogicCalculator
             }
             int upperRowIndex = spGridTable.Children.IndexOf(upperRow);
             int lowerRowIndex = spGridTable.Children.IndexOf(lowerRow);
-            //check if need wraping box check
-            if (upperRowIndex != 0 || lowerRowIndex != spGridTable.Children.Count - 1)
-            {
-                int aboveIndex = upperRowIndex == 0 ? upperRowIndex : upperRowIndex - 1;
-                int belowIndex = lowerRowIndex == spGridTable.Children.Count - 1 ? lowerRowIndex : lowerRowIndex + 1;
-                Grid aboveRow = spGridTable.Children[aboveIndex] as Grid;
-                Grid belowRow = spGridTable.Children[belowIndex] as Grid;
-                //check if wrapped rows are Box
-                if ((aboveRow.Children[TEXT_BLOCK_INDEX] is TextBlock aboveTb) &&
-                        (belowRow.Children[TEXT_BLOCK_INDEX] is TextBlock belowTb))
-                {
-                    if (aboveTb.Text.Contains("┌") && belowTb.Text.Contains("└"))
-                    {
-                        return -ERRMISSLINE;
-                    }
-                }
-            }
             //check outerbox padding
             ret = SUCCESS;
             List<Grid> outerBox = getOuterBox(spGridTable, upperRow, lowerRow);
@@ -1306,7 +1289,7 @@ namespace LogicCalculator
                 {
                     if (!verified.Contains(row))
                     {
-                        brushBackgroundRed(tbClose);
+                        brushBackgroundRed(row.Children[TEXT_BLOCK_INDEX]);
                         return -ERRBOXMISSOPEN;
                     }
       
@@ -1323,7 +1306,7 @@ namespace LogicCalculator
                     }
                     if (((CheckBox)closerGrid.Children[CHECKBOX_INDEX]).IsChecked == false)
                     {
-                        brushBackgroundRed(tbOpen);
+                        brushBackgroundRed(row.Children[TEXT_BLOCK_INDEX]);
                         return -ERRBOXMISSCLOSE;
                     }
                     else
@@ -1347,8 +1330,8 @@ namespace LogicCalculator
                         boxOpenerIndex = spGridTable.Children.IndexOf(row);
                     if (checkBoxPadding(spGridTable, boxOpenerIndex, boxCloserIndex, checkedRows) == -ERRBOXPADDING)
                     {
-                        brushBackgroundRed(row);
-                        brushBackgroundRed(boxCloser);
+                        brushBackgroundRed(tbOpen as UIElement);
+                        brushBackgroundRed(boxCloser.Children[TEXT_BLOCK_INDEX]);
                         return -ERRBOXPADDING;
                     }
                         
