@@ -813,7 +813,9 @@ namespace LogicCalculator
         #region BUTTON_CLICKS
         private void BtnAddLine_Click(object sender, RoutedEventArgs e)
         {
-            CreateRow(-1);
+            Grid line = CreateRow(-1);
+            elementWithFocus = line.Children[STATEMENT_INDEX] as TextBox;
+            Keyboard.Focus(elementWithFocus);
             MasterCheck.Visibility = Visibility.Visible;
         }
         private void CheckButton_click(object sender, RoutedEventArgs e)
