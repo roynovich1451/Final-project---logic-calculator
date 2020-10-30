@@ -61,6 +61,10 @@ namespace LogicCalculator
                     And_Elimination_Two();
                     break;
 
+                case "∧i":
+                    And_Introduction();
+                    break;
+
                 case "∨i1":
                     Or_Introduction_One();
                     break;
@@ -71,11 +75,7 @@ namespace LogicCalculator
 
                 case "∨e":
                     Or_Elimination();
-                    break;
-
-                case "∧i":
-                    And_Introduction();
-                    break;
+                    break;               
 
                 case "¬i":
                     Not_Introduction();
@@ -255,21 +255,22 @@ namespace LogicCalculator
         {
             int first_row = Get_Row(statement_list[current_line].First_segment),
             second_row = Get_Row(statement_list[current_line].Second_segment);
+            string current = statement_list[current_line].Expression;
+
             if (first_row == -1 || second_row == -1)
                 return;
-            Is_Valid = statement_list[current_line].Expression.Contains("^")
-                || statement_list[current_line].Expression.Contains("∧");
+
+            Is_Valid = current.Contains("^")|| current.Contains("∧");
             if (!Is_Valid)
             {
                 DisplayErrorMsg("Missing ∧ in and introduction");
                 return;
             }
+
             string first = statement_list[first_row].Expression;
             string second = statement_list[second_row].Expression;
-            Is_Valid = statement_list[current_line].Expression == first + "^" + second ||
-                statement_list[current_line].Expression == first + "∧" + second ||
-                statement_list[current_line].Expression == second + "^" + first ||
-                statement_list[current_line].Expression == second + "∧" + first;
+            Is_Valid = Equal_With_Operator(current, first, second, "^") ||
+                Equal_With_Operator(current, first, second, "∧");
             if (!Is_Valid)
             {
                 DisplayErrorMsg("Misuse of And Introduction");
@@ -336,10 +337,7 @@ namespace LogicCalculator
                    first_segment_end = statement_list[first_segment_lines[first_segment_lines.Count - 1]].Expression,
                    second_segment_end = statement_list[second_segment_lines[second_segment_lines.Count - 1]].Expression;
 
-            Is_Valid = (base_expression == first_segment_start + second_segment_start ||
-                base_expression == "(" + first_segment_start + ")" + second_segment_start ||
-               base_expression == first_segment_start + "(" + second_segment_start + ")" ||
-              base_expression == "(" + first_segment_start + ")" + "(" + second_segment_start + ")");
+            Is_Valid = Equal_With_Operator(base_expression, first_segment_start ,second_segment_start,"");
             Is_Valid = first_segment_end == second_segment_end
                     && second_segment_end == current_expression;
             if (!Is_Valid)
@@ -470,7 +468,7 @@ namespace LogicCalculator
             int start_row = lines[0],
             end_row = lines[lines.Count - 1];
             string current_expression = statement_list[current_line].Expression;
-            //TODO: add box check
+
             if (!current_expression.Contains("→"))
             {
                 DisplayErrorMsg("Missing → in row");
@@ -656,6 +654,12 @@ namespace LogicCalculator
         private bool My_Equal(string first, string second)
         {
             return first == second ||'('+ first + ')' == second ||  first == '(' + second + ')' || '(' + first + ')' == '(' + second + ')';
+        }
+
+        private bool Equal_With_Operator(string expression,string first, string second,string op)
+        {
+            return expression == first+op+second || expression == '(' + first + ')' + op + second || expression == first + op + '(' + second + ')' || expression == '(' + first + ')' + op + '(' + second + ')'||
+                expression == second + op + first || expression == '(' + second + ')' + op + first || expression == second + op + '(' + first + ')' || expression == '(' + second + ')' + op + '(' + first + ')';
         }
         #endregion UTILITY
     }
