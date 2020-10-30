@@ -1635,7 +1635,7 @@ namespace LogicCalculator
                     if (!IsValidStatement(expression, rule, first_segment, second_segment, third_segment))
                         return;
                     statement_list.Add(new Statement(expression, rule, first_segment, second_segment, third_segment));
-                    Evaluation e = new Evaluation(statement_list, rule, box_pairs_list);
+                    Evaluation e = new Evaluation(statement_list, rule);
                     if (!e.Is_Valid)
                         return;
                     if (!IsValidBox(row, rule, first_segment, second_segment, third_segment))

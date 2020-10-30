@@ -12,91 +12,82 @@ namespace LogicCalculator
         private readonly List<Statement> statement_list;
         private readonly int current_line;
         private Regex predicate_regex;
-        private static int PREDICATE_LENGTH=4;
+        private static int PREDICATE_LENGTH = 4;
 
         //([a-z]*)+[∧,∨,¬,=,∀,∃][a-z]* \/ ([a-z]*)+[∧,∨,¬,=,∀,∃]([a-z]*)
 
-        public Evaluation(List<Statement> statement_list, string rule, List<Tuple<int, string>> box_pairs_list)
+        public Evaluation(List<Statement> statement_list, string rule)
         {
             Is_Valid = false;
             this.statement_list = statement_list;
             current_line = statement_list.Count - 1;
-            predicate_regex = new Regex("[a-z|A-Z]+([a-z])"); 
+            predicate_regex = new Regex("[a-z|A-Z]+([a-z])");
+            //if (statement_list[current_line].Expression !=) ;
 
-            switch (rule)
+            Handle_Rule(rule);
+            //if(Is_Valid)
+              //  Final_Check();
+        }
+
+        #region RULES
+
+        private void Handle_Rule(string rule){
+                switch (rule)
             {
                 case "Data":
                     Data();
                     break;
-
                 case "Assumption":
                     Is_Valid = true;
                     return;
-
                 case "MP":
                     MP();
                     break;
-
                 case "Copy":
                     Copy();
                     break;
-
                 case "MT":
                     MT();
                     break;
-
                 case "PBC":
                     PBC();
                     break;
-
                 case "LEM":
                     LEM();
                     break;
-
                 case "∧e1":
                     And_Elimination_One();
                     break;
-
                 case "∧e2":
                     And_Elimination_Two();
                     break;
-
                 case "∧i":
                     And_Introduction();
                     break;
-
                 case "∨i1":
                     Or_Introduction_One();
                     break;
-
                 case "∨i2":
                     Or_Introduction_Two();
                     break;
-
                 case "∨e":
                     Or_Elimination();
-                    break;               
-
+                    break;
                 case "¬i":
                     Not_Introduction();
                     break;
-
                 case "¬e":
                     Not_Elimination();
                     break;
-
                 case "⊥e":
                     Contradiction_Elimination();
                     break;
-
                 case "¬¬e":
                     Not_Not_Elimination();
                     break;
-
                 case "¬¬i":
                     Not_Not_Introduction();
                     break;
-
                 case "→i":
                     Arrow_Introduction();
                     break;
@@ -107,20 +98,20 @@ namespace LogicCalculator
                     Equal_Elimination();
                     break;
                 case "∀i":
-                case var ai when new Regex(@"∀.*i").IsMatch(ai):
+                case var ai when new Regex(@"∀.*i").IsMatch(ai) :
                     All_Introduction();
                     break;
-                case var ae when new Regex(@"∀.*e").IsMatch(ae):
+                case var ae when new Regex(@"∀.*e").IsMatch(ae) :
                     All_Elimination();
                     break;
-                case var ei when new Regex(@"∃.*i").IsMatch(ei):
+                case var ei when new Regex(@"∃.*i").IsMatch(ei) :
                     Exists_Introduction();
                     break;
-                case var ee when new Regex(@"∃.*i").IsMatch(ee):
+                case var ee when new Regex(@"∃.*i").IsMatch(ee) :
                     Exists_Elimination();
                     break;
             }
-        }
+}
 
         private void Data()
         {
@@ -337,12 +328,19 @@ namespace LogicCalculator
                    first_segment_end = statement_list[first_segment_lines[first_segment_lines.Count - 1]].Expression,
                    second_segment_end = statement_list[second_segment_lines[second_segment_lines.Count - 1]].Expression;
 
-            Is_Valid = Equal_With_Operator(base_expression, first_segment_start ,second_segment_start,"");
-            Is_Valid = first_segment_end == second_segment_end
-                    && second_segment_end == current_expression;
+            Is_Valid = current_expression == first_segment_end && current_expression == second_segment_end;
+            
+           if (!Is_Valid)
+           {
+               DisplayErrorMsg(current_expression + " Should be equal to " + first_segment_end +" and to "+ second_segment_end);
+               return;
+           }
+            Is_Valid = Equal_With_Operator(base_expression, first_segment_start, second_segment_start, "∨")
+            || Equal_With_Operator(base_expression, first_segment_start, second_segment_start, "v");
+
             if (!Is_Valid)
             {
-                DisplayErrorMsg(current_expression + " Should be equal to " + second_segment_end + " and to " + first_segment_end);
+                DisplayErrorMsg(base_expression + " Should be equal to " + first_segment_start + "∨" + second_segment_start);
                 return;
             }
         }
@@ -566,8 +564,28 @@ namespace LogicCalculator
         }
         private void Exists_Elimination() { throw new NotImplementedException(); }
 
+        #endregion
 
         #region UTILITY
+        private void Final_Check()
+        {
+            int index;
+            string to_prove = statement_list[0].Expression;
+
+            index = to_prove.IndexOf("⊢");
+            if (index == -1)
+            {
+                Is_Valid = false;
+                DisplayErrorMsg("Missing ⊢");
+                return;
+            }                
+            Is_Valid = statement_list[current_line].Expression == to_prove.Substring(index + 1);
+            if (!Is_Valid)
+            {                
+                DisplayErrorMsg("Last expression isnt what was needed to prove");
+            }
+        }
+
 
         private char Find_Letter(string to_search)
         {
