@@ -1618,7 +1618,9 @@ namespace LogicCalculator
             List<Tuple<int, string>> box_pairs_list = GetBoxPairs();
             string expression, rule, first_segment, second_segment, third_segment;
             int index;
-
+            bool isGoalAchived = false;
+            string msg = "All input is valid";
+            string header = "Conclusions";
             //One less column because of the line number column
 
 
@@ -1632,17 +1634,47 @@ namespace LogicCalculator
                     first_segment = ((TextBox)row.Children[SEGMENT1_INDEX]).IsEnabled ? ((TextBox)row.Children[SEGMENT1_INDEX]).Text.Replace(" ", string.Empty) : null;
                     second_segment = ((TextBox)row.Children[SEGMENT2_INDEX]).IsEnabled ? ((TextBox)row.Children[SEGMENT2_INDEX]).Text.Replace(" ", string.Empty) : null;
                     third_segment = ((TextBox)row.Children[SEGMENT3_INDEX]).IsEnabled ? ((TextBox)row.Children[SEGMENT3_INDEX]).Text.Replace(" ", string.Empty) : null;
+
                     if (!IsValidStatement(expression, rule, first_segment, second_segment, third_segment))
                         return;
                     statement_list.Add(new Statement(expression, rule, first_segment, second_segment, third_segment));
                     Evaluation e = new Evaluation(statement_list, rule);
                     if (!e.Is_Valid)
                         return;
-                    if (!IsValidBox(row, rule, first_segment, second_segment, third_segment))
-                        return;
                 }
             }
-            DisplayInfoMsg("All input is valid", "Success!");
+            isGoalAchived = checkGoalAchived(spGridTable.Children[spGridTable.Children.Count - 1] as Grid);
+            if (isGoalAchived)
+            {
+                foreach (Grid row in spGridTable.Children)
+                {
+                    index = spGridTable.Children.IndexOf(row);
+                    if (row.Children[LABEL_INDEX] is Label)
+                    {
+                        expression = ((TextBox)row.Children[STATEMENT_INDEX]).Text.Replace(" ", string.Empty);
+                        rule = ((ComboBox)row.Children[COMBOBOX_INDEX]).Text.Replace(" ", string.Empty);
+                        first_segment = ((TextBox)row.Children[SEGMENT1_INDEX]).IsEnabled ? ((TextBox)row.Children[SEGMENT1_INDEX]).Text.Replace(" ", string.Empty) : null;
+                        second_segment = ((TextBox)row.Children[SEGMENT2_INDEX]).IsEnabled ? ((TextBox)row.Children[SEGMENT2_INDEX]).Text.Replace(" ", string.Empty) : null;
+                        third_segment = ((TextBox)row.Children[SEGMENT3_INDEX]).IsEnabled ? ((TextBox)row.Children[SEGMENT3_INDEX]).Text.Replace(" ", string.Empty) : null;
+
+                        if (!IsValidBox(row, rule, first_segment, second_segment, third_segment))
+                            return;
+                    }
+                }
+            }
+            if (!isGoalAchived)
+                msg += ", but still didn't achived goal";
+                
+            else
+                msg += ", proof success!";
+            DisplayInfoMsg(msg, header);
+        }
+
+        private bool checkGoalAchived(Grid lastRow)
+        {
+            string lastRowInput = ((TextBox)lastRow.Children[STATEMENT_INDEX]).Text.Trim().Replace('^', '∧').Replace('∨', 'V').Replace('~', '¬');
+            string needToProof = tbValue.Text.Substring(tbValue.Text.IndexOf('⊢') + 1).Trim().Replace('^', '∧').Replace('∨', 'V').Replace('~', '¬');
+            return lastRowInput.Equals(needToProof);
         }
 
         private bool IsValidBox(Grid row, string rule, string first_segment, string second_segment, string third_segment)
