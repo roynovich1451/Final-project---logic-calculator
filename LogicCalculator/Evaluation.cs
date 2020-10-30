@@ -22,11 +22,8 @@ namespace LogicCalculator
             this.statement_list = statement_list;
             current_line = statement_list.Count - 1;
             predicate_regex = new Regex("[a-z|A-Z]+([a-z])");
-            //if (statement_list[current_line].Expression !=) ;
 
-            Handle_Rule(rule);
-            //if(Is_Valid)
-              //  Final_Check();
+            Handle_Rule(rule);         
         }
 
         #region RULES
