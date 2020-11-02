@@ -52,13 +52,15 @@
         <Grid Name="GridMain" Margin="5">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="73*"/>
-                <ColumnDefinition Width="691*"/>
+                <ColumnDefinition Width="99*"/>
+                <ColumnDefinition Width="476*"/>
+                <ColumnDefinition Width="116*"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="550"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
-            <Grid Name="GridPermanent" Grid.ColumnSpan="2">
+            <Grid Name="GridPermanent" Grid.ColumnSpan="4">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
@@ -67,7 +69,7 @@
             </Grid>
 
             <!--TABs-->
-            <TabControl Name="mainTab" Grid.ColumnSpan="2" SelectionChanged="MainTab_SelectionChanged">
+            <TabControl Name="mainTab" Grid.ColumnSpan="4" SelectionChanged="MainTab_SelectionChanged">
                 <TabItem Header="Logical Proof">
                     <!--LOGICAL PROOF TAB-->
                     <Grid Name="GridLogicalProof">
@@ -143,13 +145,12 @@
                 </TabItem>
             </TabControl>
             <!--KEYBOARD-->
-            <GroupBox Header="Logic Keyboard" Grid.Row="1" BorderThickness="2" BorderBrush="Black" Grid.ColumnSpan="2" Margin="0,0,0,-0.4">
+            <GroupBox Grid.Row="1" Padding="2,6,2,2" BorderThickness="0" BorderBrush="Black" Grid.ColumnSpan="4" Background="Black">
                 <Grid Name="gridKeyboard" MouseEnter="GridKeyboard_MouseEnter">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="*"/>
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="*"/>
@@ -262,23 +263,15 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <Button Name="btnExists" Content="∃" Margin="2" Click="BtnExists_Click"
-                            Grid.ColumnSpan="2" Grid.Column="5"/>
+                            Grid.ColumnSpan="2" Grid.Column="2"/>
                         <Button Name="btnForAll" Content="∀"  Margin="2" Click="BtnForAll_Click"
-                            Grid.ColumnSpan="2" Grid.Column="7"/>
+                            Grid.ColumnSpan="2" Grid.Column="10"/>
                         <Button Name="btnX" Content="X_0"  Margin="2" Click="BtnX_Click"
-                            Grid.ColumnSpan="2" Grid.Column="3"/>
+                            Grid.ColumnSpan="2" Grid.Column="0"/>
                         <Button Name="btnY" Content="Y_0"  Margin="2" Click="BtnY_Click"
-                            Grid.ColumnSpan="2" Grid.Column="9"/>
-                    </Grid>
-                    <Grid Grid.Row="4">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
+                            Grid.ColumnSpan="2" Grid.Column="12"/>
                         <Button Name="btnCreateBox" Content="Create Box"  Margin="2" Click="BtnCreateBox_Click"
-                            Grid.ColumnSpan="2" Grid.Column="1"/>
+                            Grid.ColumnSpan="6" Grid.Column="4"/>
                     </Grid>
                 </Grid>
             </GroupBox>
