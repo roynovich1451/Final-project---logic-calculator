@@ -169,7 +169,7 @@ namespace LogicCalculator
             if (index != -1)
             {
                 left_part = first_expression.Substring(0, index);
-                right_part = first_expression.Substring(index + 1, first_expression.Length - (index + 1));
+                right_part = first_expression.Substring(index + 1);
                 if (second_expression != "~" + right_part && second_expression != "¬" + right_part)
                 {
                     DisplayErrorMsg("MT missing ¬");
@@ -183,7 +183,7 @@ namespace LogicCalculator
                 if (index != -1)
                 {
                     left_part = second_expression.Substring(0, index);
-                    right_part = second_expression.Substring(index + 1, second_expression.Length - (index + 1));
+                    right_part = second_expression.Substring(index + 1);
                     if (first_expression != "~" + right_part && first_expression != "¬" + right_part)
                     {
                         DisplayErrorMsg("MT missing ¬");
@@ -231,7 +231,7 @@ namespace LogicCalculator
                 return;
             }
             left_part = expression.Substring(0, index);
-            right_part = expression.Substring(index + 1, expression.Length - (index + 1));
+            right_part = expression.Substring(index + 1);
             Is_Valid = Check_If_Not(left_part, right_part);
             if (!Is_Valid)
             {
@@ -402,7 +402,6 @@ namespace LogicCalculator
                 DisplayErrorMsg("Missuse of Not Introduction");
         }
 
-        //TODO add box checks
         private void Not_Elimination()
         {
             Is_Valid = statement_list[current_line].Expression == "⊥";
@@ -419,7 +418,6 @@ namespace LogicCalculator
                 DisplayErrorMsg("Missuse of Not Elimination");
         }
 
-        //TODO add box checks
         private void Contradiction_Elimination()
         {
             Is_Valid = statement_list[current_line - 1].Expression == "⊥";
@@ -492,7 +490,7 @@ namespace LogicCalculator
                 return;
             }
             Is_Valid = current_expression.Substring(0, index) ==
-                current_expression.Substring(index + 1, current_expression.Length - (index + 1));
+                current_expression.Substring(index + 1);
             if (!Is_Valid)
                 DisplayErrorMsg("Equal introduction format is t1=t1");
         }
@@ -503,23 +501,46 @@ namespace LogicCalculator
 
 
             string current_expression = statement_list[current_line].Expression,
+                first_expression= statement_list[first_line].Expression,
+                second_expression= statement_list[second_line].Expression,
                 first_left, first_right, second_left, second_right,current_left,current_right;
-            index = current_expression.IndexOf('=');
+
+            index = current_expression.IndexOf("=");
             if (index == -1)
             {
                 DisplayErrorMsg("Missing = in row");
                 return;
             }
             current_left = current_expression.Substring(0,index);
-            current_right = current_expression.Substring(index + 1, current_expression.Length - (index + 1));
+            current_right = current_expression.Substring(index + 1);
+
+            index = first_expression.IndexOf("=");
+            if (index == -1)
+            {
+                DisplayErrorMsg("Missing = in row");
+                return;
+            }
+            first_left =first_expression.Substring(0,index);
+            first_right =first_expression.Substring(index+1);
+
+            index = second_expression.IndexOf("=");
+            if (index == -1)
+            {
+                DisplayErrorMsg("Missing = in row");
+                return;
+            }
+            second_left = second_expression.Substring(0, index);
+            second_right = second_expression.Substring(index + 1);
+
+
+
             //if()
             Is_Valid = current_expression ==
-                current_expression.Substring(index + 1, current_expression.Length - (index + 1));
+                current_expression.Substring(index + 1);
             if (!Is_Valid)
                 DisplayErrorMsg("Equal introduction format is t1=t1");
         }
 
-        //TODO add box checks
         private void All_Introduction() {
             Regex all_regex = new Regex("∀[a-z]+[a-z|A-Z]*([a-z])");
             int index;
@@ -564,25 +585,6 @@ namespace LogicCalculator
         #endregion
 
         #region UTILITY
-        private void Final_Check()
-        {
-            int index;
-            string to_prove = statement_list[0].Expression;
-
-            index = to_prove.IndexOf("⊢");
-            if (index == -1)
-            {
-                Is_Valid = false;
-                DisplayErrorMsg("Missing ⊢");
-                return;
-            }                
-            Is_Valid = statement_list[current_line].Expression == to_prove.Substring(index + 1);
-            if (!Is_Valid)
-            {                
-                DisplayErrorMsg("Last expression isnt what was needed to prove");
-            }
-        }
-
 
         private char Find_Letter(string to_search)
         {
@@ -598,20 +600,6 @@ namespace LogicCalculator
             return letter;
         }
 
-        private int Find_Closer_Paranthesis(string to_check)
-        {
-            int paranthesis_number = 0;
-            for(int i=0;i<to_check.Length;i++)
-            {
-                if (to_check[i] == ')')
-                    paranthesis_number--;
-                if (to_check[i] == '(')
-                    paranthesis_number++;
-                if(paranthesis_number==0)
-                    return i;
-            }
-            return -1;
-        }
 
         private int Get_Row(string s)
         {
@@ -645,7 +633,7 @@ namespace LogicCalculator
             if (index != -1)
             {
                 int starting_number = Int32.Parse(seg.Substring(0, index)),
-                    last_number = Int32.Parse(seg.Substring(index + 1, seg.Length - (index + 1)));
+                    last_number = Int32.Parse(seg.Substring(index+1));
                 ret.AddRange(Enumerable.Range(starting_number, last_number - starting_number + 1));
             }
             else
