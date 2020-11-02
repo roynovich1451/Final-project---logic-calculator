@@ -114,7 +114,7 @@
                             </Grid>
                         </StackPanel>
                         <ScrollViewer Grid.ColumnSpan="4" Margin="0,90,-0.6,49.4" Grid.RowSpan="3" ScrollViewer.VerticalScrollBarVisibility="Auto">
-                            <StackPanel Name="spGridTable" >
+                            <StackPanel Name="spGridTable">
 
                             </StackPanel>
                         </ScrollViewer>

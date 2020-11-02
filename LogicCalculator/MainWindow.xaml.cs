@@ -193,6 +193,7 @@ namespace LogicCalculator
                     }
                 }
             }
+            HandleMasterCheck();
         }
         private void MenuItemSave_Click(object sender, RoutedEventArgs e)
         {
@@ -1324,6 +1325,7 @@ namespace LogicCalculator
             }
             return verified.Count;
         }
+       
         private int checkAllBoxesPadding(List<Grid> checkedRows)
         {
             foreach (Grid row in spGridTable.Children)
@@ -1618,6 +1620,16 @@ namespace LogicCalculator
         private void HandleTableInput()
         {
             statement_list.Clear();
+            if (string.IsNullOrEmpty(tbValue.Text))
+            {
+                DisplayErrorMsg("Miss proof header","Error");
+                return;
+            }
+            if (spGridTable.Children.Count == 0)
+            {
+                DisplayErrorMsg("Nothing to check", "Error");
+                return;
+            }
             statement_list.Add(new Statement(tbValue.Text, "first", "0"));
             List<Tuple<int, string>> box_pairs_list = GetBoxPairs();
             string expression, rule, first_segment, second_segment, third_segment;
@@ -1665,12 +1677,11 @@ namespace LogicCalculator
                             return;
                     }
                 }
+                msg += ", proof success!";
             }
-            if (!isGoalAchived)
+            else
                 msg += ", but still didn't achived goal";
                 
-            else
-                msg += ", proof success!";
             DisplayInfoMsg(msg, header);
         }
 
