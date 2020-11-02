@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Tracing;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -23,14 +24,18 @@ namespace LogicCalculator
             current_line = statement_list.Count - 1;
             predicate_regex = new Regex("[a-z|A-Z]+([a-z])");
 
-            Handle_Rule(rule);         
+            Handle_Rule(rule);
         }
 
         #region RULES
 
-        private void Handle_Rule(string rule){
-                switch (rule)
+        private void Handle_Rule(string rule)
+        {
+            switch (rule)
             {
+                case "None":
+                    None();
+                    break;
                 case "Data":
                     Data();
                     break;
@@ -95,20 +100,29 @@ namespace LogicCalculator
                     Equal_Elimination();
                     break;
                 case "∀i":
-                case var ai when new Regex(@"∀.*i").IsMatch(ai) :
+                case var ai when new Regex(@"∀.*i").IsMatch(ai):
                     All_Introduction();
                     break;
-                case var ae when new Regex(@"∀.*e").IsMatch(ae) :
+                case var ae when new Regex(@"∀.*e").IsMatch(ae):
                     All_Elimination();
                     break;
-                case var ei when new Regex(@"∃.*i").IsMatch(ei) :
+                case var ei when new Regex(@"∃.*i").IsMatch(ei):
                     Exists_Introduction();
                     break;
-                case var ee when new Regex(@"∃.*i").IsMatch(ee) :
+                case var ee when new Regex(@"∃.*i").IsMatch(ee):
                     Exists_Elimination();
                     break;
             }
-}
+        }
+
+        private void None()
+        {
+            Is_Valid = statement_list[current_line].Expression.Equals("X0") ||
+                statement_list[current_line].Expression.Equals("Y0");
+            if (!Is_Valid)
+                DisplayErrorMsg("Empty rule must be X0 or Y0");
+            return;
+        }
 
         private void Data()
         {
@@ -248,7 +262,7 @@ namespace LogicCalculator
             if (first_row == -1 || second_row == -1)
                 return;
 
-            Is_Valid = current.Contains("^")|| current.Contains("∧");
+            Is_Valid = current.Contains("^") || current.Contains("∧");
             if (!Is_Valid)
             {
                 DisplayErrorMsg("Missing ∧ in and introduction");
@@ -326,12 +340,12 @@ namespace LogicCalculator
                    second_segment_end = statement_list[second_segment_lines[second_segment_lines.Count - 1]].Expression;
 
             Is_Valid = current_expression == first_segment_end && current_expression == second_segment_end;
-            
-           if (!Is_Valid)
-           {
-               DisplayErrorMsg(current_expression + " Should be equal to " + first_segment_end +" and to "+ second_segment_end);
-               return;
-           }
+
+            if (!Is_Valid)
+            {
+                DisplayErrorMsg(current_expression + " Should be equal to " + first_segment_end + " and to " + second_segment_end);
+                return;
+            }
             Is_Valid = Equal_With_Operator(base_expression, first_segment_start, second_segment_start, "∨")
             || Equal_With_Operator(base_expression, first_segment_start, second_segment_start, "v");
 
@@ -501,9 +515,9 @@ namespace LogicCalculator
 
 
             string current_expression = statement_list[current_line].Expression,
-                first_expression= statement_list[first_line].Expression,
-                second_expression= statement_list[second_line].Expression,
-                first_left, first_right, second_left, second_right,current_left,current_right;
+                first_expression = statement_list[first_line].Expression,
+                second_expression = statement_list[second_line].Expression,
+                first_left, first_right, second_left, second_right, current_left, current_right;
 
             index = current_expression.IndexOf("=");
             if (index == -1)
@@ -511,7 +525,7 @@ namespace LogicCalculator
                 DisplayErrorMsg("Missing = in row");
                 return;
             }
-            current_left = current_expression.Substring(0,index);
+            current_left = current_expression.Substring(0, index);
             current_right = current_expression.Substring(index + 1);
 
             index = first_expression.IndexOf("=");
@@ -520,8 +534,8 @@ namespace LogicCalculator
                 DisplayErrorMsg("Missing = in row");
                 return;
             }
-            first_left =first_expression.Substring(0,index);
-            first_right =first_expression.Substring(index+1);
+            first_left = first_expression.Substring(0, index);
+            first_right = first_expression.Substring(index + 1);
 
             index = second_expression.IndexOf("=");
             if (index == -1)
@@ -541,29 +555,31 @@ namespace LogicCalculator
                 DisplayErrorMsg("Equal introduction format is t1=t1");
         }
 
-        private void All_Introduction() {
+        private void All_Introduction()
+        {
             Regex all_regex = new Regex("∀[a-z]+[a-z|A-Z]*([a-z])");
             int index;
-            List < int > line_numbers= Get_Lines_From_Segment(statement_list[current_line].First_segment);
+            List<int> line_numbers = Get_Lines_From_Segment(statement_list[current_line].First_segment);
             string current_expression = statement_list[current_line].Expression,
-                last_expression= statement_list[line_numbers[line_numbers.Count-1]].Expression;
+                last_expression = statement_list[line_numbers[line_numbers.Count - 1]].Expression;
             char letter = Find_Letter(last_expression);
             current_expression.Replace(current_expression[4], letter);
             Is_Valid = current_expression.Substring(2) == last_expression;
         }
-        private void All_Elimination() {
+        private void All_Elimination()
+        {
             int index, previous_line = Get_Row(statement_list[current_line].First_segment);
             string current_expression = statement_list[current_line].Expression,
-                previous_expression= statement_list[previous_line].Expression;
+                previous_expression = statement_list[previous_line].Expression;
 
-            index = statement_list[current_line].Rule[previous_expression.IndexOf("∀")]+1;
+            index = statement_list[current_line].Rule[previous_expression.IndexOf("∀")] + 1;
             char letter = statement_list[current_line].Rule[index];
             string all = "∀" + letter;
 
-            index = previous_expression.IndexOf(all)+2;
+            index = previous_expression.IndexOf(all) + 2;
             if (index == -1)
             {
-                DisplayErrorMsg("Missing "+all+" in row");
+                DisplayErrorMsg("Missing " + all + " in row");
                 return;
             }
 
@@ -574,7 +590,8 @@ namespace LogicCalculator
                 DisplayErrorMsg("Misuse of all elimination");
             }
         }
-        private void Exists_Introduction() {
+        private void Exists_Introduction()
+        {
             int previous_line = Get_Row(statement_list[current_line].First_segment);
             string current_expression = statement_list[current_line].Expression,
                 previous_expression = statement_list[previous_line].Expression;
@@ -588,10 +605,10 @@ namespace LogicCalculator
 
         private char Find_Letter(string to_search)
         {
-            char letter='%';
-            for (int i = 0; i < to_search.Length- PREDICATE_LENGTH; i++)
+            char letter = '%';
+            for (int i = 0; i < to_search.Length - PREDICATE_LENGTH; i++)
             {
-                if(predicate_regex.IsMatch(to_search.Substring(i, PREDICATE_LENGTH)))              
+                if (predicate_regex.IsMatch(to_search.Substring(i, PREDICATE_LENGTH)))
                 {
                     letter = to_search[i + 2];
                     break;
@@ -633,7 +650,7 @@ namespace LogicCalculator
             if (index != -1)
             {
                 int starting_number = Int32.Parse(seg.Substring(0, index)),
-                    last_number = Int32.Parse(seg.Substring(index+1));
+                    last_number = Int32.Parse(seg.Substring(index + 1));
                 ret.AddRange(Enumerable.Range(starting_number, last_number - starting_number + 1));
             }
             else
@@ -656,12 +673,12 @@ namespace LogicCalculator
 
         private bool My_Equal(string first, string second)
         {
-            return first == second ||'('+ first + ')' == second ||  first == '(' + second + ')' || '(' + first + ')' == '(' + second + ')';
+            return first == second || '(' + first + ')' == second || first == '(' + second + ')' || '(' + first + ')' == '(' + second + ')';
         }
 
-        private bool Equal_With_Operator(string expression,string first, string second,string op)
+        private bool Equal_With_Operator(string expression, string first, string second, string op)
         {
-            return expression == first+op+second || expression == '(' + first + ')' + op + second || expression == first + op + '(' + second + ')' || expression == '(' + first + ')' + op + '(' + second + ')'||
+            return expression == first + op + second || expression == '(' + first + ')' + op + second || expression == first + op + '(' + second + ')' || expression == '(' + first + ')' + op + '(' + second + ')' ||
                 expression == second + op + first || expression == '(' + second + ')' + op + first || expression == second + op + '(' + first + ')' || expression == '(' + second + ')' + op + '(' + first + ')';
         }
         #endregion UTILITY

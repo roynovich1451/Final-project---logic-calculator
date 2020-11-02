@@ -87,7 +87,7 @@ namespace LogicCalculator
         private int table_row_num = 0;
         private static readonly int TABLE_COL_NUM = 6;
         private TextBox elementWithFocus;
-        private readonly List<string> rules = new List<string> { "Data", "Assumption", "LEM", "PBC", "MP", "MT", "Copy"
+        private readonly List<string> rules = new List<string> { "None","Data", "Assumption", "LEM", "PBC", "MP", "MT", "Copy"
                                                                  ,"∧i", "∧e1", "∧e2", "∨i1", "∨i2", "∨e", "¬¬e",
                                                                  "¬¬i", "→i", "⊥e", "¬i", "¬e", "→i",
                                                                  "=i","=e","∀x i","∀x e","∃x i","∃x e","∀y i","∀y e","∃y i","∃y e" };
@@ -763,6 +763,7 @@ namespace LogicCalculator
                 case "Data":
                 case "Assumption":
                 case "LEM":
+                case "None":
                 case "=i":
                     HandleGridVisability(parent, 0);
                     //handleBox(cmb, location);
@@ -1325,7 +1326,7 @@ namespace LogicCalculator
             }
             return verified.Count;
         }
-       
+
         private int checkAllBoxesPadding(List<Grid> checkedRows)
         {
             foreach (Grid row in spGridTable.Children)
@@ -1622,7 +1623,7 @@ namespace LogicCalculator
             statement_list.Clear();
             if (string.IsNullOrEmpty(tbValue.Text))
             {
-                DisplayErrorMsg("Miss proof header","Error");
+                DisplayErrorMsg("Miss proof header", "Error");
                 return;
             }
             if (spGridTable.Children.Count == 0)
@@ -1681,7 +1682,7 @@ namespace LogicCalculator
             }
             else
                 msg += ", but still didn't achived goal";
-                
+
             DisplayInfoMsg(msg, header);
         }
 
@@ -1926,7 +1927,8 @@ namespace LogicCalculator
         private bool IsOperator(char c)
         {
             return c == '^' || c == 'v' || c == '|' || c == '¬' || c == '~' ||
-                c == '∧' || c == '→' || c == '∨' || c == '↔' || c == '⊢' || c == '⊥';
+                c == '∧' || c == '→' || c == '∨' || c == '↔' || c == '⊢' ||
+                c == '⊥' || c == '∃' || c == '∀';
         }
         public void Expression_Error(int row, string error, int index = -1)
         {
@@ -1962,6 +1964,11 @@ namespace LogicCalculator
 
                 if (Char.IsNumber(c))
                 {
+                    if (i > 0)
+                    {
+                        if (input[i] == '0' && (input[i - 1] == 'X' || input[i - 1] == 'Y'))
+                            continue;
+                    }  
                     Expression_Error(row, "Entering digits is not allowed, problematic char is: " + c, i);
                     return false;
                 }
