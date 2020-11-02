@@ -115,6 +115,8 @@ namespace LogicCalculator
                     return;
             }
             NewFile();
+            elementWithFocus = tbValue;
+            Keyboard.Focus(elementWithFocus);
         }
         private void NewFile()
         {
