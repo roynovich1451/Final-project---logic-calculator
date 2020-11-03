@@ -2,8 +2,12 @@
 using System.Collections.Generic;
 using System.Diagnostics.Tracing;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Runtime.ExceptionServices;
 using System.Text.RegularExpressions;
+using System.Web.UI;
 using System.Windows;
+using System.Windows.Media.Media3D;
 
 namespace LogicCalculator
 {
@@ -33,6 +37,13 @@ namespace LogicCalculator
         {
             switch (rule)
             {
+                case "Proveni":
+                    //THIS ON VERIFIED IN MAINWINDOW\
+                    Is_Valid = true;
+                    break;
+                case "Provene":
+                    Proven_Elimination();
+                    break;
                 case "None":
                     None();
                     break;
@@ -113,6 +124,79 @@ namespace LogicCalculator
                     Exists_Elimination();
                     break;
             }
+        }
+
+        private HashSet<string> getData(string s)
+        {
+            HashSet<string> ret = new HashSet<string>();
+            string[] splited = s.Split('⊢');
+            string[] all_data = splited[0].Split(',');
+            foreach (var d in all_data)
+            {
+                ret.Add(replaceAll(d));
+            }
+            return ret;
+        }
+        private string getGoal(string s)
+        {
+            if (!s.Contains('⊢'))
+                return null;
+            string[] splited = s.Split('⊢');
+            return replaceAll(splited[1]);
+        }
+
+        private string replaceAll(string s)
+        {
+            return s.Trim().Replace('^', '∧').Replace('V', '∨').Replace('~', '¬').Replace(" ", "");
+        }
+        private void Proven_Elimination()
+        {
+            int proven_index = Get_Row(statement_list[current_line].First_segment);
+            HashSet<string> proven_data = getData(statement_list[proven_index].Expression);
+            string msg = "Proven elimination first segment must be positive integer\nSecond segment must be positive integers separate by ','";
+            List<int> data_indexes = Get_Rows_For_Proven(statement_list[current_line].Second_segment);
+            if (data_indexes == null)
+            {
+                DisplayErrorMsg(msg);
+                return;
+            }
+            HashSet<string> provided_data = new HashSet<string>();
+            foreach (int index in data_indexes)
+            {
+                provided_data.Add(replaceAll(statement_list[index].Expression));
+            }
+            string proven_goal = getGoal(statement_list[proven_index].Expression);
+            string current_goal = replaceAll(statement_list[current_line].Expression);
+            bool data_check = compare_sets(proven_data, provided_data);
+            
+            if (!data_check)
+                msg = "Data given is not equivelant to the data needed" +
+                    "";
+            bool goal_check = !string.IsNullOrEmpty(proven_goal) &&
+                !string.IsNullOrEmpty(current_goal) &&
+                proven_goal.Equals(current_goal);
+            if (!goal_check)
+            {
+                if (!string.IsNullOrEmpty(msg))
+                    msg += "\nAlso, ";
+                msg += "Goals are not the same";
+            }
+            Is_Valid = data_check && goal_check;
+            if (!Is_Valid)
+                DisplayErrorMsg(msg);
+            return;
+        }
+
+        private bool compare_sets(HashSet<string> s1, HashSet<string> s2)
+        {
+            if (s1.Count != s2.Count)
+                return false;
+            foreach (var d in s1)
+            {
+                if (!s2.Contains(d))
+                    return false;
+            }
+            return true;
         }
 
         private void None()
@@ -656,6 +740,20 @@ namespace LogicCalculator
             else
                 ret.Add(Int32.Parse(seg));
 
+            return ret;
+        }
+
+        private List<int> Get_Rows_For_Proven(string seg)
+        {
+            List<int> ret = new List<int>();
+            
+            string[] indexes = seg.Split(',');
+            foreach (var s in indexes)
+            {
+                if (!Int32.TryParse(s, out int o))
+                    return null;
+                ret.Add(o);
+            }
             return ret;
         }
 

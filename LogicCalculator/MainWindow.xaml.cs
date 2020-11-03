@@ -76,6 +76,7 @@ namespace LogicCalculator
         private const int ERRBOXMISSCLOSE = 4;
         private const int ERRBOXPADDING = 5;
         private const int ERRNOTFOUND = 6;
+        private const int ERRMISSTURNSTILE = 7;
         #endregion
 
         #endregion DEFINES
@@ -87,7 +88,7 @@ namespace LogicCalculator
         private int table_row_num = 0;
         private static readonly int TABLE_COL_NUM = 6;
         private TextBox elementWithFocus;
-        private readonly List<string> rules = new List<string> { "None","Data", "Assumption", "LEM", "PBC", "MP", "MT", "Copy"
+        private readonly List<string> rules = new List<string> { "None","Data","Proven i","Proven e", "Assumption", "LEM", "PBC", "MP", "MT", "Copy"
                                                                  ,"∧i", "∧e1", "∧e2", "∨i1", "∨i2", "∨e", "¬¬e",
                                                                  "¬¬i", "→i", "⊥e", "¬i", "¬e", "→i",
                                                                  "=i","=e","∀x i","∀x e","∃x i","∃x e","∀y i","∀y e","∃y i","∃y e" };
@@ -180,7 +181,7 @@ namespace LogicCalculator
                             Grid current_row = CreateRow(-1);
 
                             expression = proof_table.Rows[i].Cells[1].Paragraphs.First().Text.Replace(" ", string.Empty);
-                            rule = proof_table.Rows[i].Cells[2].Paragraphs.First().Text.Replace(" ", string.Empty);
+                            rule = proof_table.Rows[i].Cells[2].Paragraphs.First().Text;
                             first_segment = proof_table.Rows[i].Cells[3].Paragraphs.First().Text.Replace(" ", string.Empty);
                             second_segment = proof_table.Rows[i].Cells[4].Paragraphs.First().Text.Replace(" ", string.Empty);
                             third_segment = proof_table.Rows[i].Cells[5].Paragraphs.First().Text.Replace(" ", string.Empty);
@@ -243,7 +244,7 @@ namespace LogicCalculator
                             {
                                 line_num = ((Label)row.Children[LABEL_INDEX]).Content.ToString();
                                 expression = ((TextBox)row.Children[STATEMENT_INDEX]).Text.Replace(" ", string.Empty);
-                                rule = ((ComboBox)row.Children[COMBOBOX_INDEX]).Text.Replace(" ", string.Empty);
+                                rule = ((ComboBox)row.Children[COMBOBOX_INDEX]).Text;
                                 first_segment = ((TextBox)row.Children[SEGMENT1_INDEX]).IsEnabled ? ((TextBox)row.Children[SEGMENT1_INDEX]).Text.Replace(" ", string.Empty) : null;
                                 second_segment = ((TextBox)row.Children[SEGMENT2_INDEX]).IsEnabled ? ((TextBox)row.Children[SEGMENT2_INDEX]).Text.Replace(" ", string.Empty) : null;
                                 third_segment = ((TextBox)row.Children[SEGMENT3_INDEX]).IsEnabled ? ((TextBox)row.Children[SEGMENT3_INDEX]).Text.Replace(" ", string.Empty) : null;
@@ -765,6 +766,7 @@ namespace LogicCalculator
                 case "LEM":
                 case "None":
                 case "=i":
+                case "Proven i":
                     HandleGridVisability(parent, 0);
                     //handleBox(cmb, location);
                     break;
@@ -794,6 +796,7 @@ namespace LogicCalculator
                 case "∧i":
                 case "∃e":
                 case "=e":
+                case "Proven e":
                 case var ee when new Regex(@"∃.*e").IsMatch(ee):
                     HandleGridVisability(parent, 2);
                     break;
@@ -1545,6 +1548,7 @@ namespace LogicCalculator
             }
             return ret;
         }
+        /*
         public List<Tuple<int, string>> GetBoxPairs()
         {
             UIElementCollection grids = spGridTable.Children;
@@ -1560,7 +1564,7 @@ namespace LogicCalculator
             }
             return ret;
         }
-
+        */
         private bool IsValidStatement(string expression, string rule, string first_segment,
            string second_segment, string third_segment)
         {
@@ -1620,23 +1624,28 @@ namespace LogicCalculator
         //OREN
         private void HandleTableInput()
         {
+            string msg = "All input is valid";
             statement_list.Clear();
             if (string.IsNullOrEmpty(tbValue.Text))
             {
                 DisplayErrorMsg("Miss proof header", "Error");
                 return;
             }
+            if (!isValidLogicalEquivalent(tbValue.Text))
+            {
+                return;  
+            }
             if (spGridTable.Children.Count == 0)
             {
                 DisplayErrorMsg("Nothing to check", "Error");
                 return;
             }
+
             statement_list.Add(new Statement(tbValue.Text, "first", "0"));
-            List<Tuple<int, string>> box_pairs_list = GetBoxPairs();
             string expression, rule, first_segment, second_segment, third_segment;
             int index;
             bool isGoalAchived = false;
-            string msg = "All input is valid";
+
             string header = "Conclusions";
             //One less column because of the line number column
 
@@ -1651,9 +1660,16 @@ namespace LogicCalculator
                     first_segment = ((TextBox)row.Children[SEGMENT1_INDEX]).IsEnabled ? ((TextBox)row.Children[SEGMENT1_INDEX]).Text.Replace(" ", string.Empty) : null;
                     second_segment = ((TextBox)row.Children[SEGMENT2_INDEX]).IsEnabled ? ((TextBox)row.Children[SEGMENT2_INDEX]).Text.Replace(" ", string.Empty) : null;
                     third_segment = ((TextBox)row.Children[SEGMENT3_INDEX]).IsEnabled ? ((TextBox)row.Children[SEGMENT3_INDEX]).Text.Replace(" ", string.Empty) : null;
-
-                    if (!IsValidStatement(expression, rule, first_segment, second_segment, third_segment))
-                        return;
+                    if (rule.Equals("Proveni"))
+                    {
+                        if (!isValidLogicalEquivalent(expression))
+                            return;
+                    }
+                    else
+                    {
+                        if (!IsValidStatement(expression, rule, first_segment, second_segment, third_segment))
+                            return;
+                    }
                     statement_list.Add(new Statement(expression, rule, first_segment, second_segment, third_segment));
                     Evaluation e = new Evaluation(statement_list, rule);
                     if (!e.Is_Valid)
@@ -1686,13 +1702,52 @@ namespace LogicCalculator
             DisplayInfoMsg(msg, header);
         }
 
-        private bool checkGoalAchived(Grid lastRow)
+        private bool isValidLogicalEquivalent(string s)
         {
-            string lastRowInput = ((TextBox)lastRow.Children[STATEMENT_INDEX]).Text.Trim().Replace('^', '∧').Replace('∨', 'V').Replace('~', '¬');
-            string needToProof = tbValue.Text.Substring(tbValue.Text.IndexOf('⊢') + 1).Trim().Replace('^', '∧').Replace('∨', 'V').Replace('~', '¬');
-            return lastRowInput.Equals(needToProof);
+            //VALIDATE HAS '⊢'
+            if (!s.Contains('⊢'))
+            {
+                DisplayErrorMsg("Valid logical Equivalent must contain '⊢'", "Error");
+                return false;
+            }
+            //VALIDATE WHAT SHOULD BE PROOF
+            string goal = getGoal(s);
+            if (!IsValidExpression(goal, -1, false))
+                return false;
+            //VALIDATE DATA
+            string data = getData(s);
+            string[] dataSplit = data.Split(',');
+            foreach (string d in dataSplit)
+            {
+                if (!IsValidExpression(d, -1, false))
+                {
+                    return false;
+                }
+            }
+            return true;
         }
 
+        private bool checkGoalAchived(Grid lastRow)
+        {
+            string lastRowInput = replaceAll(((TextBox)lastRow.Children[STATEMENT_INDEX]).Text);
+            string needToProof = getGoal(tbValue.Text);
+            return lastRowInput.Equals(needToProof);
+        }
+        private string getData(string s)
+        {
+            string[] splited = s.Split('⊢');
+            return replaceAll(splited[0]);
+        }
+        private string getGoal(string s)
+        {
+            string[] splited = s.Split('⊢');
+            return replaceAll(splited[1]);
+        }
+
+        private string replaceAll(string s)
+        {
+            return s.Trim().Replace('^', '∧').Replace('V', '∨').Replace('~', '¬').Replace(" ", "");
+        }
         private bool IsValidBox(Grid row, string rule, string first_segment, string second_segment, string third_segment)
         {
 
@@ -1933,6 +1988,10 @@ namespace LogicCalculator
         public void Expression_Error(int row, string error, int index = -1)
         {
             string error_message = "Error on row: " + row;
+            if (row == -1)
+            {
+                error_message = "Error on logical expession given:";
+            }
             if (index != -1)
             {
                 error_message += " index: " + index;
@@ -1968,7 +2027,7 @@ namespace LogicCalculator
                     {
                         if (input[i] == '0' && (input[i - 1] == 'X' || input[i - 1] == 'Y'))
                             continue;
-                    }  
+                    }
                     Expression_Error(row, "Entering digits is not allowed, problematic char is: " + c, i);
                     return false;
                 }
@@ -2049,12 +2108,15 @@ namespace LogicCalculator
         }
         public bool IsValidSegment(string seg)
         {
-            int index = seg.IndexOf('-');
-            if (index == -1)
+            string[] splitted = seg.Split(new Char[] { ',', '-' });
+            if (seg.Contains('-') && splitted.Length > 2)
+
+            foreach (var s in splitted)
             {
-                return Int32.TryParse(seg, out _);
+                if (!Int32.TryParse(s, out _))
+                    return false;
             }
-            return Int32.TryParse(seg.Substring(0, index), out _) && Int32.TryParse(seg.Substring(index + 1, seg.Length - (index + 1)), out _);
+            return true;
         }
         #endregion INPUT_CHECKS
 
