@@ -629,20 +629,124 @@ namespace LogicCalculator
             }
             second_left = second_expression.Substring(0, index);
             second_right = second_expression.Substring(index + 1);
+            
+            //first case
+            if (first_left == current_left)
+            {
+                if (first_right == second_left)
+                {
+                    Is_Valid = second_right == current_right;
+                    if (!Is_Valid)
+                    {
+                        DisplayErrorMsg("Misuse of equal elimination");
+                        return;
+                    }
+                }
+                else if (first_right == second_right)
+                {
+                    Is_Valid = second_left == current_right;
+                    if (!Is_Valid)
+                    {
+                        DisplayErrorMsg("Misuse of equal elimination");
+                        return;
+                    }
+                }
+                else
+                {
+                    Is_Valid = false;
+                    DisplayErrorMsg("Misuse of equal elimination");
+                    return;
+                }
+            }
+            //second case
+            else if (first_left == current_right)
+            {
+                if (first_right == second_left)
+                {
+                    Is_Valid = second_right == current_left;
+                    if (!Is_Valid)
+                    {
+                        DisplayErrorMsg("Misuse of equal elimination");
+                        return;
+                    }
+                }
+                else if (first_right == second_right)
+                {
+                    Is_Valid = second_left == current_left;
+                    if (!Is_Valid)
+                    {
+                        DisplayErrorMsg("Misuse of equal elimination");
+                        return;
+                    }
+                }
+                else
+                {
+                    Is_Valid = false;
+                    DisplayErrorMsg("Misuse of equal elimination");
+                    return;
+                }
+            }
 
-
-
-            //if()
-            Is_Valid = current_expression ==
-                current_expression.Substring(index + 1);
-            if (!Is_Valid)
-                DisplayErrorMsg("Equal introduction format is t1=t1");
+            //third case
+            else if (first_right == current_left) {
+                if (first_left == second_left)
+                {
+                    Is_Valid = second_right == current_right;
+                    if (!Is_Valid)
+                    {
+                        DisplayErrorMsg("Misuse of equal elimination");
+                        return;
+                    }
+                }
+                else if (first_left == second_right)
+                {
+                    Is_Valid = second_left == current_right;
+                    if (!Is_Valid)
+                    {
+                        DisplayErrorMsg("Misuse of equal elimination");
+                        return;
+                    }
+                }
+                else
+                {
+                    Is_Valid = false;
+                    DisplayErrorMsg("Misuse of equal elimination");
+                    return;
+                }
+            }
+            //fourth case
+            else if (first_right == current_right) {
+                if (first_left == second_left) {
+                    Is_Valid = second_right == current_left;
+                    if (!Is_Valid)
+                    {
+                        DisplayErrorMsg("Misuse of equal elimination");
+                        return;
+                    }
+                }
+                else if (first_left == second_right) {
+                    Is_Valid = second_left == current_left;
+                    if (!Is_Valid)
+                    {
+                        DisplayErrorMsg("Misuse of equal elimination");
+                        return;
+                    }
+                }
+                else
+                {
+                    Is_Valid = false;
+                    DisplayErrorMsg("Misuse of equal elimination");
+                    return;
+                }
+            }
+            else {
+                Is_Valid = false;
+                DisplayErrorMsg("Misuse of equal elimination");
+            }           
         }
 
         private void All_Introduction()
         {
-            Regex all_regex = new Regex("∀[a-z]+[a-z|A-Z]*([a-z])");
-            int index;
             List<int> line_numbers = Get_Lines_From_Segment(statement_list[current_line].First_segment);
             string current_expression = statement_list[current_line].Expression,
                 last_expression = statement_list[line_numbers[line_numbers.Count - 1]].Expression;
