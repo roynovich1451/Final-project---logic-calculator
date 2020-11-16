@@ -679,9 +679,25 @@ namespace LogicCalculator
             int previous_line = Get_Row(statement_list[current_line].First_segment);
             string current_expression = statement_list[current_line].Expression,
                 previous_expression = statement_list[previous_line].Expression;
+            char letter = Find_Letter(previous_expression);
+            current_expression.Replace(current_expression[4], letter);
             Is_Valid = current_expression == previous_expression;
+            if (!Is_Valid)
+            {
+                DisplayErrorMsg("Misuse of exist introduction");
+            }
         }
-        private void Exists_Elimination() { throw new NotImplementedException(); }
+        private void Exists_Elimination() {
+            List<int> second_seg_rows= Get_Lines_From_Segment(statement_list[current_line].Second_segment);
+            int previous_line=second_seg_rows[second_seg_rows.Count];
+            string current_expression = statement_list[current_line].Expression,
+                previous_expression = statement_list[previous_line].Expression;
+            Is_Valid = current_expression == previous_expression;
+            if (!Is_Valid)
+            {
+                DisplayErrorMsg("Misuse of exist introduction");
+            }
+        }
 
         #endregion
 
