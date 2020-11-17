@@ -1729,6 +1729,9 @@ namespace LogicCalculator
 
         private bool checkGoalAchived(Grid lastRow)
         {
+            if (lastRow.Children[TEXT_BLOCK_INDEX] is TextBlock)
+                return false;
+
             string lastRowInput = replaceAll(((TextBox)lastRow.Children[STATEMENT_INDEX]).Text);
             string needToProof = getGoal(tbValue.Text);
             return lastRowInput.Equals(needToProof);
