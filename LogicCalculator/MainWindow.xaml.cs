@@ -1569,7 +1569,7 @@ namespace LogicCalculator
            string second_segment, string third_segment)
         {
             int row = statement_list.Count;
-            if (!IsValidExpression(expression, row, false))
+            if (!IsValidExpression(expression, row))
             {
                 return false;
             }
@@ -1712,14 +1712,14 @@ namespace LogicCalculator
             }
             //VALIDATE WHAT SHOULD BE PROOF
             string goal = getGoal(s);
-            if (!IsValidExpression(goal, -1, false))
+            if (!IsValidExpression(goal, -1))
                 return false;
             //VALIDATE DATA
             string data = getData(s);
             string[] dataSplit = data.Split(',');
             foreach (string d in dataSplit)
             {
-                if (!IsValidExpression(d, -1, false))
+                if (!IsValidExpression(d, -1))
                 {
                     return false;
                 }
@@ -1986,7 +1986,7 @@ namespace LogicCalculator
         {
             return c == '^' || c == 'v' || c == '|' || c == '¬' || c == '~' ||
                 c == '∧' || c == '→' || c == '∨' || c == '↔' || c == '⊢' ||
-                c == '⊥' || c == '∃' || c == '∀';
+                c == '⊥' || c == '=';
         }
         public void Expression_Error(int row, string error, int index = -1)
         {
@@ -2003,10 +2003,11 @@ namespace LogicCalculator
 
             DisplayErrorMsg(error_message, "Expression Check");
         }
-        public bool IsValidExpression(string input, int row, bool allow_comma)
+        public bool IsValidExpression(string input, int row)
         {
             int parentheses_count = 0;
             bool after_operator = false;
+            bool after_predicate = false;
             int i = 0;
 
             //Check if input is empty
@@ -2044,6 +2045,7 @@ namespace LogicCalculator
                         return false;
                     }
                     after_operator = true;
+                    after_predicate = false;
                     parentheses_count++;
                 }
                 //Close parentheses
@@ -2054,6 +2056,11 @@ namespace LogicCalculator
                         Expression_Error(row, "Two operators in a row, problematic char is: " + c, i);
                         return false;
                     }
+                    if (after_predicate)
+                    {
+                        Expression_Error(row, "Cant put ')' after predicate sign ", i);
+                        return false;
+                    }
                     parentheses_count--;
                     if (parentheses_count < 0)
                     {
@@ -2061,22 +2068,14 @@ namespace LogicCalculator
                         return false;
                     }
                 }
-                else if (Char.IsLetter(c))
+                else if (c == '∀' || c == '∃')
                 {
-                    if (!after_operator && i != 0)
+                    if (after_predicate)
                     {
-                        Expression_Error(row, "Two variables in a row, problematic char is: " + c, i);
+                        Expression_Error(row, "Two predicate symbols in a row, problematic char is: " + c, i);
                         return false;
                     }
-                    int j = i + 1;
-                    for (; j < input.Length; j++)
-                    {
-                        c = input[j];
-                        if (!Char.IsLetter(c))
-                            break;
-                    }
-                    i = j - 1;
-
+                    after_predicate = true;
                     after_operator = false;
                 }
                 else if (IsOperator(c))
@@ -2090,8 +2089,26 @@ namespace LogicCalculator
                         }
                     }
                     after_operator = true;
+                    after_predicate = false;
                 }
-                else if (c == ',' && !allow_comma)
+                else if (Char.IsLetter(c))
+                {
+                    if (!after_operator && !after_predicate && i != 0)
+                    {
+                        Expression_Error(row, "Two variables in a row, problematic char is: " + c, i);
+                        return false;
+                    }
+                    int j = i + 1;
+                    for (; j < input.Length; j++)
+                    {
+                        c = input[j];
+                        if (!Char.IsLetter(c))
+                            break;
+                    }
+                    i = j - 1;
+                    after_predicate = after_operator = false;
+                }
+                else if (c == ',')
                 {
                     Expression_Error(row, "An invalid character input, problematic char is: " + c, i);
                     return false;
@@ -2109,6 +2126,7 @@ namespace LogicCalculator
             }
             return true;
         }
+
         public bool IsValidSegment(string seg)
         {
             string[] splitted = seg.Split(new Char[] { ',', '-' });
