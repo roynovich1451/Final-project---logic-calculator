@@ -77,6 +77,10 @@ namespace LogicCalculator
         private const int ERRBOXPADDING = 5;
         private const int ERRNOTFOUND = 6;
         private const int ERRMISSTURNSTILE = 7;
+        private const int ERRMISSINTEGER = 8;
+        private const int ERRARGUMENT = 9;
+        private const int ERRINDEX = 10;
+
         #endregion
 
         #endregion DEFINES
@@ -110,7 +114,7 @@ namespace LogicCalculator
         {
             if (!string.IsNullOrEmpty(tbValue.Text) || spGridTable.Children.Count != 0 || !string.IsNullOrEmpty(tbEditor.Text))
             {
-                MessageBoxResult res = MessageBox.Show("Warning: You are about to open new file,\nYou will use not saved data\ncontinue?"
+                MessageBoxResult res = MessageBox.Show("Warning: You are about to open new file,\nYou will loose not saved data\ncontinue?"
                 , "Warning", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
                 if (res == MessageBoxResult.Cancel)
                     return;
@@ -1178,7 +1182,6 @@ namespace LogicCalculator
             if (checked_checkboxes != 2)
             {
                 DisplayErrorMsg("Error: Need to check exactly 2 rows if you want to create box", "Error");
-                CheckMode(false);
                 return;
             }
 
@@ -1568,6 +1571,7 @@ namespace LogicCalculator
         private bool IsValidStatement(string expression, string rule, string first_segment,
            string second_segment, string third_segment)
         {
+            int ret = 0;
             int row = statement_list.Count;
             if (!IsValidExpression(expression, row))
             {
@@ -1585,9 +1589,14 @@ namespace LogicCalculator
                     Expression_Error(row, "First segment is empty");
                     return false;
                 }
-                else if (!IsValidSegment(first_segment))
+                else if ((ret = IsValidSegment(first_segment)) != 0)
                 {
-                    Expression_Error(row, "First segment is not a positive integer number");
+                    if (ret == -ERRARGUMENT)
+                        Expression_Error(row, "First segment is not a positive integer number");
+                    else if (ret == -ERRMISSINTEGER)
+                        Expression_Error(row, "Missing positive integer in first segment");
+                    else if (ret == -ERRINDEX)
+                        Expression_Error(row, "First segemnt given index out of bounds");
                     return false;
                 }
             }
@@ -1598,9 +1607,14 @@ namespace LogicCalculator
                     Expression_Error(row, "Second segment is empty");
                     return false;
                 }
-                if (!IsValidSegment(second_segment))
+                if ((ret = IsValidSegment(second_segment)) != 0)
                 {
-                    Expression_Error(row, "Second segment is not a positive integer number");
+                    if (ret == -ERRARGUMENT)
+                        Expression_Error(row, "Second segment is not a positive integer number");
+                    else if (ret == -ERRMISSINTEGER)
+                        Expression_Error(row, "Missing positive integer in Second segment");
+                    else if (ret == -ERRINDEX)
+                        Expression_Error(row, "Second segemnt given index out of bounds");
                     return false;
                 }
             }
@@ -1611,9 +1625,14 @@ namespace LogicCalculator
                     Expression_Error(row, "Third segment is empty");
                     return false;
                 }
-                if (!IsValidSegment(third_segment))
+                if ((ret = IsValidSegment(third_segment)) != 0)
                 {
-                    Expression_Error(row, "Third segment is not a positive integer number");
+                    if (ret == -ERRARGUMENT)
+                        Expression_Error(row, "Third segment is not a positive integer number");
+                    else if (ret == -ERRMISSINTEGER)
+                        Expression_Error(row, "Missing positive integer in Third segment");
+                    else if (ret == -ERRINDEX)
+                        Expression_Error(row, "Third segemnt given index out of bounds");
                     return false;
                 }
             }
@@ -1633,7 +1652,7 @@ namespace LogicCalculator
             }
             if (!isValidLogicalEquivalent(tbValue.Text))
             {
-                return;  
+                return;
             }
             if (spGridTable.Children.Count == 0)
             {
@@ -1705,9 +1724,9 @@ namespace LogicCalculator
         private bool isValidLogicalEquivalent(string s)
         {
             //VALIDATE HAS '⊢'
-            if (!s.Contains('⊢'))
+            if (Regex.Matches(s, "⊢").Count != 1)
             {
-                DisplayErrorMsg("Valid logical Equivalent must contain '⊢'", "Error");
+                DisplayErrorMsg("Valid logical Equivalent must contain exactly one '⊢'", "Error");
                 return false;
             }
             //VALIDATE WHAT SHOULD BE PROOF
@@ -1717,6 +1736,8 @@ namespace LogicCalculator
             //VALIDATE DATA
             string data = getData(s);
             string[] dataSplit = data.Split(',');
+            if (string.IsNullOrEmpty(dataSplit[0]) && dataSplit.Length == 1)
+                return true;
             foreach (string d in dataSplit)
             {
                 if (!IsValidExpression(d, -1))
@@ -2127,17 +2148,28 @@ namespace LogicCalculator
             return true;
         }
 
-        public bool IsValidSegment(string seg)
+        public int IsValidSegment(string seg)
         {
+            int maxNum = spGridTable.Children.Count;
             string[] splitted = seg.Split(new Char[] { ',', '-' });
-            if (seg.Contains('-') && splitted.Length > 2)
-
+            if (seg.Contains('-') && (string.IsNullOrEmpty(splitted[1]) || string.IsNullOrEmpty(splitted[0])))
+                return -ERRMISSINTEGER;
+            if (seg.Contains(','))
+            {
+                foreach (string s in splitted)
+                {
+                    if (string.IsNullOrEmpty(s))
+                        return -ERRMISSINTEGER;
+                }
+            }
             foreach (var s in splitted)
             {
                 if (!Int32.TryParse(s, out _))
-                    return false;
+                    return -ERRARGUMENT;
+                if (int.Parse(s) > maxNum)
+                    return -ERRINDEX;
             }
-            return true;
+            return SUCCESS;
         }
         #endregion INPUT_CHECKS
 
