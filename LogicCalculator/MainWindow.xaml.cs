@@ -1191,7 +1191,7 @@ namespace LogicCalculator
             {
                 DisplayErrorMsg($"Error: Can't create box, checked rows are illegal parenthesis Validity", "Error");
                 CheckMode(false);
-                return;
+                return;3
             }
             else if (ret == -ERRMISSLINE)
             {
