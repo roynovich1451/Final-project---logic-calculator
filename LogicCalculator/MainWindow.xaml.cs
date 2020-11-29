@@ -244,7 +244,7 @@ namespace LogicCalculator
                         for (int i = 1; i < row_num + 1; i++)
                         {
                             Grid row = spGridTable.Children[i - 1] as Grid;
-                            if (!(row.Children[TEXT_BLOCK_INDEX] is TextBlock))
+                            if (!(row.Children[TEXT_BLOCK_INDEX] is TextBlock block))
                             {
                                 line_num = ((Label)row.Children[LABEL_INDEX]).Content.ToString();
                                 expression = ((TextBox)row.Children[STATEMENT_INDEX]).Text.Replace(" ", string.Empty);
@@ -262,7 +262,7 @@ namespace LogicCalculator
                             else
                             {
                                 proof_table.Rows[i].MergeCells(0, TABLE_COL_NUM - 1);
-                                proof_table.Rows[i].Cells[0].Paragraphs.First().Append(((TextBlock)row.Children[TEXT_BLOCK_INDEX]).Text).Alignment = Alignment.center;
+                                proof_table.Rows[i].Cells[0].Paragraphs.First().Append(block.Text).Alignment = Alignment.center;
                             }
                         }
 
@@ -760,7 +760,6 @@ namespace LogicCalculator
         {
             ComboBox cmb = sender as ComboBox;
             Grid parent = cmb.Parent as Grid;
-            var location = spGridTable.Children.IndexOf(parent);
             string rule = cmb.SelectedItem as string;
             switch (rule)
             {
@@ -1065,7 +1064,7 @@ namespace LogicCalculator
                 AppendKeyboardChar(elementWithFocus, "Y0");
             }
         }
-        private int isBracketsLogic(Grid uperRow, Grid lowerRow)
+        private int IsBracketsLogic(Grid uperRow, Grid lowerRow)
         {
             int braketsCnt = 0;
             int openIndex = spGridTable.Children.IndexOf(uperRow),
@@ -1098,7 +1097,7 @@ namespace LogicCalculator
         {
 
             //chekc picked indexes, to see if ligal (mathematic brackets logic)
-            int ret = isBracketsLogic(upperRow, lowerRow);
+            int ret = IsBracketsLogic(upperRow, lowerRow);
             if (ret != 0)
                 return ret;
 
@@ -1111,7 +1110,7 @@ namespace LogicCalculator
             int lowerRowIndex = spGridTable.Children.IndexOf(lowerRow);
             //check outerbox padding
             ret = SUCCESS;
-            List<Grid> outerBox = getOuterBox(spGridTable, upperRow, lowerRow);
+            List<Grid> outerBox = GetOuterBox(spGridTable, upperRow);
             if (outerBox.Count != 0)
             {
                 List<Grid> ignoreLines = new List<Grid>();
@@ -1122,22 +1121,21 @@ namespace LogicCalculator
                 int openerIndex = spGridTable.Children.IndexOf(outerBox[OPEN_BOX_LIST_INDEX]) + 1,
                    closerIndex = spGridTable.Children.IndexOf(outerBox[CLOSE_BOX_LIST_INDEX]);
 
-                ret = checkBoxPadding(spGridTable, openerIndex, closerIndex, ignoreLines);
+                ret = CheckBoxPadding(openerIndex, closerIndex, ignoreLines);
                 if (ret == -ERRBOXPADDING)
                 {
-                    brushBackgroundRed(outerBox[OPEN_BOX_LIST_INDEX].Children[TEXT_BLOCK_INDEX]);
-                    brushBackgroundRed(outerBox[CLOSE_BOX_LIST_INDEX].Children[TEXT_BLOCK_INDEX]);
+                    BrushBackgroundRed(outerBox[OPEN_BOX_LIST_INDEX].Children[TEXT_BLOCK_INDEX]);
+                    BrushBackgroundRed(outerBox[CLOSE_BOX_LIST_INDEX].Children[TEXT_BLOCK_INDEX]);
                 }
 
             }
             return ret;
         }
 
-        private List<Grid> getOuterBox(StackPanel spRows, Grid upperRow, Grid lowerRow)
+        private List<Grid> GetOuterBox(StackPanel spRows, Grid upperRow)
         {
             List<Grid> ret = new List<Grid>();
-            int upperRowIndex = spRows.Children.IndexOf(upperRow),
-                lowerRowIndex = spRows.Children.IndexOf(lowerRow);
+            int upperRowIndex = spRows.Children.IndexOf(upperRow);
             int parCnt = 0;
             bool hasOuter = false;
             if (upperRowIndex != 0) //if upperRowindex = 0 no way there is outer box
@@ -1170,10 +1168,10 @@ namespace LogicCalculator
             }
             return ret;
         }
-        private void brushBackgroundRed(UIElement elem)
+        private void BrushBackgroundRed(UIElement elem)
         {
-            if (elem is TextBox)
-                ((TextBox)elem).Background = Brushes.Red;
+            if (elem is TextBox box)
+                box.Background = Brushes.Red;
             else
                 ((TextBlock)elem).Background = Brushes.Red;
         }
@@ -1191,7 +1189,7 @@ namespace LogicCalculator
             {
                 DisplayErrorMsg($"Error: Can't create box, checked rows are illegal parenthesis Validity", "Error");
                 CheckMode(false);
-                return;3
+                return;
             }
             else if (ret == -ERRMISSLINE)
             {
@@ -1202,7 +1200,7 @@ namespace LogicCalculator
             else if (ret == -ERRBOXPADDING)
             {
                 DisplayErrorMsg($"Error: Can't create box, outer box must have at least one line padding", "Error");
-                removeBackgroundColor();
+                RemoveBackgroundColor();
                 CheckMode(false);
                 return;
             }
@@ -1254,11 +1252,11 @@ namespace LogicCalculator
             MessageBoxResult res = MessageBox.Show($"Warning: You are about to REMOVE {pickedByUserRows.Count} lines\nPlease confirm",
                 "Confirmation", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
             if (res == MessageBoxResult.Cancel) return;
-            int ret = checkAllBoxesPadding(pickedByUserRows);
+            int ret = CheckAllBoxesPadding(pickedByUserRows);
             if (ret == -ERRBOXPADDING)
             {
                 DisplayErrorMsg("Error: after remove one of the boxes will be without lines inside\nPlease recheck rows", "ERROR");
-                removeBackgroundColor();
+                RemoveBackgroundColor();
                 return;
             }
             ret = CheckBoxesForRemove(pickedByUserRows);
@@ -1271,13 +1269,13 @@ namespace LogicCalculator
             if (ret == -ERRBOXMISSCLOSE)
             {
                 DisplayErrorMsg("Error: checked box missng it's closer\nPlease recheck rows", "ERROR");
-                removeBackgroundColor();
+                RemoveBackgroundColor();
                 return;
             }
             if (ret == -ERRBOXMISSOPEN)
             {
                 DisplayErrorMsg("Error: checked box missng it's opener\nPlease recheck rows", "ERROR");
-                removeBackgroundColor();
+                RemoveBackgroundColor();
                 return;
             }
             foreach (Grid row in pickedByUserRows)
@@ -1303,7 +1301,7 @@ namespace LogicCalculator
                 {
                     if (!verified.Contains(row))
                     {
-                        brushBackgroundRed(row.Children[TEXT_BLOCK_INDEX]);
+                        BrushBackgroundRed(row.Children[TEXT_BLOCK_INDEX]);
                         return -ERRBOXMISSOPEN;
                     }
 
@@ -1312,7 +1310,6 @@ namespace LogicCalculator
                 //if opener
                 if ((row.Children[TEXT_BLOCK_INDEX] is TextBlock tbOpen) && tbOpen.Text.Contains("┌"))
                 {
-                    int startSearchIndex = spGridTable.Children.IndexOf(row);
                     Grid closerGrid = GetCloserGrid(spGridTable, row);
                     if (closerGrid == null)
                     {
@@ -1320,7 +1317,7 @@ namespace LogicCalculator
                     }
                     if (((CheckBox)closerGrid.Children[CHECKBOX_INDEX]).IsChecked == false)
                     {
-                        brushBackgroundRed(row.Children[TEXT_BLOCK_INDEX]);
+                        BrushBackgroundRed(row.Children[TEXT_BLOCK_INDEX]);
                         return -ERRBOXMISSCLOSE;
                     }
                     else
@@ -1333,7 +1330,7 @@ namespace LogicCalculator
             return verified.Count;
         }
 
-        private int checkAllBoxesPadding(List<Grid> checkedRows)
+        private int CheckAllBoxesPadding(List<Grid> checkedRows)
         {
             foreach (Grid row in spGridTable.Children)
             {
@@ -1343,10 +1340,10 @@ namespace LogicCalculator
                     Grid boxCloser = GetCloserGrid(spGridTable, row);
                     int boxCloserIndex = spGridTable.Children.IndexOf(boxCloser),
                         boxOpenerIndex = spGridTable.Children.IndexOf(row);
-                    if (checkBoxPadding(spGridTable, boxOpenerIndex + 1, boxCloserIndex, checkedRows) == -ERRBOXPADDING)
+                    if (CheckBoxPadding(boxOpenerIndex + 1, boxCloserIndex, checkedRows) == -ERRBOXPADDING)
                     {
-                        brushBackgroundRed(tbOpen as UIElement);
-                        brushBackgroundRed(boxCloser.Children[TEXT_BLOCK_INDEX]);
+                        BrushBackgroundRed(tbOpen as UIElement);
+                        BrushBackgroundRed(boxCloser.Children[TEXT_BLOCK_INDEX]);
                         return -ERRBOXPADDING;
                     }
 
@@ -1355,7 +1352,7 @@ namespace LogicCalculator
             return SUCCESS;
         }
 
-        private int checkBoxPadding(StackPanel sp, int boxOpenerIndex, int boxCloserIndex, List<Grid> checkedRows)
+        private int CheckBoxPadding(int boxOpenerIndex, int boxCloserIndex, List<Grid> checkedRows)
         {
             int ret = GetLineInsideBox(spGridTable, boxOpenerIndex, boxCloserIndex, checkedRows);
             if (ret == 0)
@@ -1412,7 +1409,7 @@ namespace LogicCalculator
             return null;
         }
 
-        private void removeBackgroundColor()
+        private void RemoveBackgroundColor()
         {
             foreach (Grid row in spGridTable.Children)
             {
@@ -1571,7 +1568,6 @@ namespace LogicCalculator
         private bool IsValidStatement(string expression, string rule, string first_segment,
            string second_segment, string third_segment)
         {
-            int ret = 0;
             int row = statement_list.Count;
             if (!IsValidExpression(expression, row))
             {
@@ -1582,6 +1578,7 @@ namespace LogicCalculator
                 Expression_Error(row, "Rule is empty");
                 return false;
             }
+            int ret;
             if (first_segment != null)
             {
                 if (first_segment == string.Empty)
@@ -1650,7 +1647,7 @@ namespace LogicCalculator
                 DisplayErrorMsg("Miss proof header", "Error");
                 return;
             }
-            if (!isValidLogicalEquivalent(tbValue.Text))
+            if (!IsValidLogicalEquivalent(tbValue.Text))
             {
                 return;
             }
@@ -1663,8 +1660,6 @@ namespace LogicCalculator
             statement_list.Add(new Statement(tbValue.Text, "first", "0"));
             string expression, rule, first_segment, second_segment, third_segment;
             int index;
-            bool isGoalAchived = false;
-
             string header = "Conclusions";
             //One less column because of the line number column
 
@@ -1681,7 +1676,7 @@ namespace LogicCalculator
                     third_segment = ((TextBox)row.Children[SEGMENT3_INDEX]).IsEnabled ? ((TextBox)row.Children[SEGMENT3_INDEX]).Text.Replace(" ", string.Empty) : null;
                     if (rule.Equals("Proveni"))
                     {
-                        if (!isValidLogicalEquivalent(expression))
+                        if (!IsValidLogicalEquivalent(expression))
                             return;
                     }
                     else
@@ -1695,7 +1690,7 @@ namespace LogicCalculator
                         return;
                 }
             }
-            isGoalAchived = checkGoalAchived(spGridTable.Children[spGridTable.Children.Count - 1] as Grid);
+            bool isGoalAchived = CheckGoalAchived(spGridTable.Children[spGridTable.Children.Count - 1] as Grid);
             if (isGoalAchived)
             {
                 foreach (Grid row in spGridTable.Children)
@@ -1721,7 +1716,7 @@ namespace LogicCalculator
             DisplayInfoMsg(msg, header);
         }
 
-        private bool isValidLogicalEquivalent(string s)
+        private bool IsValidLogicalEquivalent(string s)
         {
             //VALIDATE HAS '⊢'
             if (Regex.Matches(s, "⊢").Count != 1)
@@ -1730,11 +1725,11 @@ namespace LogicCalculator
                 return false;
             }
             //VALIDATE WHAT SHOULD BE PROOF
-            string goal = getGoal(s);
+            string goal = GetGoal(s);
             if (!IsValidExpression(goal, -1))
                 return false;
             //VALIDATE DATA
-            string data = getData(s);
+            string data = GetData(s);
             string[] dataSplit = data.Split(',');
             if (string.IsNullOrEmpty(dataSplit[0]) && dataSplit.Length == 1)
                 return true;
@@ -1748,27 +1743,27 @@ namespace LogicCalculator
             return true;
         }
 
-        private bool checkGoalAchived(Grid lastRow)
+        private bool CheckGoalAchived(Grid lastRow)
         {
             if (lastRow.Children[TEXT_BLOCK_INDEX] is TextBlock)
                 return false;
 
-            string lastRowInput = replaceAll(((TextBox)lastRow.Children[STATEMENT_INDEX]).Text);
-            string needToProof = getGoal(tbValue.Text);
+            string lastRowInput = ReplaceAll(((TextBox)lastRow.Children[STATEMENT_INDEX]).Text);
+            string needToProof = GetGoal(tbValue.Text);
             return lastRowInput.Equals(needToProof);
         }
-        private string getData(string s)
+        private string GetData(string s)
         {
             string[] splited = s.Split('⊢');
-            return replaceAll(splited[0]);
+            return ReplaceAll(splited[0]);
         }
-        private string getGoal(string s)
+        private string GetGoal(string s)
         {
             string[] splited = s.Split('⊢');
-            return replaceAll(splited[1]);
+            return ReplaceAll(splited[1]);
         }
 
-        private string replaceAll(string s)
+        private string ReplaceAll(string s)
         {
             return s.Trim().Replace('^', '∧').Replace('V', '∨').Replace('~', '¬').Replace(" ", "");
         }
@@ -1778,17 +1773,17 @@ namespace LogicCalculator
             switch (rule)
             {
                 case "Assumption":
-                    if (!haveAboveOpener(spGridTable.Children.IndexOf(row)))
+                    if (!HaveAboveOpener(spGridTable.Children.IndexOf(row)))
                     {
-                        DisplayErrorMsg($"Error: assumption at row {((Label)row.Children[LABEL_INDEX]).Content.ToString()}," +
+                        DisplayErrorMsg($"Error: assumption at row {((Label)row.Children[LABEL_INDEX]).Content}," +
                             $"\nmissing box opener above", "Error");
                         return false;
                     }
                     return true;
                 case "Copy":
-                    if (!copyFromLegalBox(row, first_segment))
+                    if (!CopyFromLegalBox(row, first_segment))
                     {
-                        DisplayErrorMsg($"Error: Copy  at row {((Label)row.Children[LABEL_INDEX]).Content.ToString()}," +
+                        DisplayErrorMsg($"Error: Copy  at row {((Label)row.Children[LABEL_INDEX]).Content}," +
                             $"\ncan use only for variable from current or upper box", "Error");
                         return false;
                     }
@@ -1796,10 +1791,10 @@ namespace LogicCalculator
                 case "∨e":
                     List<int> firstbox = Evaluation.Get_Lines_From_Segment(second_segment),
                         secondBox = Evaluation.Get_Lines_From_Segment(third_segment);
-                    if (!hasWrapBox(firstbox[0], firstbox[firstbox.Count - 1]) ||
-                        !hasWrapBox(secondBox[0], secondBox[secondBox.Count - 1]))
+                    if (!HasWrapBox(firstbox[0], firstbox[firstbox.Count - 1]) ||
+                        !HasWrapBox(secondBox[0], secondBox[secondBox.Count - 1]))
                     {
-                        DisplayErrorMsg($"Error: Or elimination at line {((Label)row.Children[LABEL_INDEX]).Content.ToString()}," +
+                        DisplayErrorMsg($"Error: Or elimination at line {((Label)row.Children[LABEL_INDEX]).Content}," +
                             $"\nlines mentioned in second and third segments must be wrapped with boxes", "Error");
                         return false;
                     }
@@ -1817,7 +1812,7 @@ namespace LogicCalculator
                     }
                     else
                         box = Evaluation.Get_Lines_From_Segment(first_segment);
-                    if (!hasWrapBox(box[0], box[box.Count - 1]))
+                    if (!HasWrapBox(box[0], box[box.Count - 1]))
                     {
                         string messageRule = "rule";
                         if (rule.Equals("¬i"))
@@ -1828,7 +1823,7 @@ namespace LogicCalculator
                             messageRule = "All introdution";
                         else if (new Regex(@"∃.*e").IsMatch(rule))
                             messageRule = "Exist elimination";
-                        DisplayErrorMsg($"Error: {messageRule} at line {((Label)row.Children[LABEL_INDEX]).Content.ToString()}," +
+                        DisplayErrorMsg($"Error: {messageRule} at line {((Label)row.Children[LABEL_INDEX]).Content}," +
                             $"\nlines mentioned in {segment} segment must be wrapped with box", "Error");
                         return false;
                     }
@@ -1838,17 +1833,17 @@ namespace LogicCalculator
             }
         }
 
-        private bool hasWrapBox(int open, int close)
+        private bool HasWrapBox(int open, int close)
         {
-            int realOpenIndex = getspGridIndex(open),
-                realCloseIndex = getspGridIndex(close);
+            int realOpenIndex = GetspGridIndex(open),
+                realCloseIndex = GetspGridIndex(close);
             if (realOpenIndex <= 0 || realCloseIndex < 0 || realCloseIndex == spGridTable.Children.Count - 1)
                 return false;
-            if (!isCorrectBox(realOpenIndex - 1, BoxState.Open) || !isCorrectBox(realCloseIndex + 1, BoxState.Close))
+            if (!IsCorrectBox(realOpenIndex - 1, BoxState.Open) || !IsCorrectBox(realCloseIndex + 1, BoxState.Close))
                 return false;
             return true;
         }
-        bool isCorrectBox(int index, BoxState state)
+        bool IsCorrectBox(int index, BoxState state)
         {
             Grid row = spGridTable.Children[index] as Grid;
 
@@ -1864,7 +1859,7 @@ namespace LogicCalculator
             }
             return true;
         }
-        private int getspGridIndex(int labelNumber)
+        private int GetspGridIndex(int labelNumber)
         {
             for (int i = labelNumber; i < spGridTable.Children.Count; i++)
             {
@@ -1878,7 +1873,7 @@ namespace LogicCalculator
             return -ERRNOTFOUND;
         }
 
-        private bool copyFromLegalBox(Grid row, string first_segment)
+        private bool CopyFromLegalBox(Grid row, string first_segment)
         {
             int start = spGridTable.Children.IndexOf(row);
             bool isValid = true;
@@ -1903,7 +1898,7 @@ namespace LogicCalculator
             return isValid;
         }
 
-        private bool haveAboveOpener(int index)
+        private bool HaveAboveOpener(int index)
         {
             if (index == 0)
                 return false;

@@ -16,8 +16,8 @@ namespace LogicCalculator
         public bool Is_Valid { get; set; }
         private readonly List<Statement> statement_list;
         private readonly int current_line;
-        private Regex predicate_regex;
-        private static int PREDICATE_LENGTH = 4;
+        private readonly Regex predicate_regex;
+        private static readonly int PREDICATE_LENGTH = 4;
 
         //([a-z]*)+[∧,∨,¬,=,∀,∃][a-z]* \/ ([a-z]*)+[∧,∨,¬,=,∀,∃]([a-z]*)
 
@@ -126,33 +126,33 @@ namespace LogicCalculator
             }
         }
 
-        private HashSet<string> getData(string s)
+        private HashSet<string> GetData(string s)
         {
             HashSet<string> ret = new HashSet<string>();
             string[] splited = s.Split('⊢');
             string[] all_data = splited[0].Split(',');
             foreach (var d in all_data)
             {
-                ret.Add(replaceAll(d));
+                ret.Add(ReplaceAll(d));
             }
             return ret;
         }
-        private string getGoal(string s)
+        private string GetGoal(string s)
         {
             if (!s.Contains('⊢'))
                 return null;
             string[] splited = s.Split('⊢');
-            return replaceAll(splited[1]);
+            return ReplaceAll(splited[1]);
         }
 
-        private string replaceAll(string s)
+        private string ReplaceAll(string s)
         {
             return s.Trim().Replace('^', '∧').Replace('V', '∨').Replace('~', '¬').Replace(" ", "");
         }
         private void Proven_Elimination()
         {
             int proven_index = Get_Row(statement_list[current_line].First_segment);
-            HashSet<string> proven_data = getData(statement_list[proven_index].Expression);
+            HashSet<string> proven_data = GetData(statement_list[proven_index].Expression);
             string msg = "Proven elimination first segment must be positive integer\nSecond segment must be positive integers separate by ','";
             List<int> data_indexes = Get_Rows_For_Proven(statement_list[current_line].Second_segment);
             if (data_indexes == null)
@@ -163,11 +163,11 @@ namespace LogicCalculator
             HashSet<string> provided_data = new HashSet<string>();
             foreach (int index in data_indexes)
             {
-                provided_data.Add(replaceAll(statement_list[index].Expression));
+                provided_data.Add(ReplaceAll(statement_list[index].Expression));
             }
-            string proven_goal = getGoal(statement_list[proven_index].Expression);
-            string current_goal = replaceAll(statement_list[current_line].Expression);
-            bool data_check = compare_sets(proven_data, provided_data);
+            string proven_goal = GetGoal(statement_list[proven_index].Expression);
+            string current_goal = ReplaceAll(statement_list[current_line].Expression);
+            bool data_check = Compare_Sets(proven_data, provided_data);
             
             if (!data_check)
                 msg = "Data given is not equivelant to the data needed" +
@@ -187,7 +187,7 @@ namespace LogicCalculator
             return;
         }
 
-        private bool compare_sets(HashSet<string> s1, HashSet<string> s2)
+        private bool Compare_Sets(HashSet<string> s1, HashSet<string> s2)
         {
             if (s1.Count != s2.Count)
                 return false;
@@ -244,7 +244,9 @@ namespace LogicCalculator
             Is_Valid = (first_expression == second_expression + "→" + current_expression)
                 || (first_expression == second_expression + "→(" + current_expression + ")")
                 || (second_expression == first_expression + "→" + current_expression)
-                || (second_expression == first_expression + "→(" + current_expression + ")");
+                || (second_expression == first_expression + "→(" + current_expression + ")")
+                || Equal_With_Operator(first_expression,second_expression,current_expression, "→")
+                || Equal_With_Operator(second_expression, first_expression, current_expression, "→");
             if (!Is_Valid)
             {
                 DisplayErrorMsg("Misuse of MP");
@@ -268,7 +270,8 @@ namespace LogicCalculator
             {
                 left_part = first_expression.Substring(0, index);
                 right_part = first_expression.Substring(index + 1);
-                if (second_expression != "~" + right_part && second_expression != "¬" + right_part)
+                if (right_part != "~" + second_expression && right_part != "¬" + second_expression
+                    && right_part != "~(" + second_expression+")" && right_part != "¬(" + second_expression+")")
                 {
                     DisplayErrorMsg("MT missing ¬");
                     Is_Valid = false;
@@ -282,7 +285,8 @@ namespace LogicCalculator
                 {
                     left_part = second_expression.Substring(0, index);
                     right_part = second_expression.Substring(index + 1);
-                    if (first_expression != "~" + right_part && first_expression != "¬" + right_part)
+                    if (right_part != "~" + first_expression && right_part != "¬" + first_expression
+                        && right_part != "~(" + first_expression+")" && right_part != "¬(" + first_expression+")")
                     {
                         DisplayErrorMsg("MT missing ¬");
                         Is_Valid = false;
@@ -493,9 +497,9 @@ namespace LogicCalculator
                 DisplayErrorMsg("Missing ⊥ at the previous row");
                 return;
             }
+            int first_line = Get_Lines_From_Segment(statement_list[current_line].First_segment)[0];
 
-
-            Is_Valid &= Check_If_Not(statement_list[current_line - 2].Expression, statement_list[current_line - 3].Expression);
+            Is_Valid &= Check_If_Not(statement_list[first_line].Expression, statement_list[current_line].Expression);
             if (!Is_Valid)
                 DisplayErrorMsg("Missuse of Not Introduction");
         }
@@ -879,7 +883,8 @@ namespace LogicCalculator
 
         private bool Check_If_Not(string first, string second)
         {
-            return first == "~" + second || first == "¬" + second || second == "~" + first || second == "¬" + first;
+            return first == "~" + second || first == "¬" + second || second == "~" + first || second == "¬" + first
+            || first == "~(" + second+")" || first == "¬(" + second+")" || second == "~(" + first+")" || second == "¬(" + first+")";
         }
 
         private void DisplayErrorMsg(string msg)
