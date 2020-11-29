@@ -1,13 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.Tracing;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Runtime.ExceptionServices;
 using System.Text.RegularExpressions;
-using System.Web.UI;
 using System.Windows;
-using System.Windows.Media.Media3D;
 
 namespace LogicCalculator
 {
