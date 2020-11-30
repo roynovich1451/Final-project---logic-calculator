@@ -120,6 +120,7 @@ namespace LogicCalculator
             NewFile();
             elementWithFocus = tbEquation;
             Keyboard.Focus(elementWithFocus);
+            this.Title = "Logic Calculator";
         }
         private void NewFile()
         {
@@ -2126,6 +2127,7 @@ namespace LogicCalculator
                 {
                     Expression_Error(row, "An invalid character input, problematic char is: " + c, i);
                     return false;
+
                 }
                 else
                 {
@@ -2143,7 +2145,7 @@ namespace LogicCalculator
 
         public int IsValidSegment(string seg)
         {
-            int maxNum = spGridTable.Children.Count;
+            int maxNum = GetMaxIndex();
             string[] splitted = seg.Split(new Char[] { ',', '-' });
             if (seg.Contains('-') && (string.IsNullOrEmpty(splitted[1]) || string.IsNullOrEmpty(splitted[0])))
                 return -ERRMISSINTEGER;
@@ -2163,6 +2165,18 @@ namespace LogicCalculator
                     return -ERRINDEX;
             }
             return SUCCESS;
+        }
+
+        private int GetMaxIndex()
+        {
+            for (int i = spGridTable.Children.Count - 1; i >= 0; i--)
+            {
+                if(((Grid)spGridTable.Children[i]).Children[LABEL_INDEX] is Label lb)
+                {
+                    return int.Parse(lb.Content.ToString());
+                }
+            }
+            return 0;
         }
         #endregion INPUT_CHECKS
 
