@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -147,7 +148,7 @@ namespace LogicCalculator
             string openFilePath = openFileDialog.FileName;
             if (FileInUse(openFilePath))
                 return;
-
+            this.Title = $"Logic Calculator - File: {openFileDialog.SafeFileName}, Last save: {DateTime.Now.ToString(new CultureInfo("ru-RU"))}";
             using (var document = DocX.Load(openFilePath))
             {
                 if (document.Tables.Count == 0)
@@ -207,7 +208,7 @@ namespace LogicCalculator
             };
             if (saveFileDialog.ShowDialog() == false) return;
             string saveFilePath = saveFileDialog.FileName;
-
+            this.Title = $"Logic Calculator - File: {saveFileDialog.SafeFileName}, Last save: {DateTime.Now.ToString(new CultureInfo("ru-RU"))}";
             using (var document = DocX.Create(saveFilePath))
             {
                 // Add a title.
