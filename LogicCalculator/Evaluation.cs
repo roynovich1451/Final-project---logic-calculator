@@ -267,7 +267,7 @@ namespace LogicCalculator
             {
                 left_part = first_expression.Substring(0, index);
                 right_part = first_expression.Substring(index + 1);
-                if (Check_If_Not(right_part,second_expression))
+                if (!Check_If_Not(right_part,second_expression))
                 {
                     DisplayErrorMsg("MT missing ¬");
                     Is_Valid = false;
@@ -281,7 +281,7 @@ namespace LogicCalculator
                 {
                     left_part = second_expression.Substring(0, index);
                     right_part = second_expression.Substring(index + 1);
-                    if (Check_If_Not(right_part,first_expression))
+                    if (!Check_If_Not(right_part,first_expression))
                     {
                         DisplayErrorMsg("MT missing ¬");
                         Is_Valid = false;
