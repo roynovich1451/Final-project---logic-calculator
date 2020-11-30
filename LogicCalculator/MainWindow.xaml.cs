@@ -109,7 +109,7 @@ namespace LogicCalculator
         #region MENUBAR_CLICKS
         private void MenuItemNew_Click(object sender, RoutedEventArgs e)
         {
-            if (!string.IsNullOrEmpty(tbValue.Text) || spGridTable.Children.Count != 0 || !string.IsNullOrEmpty(tbEditor.Text))
+            if (!string.IsNullOrEmpty(tbEquation.Text) || spGridTable.Children.Count != 0 || !string.IsNullOrEmpty(tbEditor.Text))
             {
                 MessageBoxResult res = MessageBox.Show("Warning: You are about to open new file,\nYou will loose not saved data\ncontinue?"
                 , "Warning", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
@@ -117,13 +117,13 @@ namespace LogicCalculator
                     return;
             }
             NewFile();
-            elementWithFocus = tbValue;
+            elementWithFocus = tbEquation;
             Keyboard.Focus(elementWithFocus);
         }
         private void NewFile()
         {
             //Proof side
-            tbValue.Text = "";
+            tbEquation.Text = "";
             spGridTable.Children.Clear();
             table_row_num = 0;
             hyphen_chunks = MAX_HYPHEN_CHUNKS;
@@ -164,7 +164,7 @@ namespace LogicCalculator
 
                     spGridTable.Children.Clear();
                     table_row_num = 0;
-                    tbValue.Text = document.Paragraphs[1].Text.Substring(20).Trim();
+                    tbEquation.Text = document.Paragraphs[1].Text.Substring(20).Trim();
                     Table proof_table = document.Tables[0];
 
                     for (int i = 1; i < proof_table.Rows.Count; i++)
@@ -218,7 +218,7 @@ namespace LogicCalculator
                 {
                     case TAB_PROOF_INDEX:
                         //Add the main expression
-                        document.InsertParagraph("Logical Expression: " + tbValue.Text + '\n').FontSize(14d);
+                        document.InsertParagraph("Logical Expression: " + tbEquation.Text + '\n').FontSize(14d);
                         int row_num = spGridTable.Children.Count;
                         Table proof_table = document.AddTable(row_num + 1, TABLE_COL_NUM);
                         proof_table.AutoFit = AutoFit.Contents;
@@ -1639,12 +1639,12 @@ namespace LogicCalculator
         {
             string msg = "All input is valid";
             statement_list.Clear();
-            if (string.IsNullOrEmpty(tbValue.Text))
+            if (string.IsNullOrEmpty(tbEquation.Text))
             {
                 DisplayErrorMsg("Miss proof header", "Error");
                 return;
             }
-            if (!IsValidLogicalEquivalent(tbValue.Text))
+            if (!IsValidLogicalEquivalent(tbEquation.Text))
             {
                 return;
             }
@@ -1654,7 +1654,7 @@ namespace LogicCalculator
                 return;
             }
 
-            statement_list.Add(new Statement(tbValue.Text, "first", "0"));
+            statement_list.Add(new Statement(tbEquation.Text.Replace(" ", string.Empty), "first", "0"));
             string expression, rule, first_segment, second_segment, third_segment;
             int index;
             string header = "Conclusions";
@@ -1666,11 +1666,11 @@ namespace LogicCalculator
                 index = spGridTable.Children.IndexOf(row);
                 if (row.Children[LABEL_INDEX] is Label)
                 {
-                    expression = ((TextBox)row.Children[STATEMENT_INDEX]).Text.Replace(" ", string.Empty);
-                    rule = ((ComboBox)row.Children[COMBOBOX_INDEX]).Text.Replace(" ", string.Empty);
-                    first_segment = ((TextBox)row.Children[SEGMENT1_INDEX]).IsEnabled ? ((TextBox)row.Children[SEGMENT1_INDEX]).Text.Replace(" ", string.Empty) : null;
-                    second_segment = ((TextBox)row.Children[SEGMENT2_INDEX]).IsEnabled ? ((TextBox)row.Children[SEGMENT2_INDEX]).Text.Replace(" ", string.Empty) : null;
-                    third_segment = ((TextBox)row.Children[SEGMENT3_INDEX]).IsEnabled ? ((TextBox)row.Children[SEGMENT3_INDEX]).Text.Replace(" ", string.Empty) : null;
+                    expression = ReplaceAll(((TextBox)row.Children[STATEMENT_INDEX]).Text);
+                    rule = ReplaceAll(((ComboBox)row.Children[COMBOBOX_INDEX]).Text);
+                    first_segment = ((TextBox)row.Children[SEGMENT1_INDEX]).IsEnabled ? ReplaceAll(((TextBox)row.Children[SEGMENT1_INDEX]).Text) : null;
+                    second_segment = ((TextBox)row.Children[SEGMENT2_INDEX]).IsEnabled ? ReplaceAll(((TextBox)row.Children[SEGMENT2_INDEX]).Text) : null;
+                    third_segment = ((TextBox)row.Children[SEGMENT3_INDEX]).IsEnabled ? ReplaceAll(((TextBox)row.Children[SEGMENT3_INDEX]).Text) : null;
                     if (rule.Equals("Proveni"))
                     {
                         if (!IsValidLogicalEquivalent(expression))
@@ -1695,11 +1695,11 @@ namespace LogicCalculator
                     index = spGridTable.Children.IndexOf(row);
                     if (row.Children[LABEL_INDEX] is Label)
                     {
-                        expression = ((TextBox)row.Children[STATEMENT_INDEX]).Text.Replace(" ", string.Empty);
-                        rule = ((ComboBox)row.Children[COMBOBOX_INDEX]).Text.Replace(" ", string.Empty);
-                        first_segment = ((TextBox)row.Children[SEGMENT1_INDEX]).IsEnabled ? ((TextBox)row.Children[SEGMENT1_INDEX]).Text.Replace(" ", string.Empty) : null;
-                        second_segment = ((TextBox)row.Children[SEGMENT2_INDEX]).IsEnabled ? ((TextBox)row.Children[SEGMENT2_INDEX]).Text.Replace(" ", string.Empty) : null;
-                        third_segment = ((TextBox)row.Children[SEGMENT3_INDEX]).IsEnabled ? ((TextBox)row.Children[SEGMENT3_INDEX]).Text.Replace(" ", string.Empty) : null;
+                        expression = ReplaceAll(((TextBox)row.Children[STATEMENT_INDEX]).Text);
+                        rule = ReplaceAll(((ComboBox)row.Children[COMBOBOX_INDEX]).Text);
+                        first_segment = ((TextBox)row.Children[SEGMENT1_INDEX]).IsEnabled ? ReplaceAll(((TextBox)row.Children[SEGMENT1_INDEX]).Text) : null;
+                        second_segment = ((TextBox)row.Children[SEGMENT2_INDEX]).IsEnabled ? ReplaceAll(((TextBox)row.Children[SEGMENT2_INDEX]).Text) : null;
+                        third_segment = ((TextBox)row.Children[SEGMENT3_INDEX]).IsEnabled ? ReplaceAll(((TextBox)row.Children[SEGMENT3_INDEX]).Text) : null;
 
                         if (!IsValidBox(row, rule, first_segment, second_segment, third_segment))
                             return;
@@ -1746,7 +1746,7 @@ namespace LogicCalculator
                 return false;
 
             string lastRowInput = ReplaceAll(((TextBox)lastRow.Children[STATEMENT_INDEX]).Text);
-            string needToProof = GetGoal(tbValue.Text);
+            string needToProof = GetGoal(tbEquation.Text);
             return lastRowInput.Equals(needToProof);
         }
         private string GetData(string s)
