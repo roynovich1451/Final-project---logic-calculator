@@ -267,8 +267,7 @@ namespace LogicCalculator
             {
                 left_part = first_expression.Substring(0, index);
                 right_part = first_expression.Substring(index + 1);
-                if (right_part != "~" + second_expression && right_part != "¬" + second_expression
-                    && right_part != "~(" + second_expression+")" && right_part != "¬(" + second_expression+")")
+                if (Check_If_Not(right_part,second_expression))
                 {
                     DisplayErrorMsg("MT missing ¬");
                     Is_Valid = false;
@@ -282,8 +281,7 @@ namespace LogicCalculator
                 {
                     left_part = second_expression.Substring(0, index);
                     right_part = second_expression.Substring(index + 1);
-                    if (right_part != "~" + first_expression && right_part != "¬" + first_expression
-                        && right_part != "~(" + first_expression+")" && right_part != "¬(" + first_expression+")")
+                    if (Check_If_Not(right_part,first_expression))
                     {
                         DisplayErrorMsg("MT missing ¬");
                         Is_Valid = false;
@@ -298,7 +296,7 @@ namespace LogicCalculator
                 }
             }
 
-            Is_Valid = current_expression == "~" + left_part || current_expression == "¬" + left_part;
+            Is_Valid =  current_expression == "¬" + left_part;
 
             if (!Is_Valid)
                 DisplayErrorMsg("Misuse of MT");
@@ -321,9 +319,7 @@ namespace LogicCalculator
         private void LEM()
         {
             string left_part, right_part, expression = statement_list[current_line].Expression;
-            int index = expression.IndexOf("V");
-            if (index == -1)
-                index = expression.IndexOf("∨");
+            int index = expression.IndexOf("∨");
             if (index == -1)
             {
                 DisplayErrorMsg("LEM without V or ∨");
@@ -347,7 +343,7 @@ namespace LogicCalculator
             if (first_row == -1 || second_row == -1)
                 return;
 
-            Is_Valid = current.Contains("^") || current.Contains("∧");
+            Is_Valid = current.Contains("∧");
             if (!Is_Valid)
             {
                 DisplayErrorMsg("Missing ∧ in and introduction");
@@ -356,8 +352,7 @@ namespace LogicCalculator
 
             string first = statement_list[first_row].Expression;
             string second = statement_list[second_row].Expression;
-            Is_Valid = Equal_With_Operator(current, first, second, "^") ||
-                Equal_With_Operator(current, first, second, "∧");
+            Is_Valid =                Equal_With_Operator(current, first, second, "∧");
             if (!Is_Valid)
             {
                 DisplayErrorMsg("Misuse of And Introduction");
@@ -371,15 +366,13 @@ namespace LogicCalculator
                 return;
             string original_expression = statement_list[row].Expression,
                 current_expression = statement_list[current_line].Expression;
-            Is_Valid = original_expression.Contains("^") || original_expression.Contains("∧");
+            Is_Valid = original_expression.Contains("∧");
             if (!Is_Valid)
             {
                 DisplayErrorMsg("Missing ∧ in and elimination");
                 return;
             }
-            Is_Valid = original_expression.Contains(current_expression + "^")
-             || original_expression.Contains(current_expression + "∧")
-             || original_expression.Contains("(" + current_expression + ")^")
+            Is_Valid =  original_expression.Contains(current_expression + "∧")
              || original_expression.Contains("(" + current_expression + ")∧");
             if (!Is_Valid)
             {
@@ -395,15 +388,13 @@ namespace LogicCalculator
             string original_expression = statement_list[row].Expression,
                 current_expression = statement_list[current_line].Expression;
 
-            Is_Valid = original_expression.Contains("^") || original_expression.Contains("∧");
+            Is_Valid =  original_expression.Contains("∧");
             if (!Is_Valid)
             {
                 DisplayErrorMsg("Missing ∧ in and elimination");
                 return;
             }
-            Is_Valid = original_expression.Contains("^" + current_expression) ||
-            original_expression.Contains("∧" + current_expression) ||
-            original_expression.Contains("^(" + current_expression + ")") ||
+            Is_Valid =             original_expression.Contains("∧" + current_expression) ||
             original_expression.Contains("∧(" + current_expression + ")");
 
             if (!Is_Valid)
@@ -431,9 +422,7 @@ namespace LogicCalculator
                 DisplayErrorMsg(current_expression + " Should be equal to " + first_segment_end + " and to " + second_segment_end);
                 return;
             }
-            Is_Valid = Equal_With_Operator(base_expression, first_segment_start, second_segment_start, "∨")
-            || Equal_With_Operator(base_expression, first_segment_start, second_segment_start, "v");
-
+            Is_Valid = Equal_With_Operator(base_expression, first_segment_start, second_segment_start, "∨");
             if (!Is_Valid)
             {
                 DisplayErrorMsg(base_expression + " Should be equal to " + first_segment_start + "∨" + second_segment_start);
@@ -447,16 +436,14 @@ namespace LogicCalculator
             if (row == -1)
                 return;
             string current_expression = statement_list[current_line].Expression;
-            Is_Valid = current_expression.Contains("V") || current_expression.Contains("∨");
+            Is_Valid = current_expression.Contains("∨");
             if (!Is_Valid)
             {
                 DisplayErrorMsg("Missing ∨ in or introduction");
                 return;
             }
             Is_Valid = current_expression.Contains(statement_list[row].Expression + "∨")
-                || current_expression.Contains(statement_list[row].Expression + "V")
-                || current_expression.Contains("(" + statement_list[row].Expression + ")∨")
-                || current_expression.Contains("(" + statement_list[row].Expression + ")V");
+                || current_expression.Contains("(" + statement_list[row].Expression + ")∨");
             if (!Is_Valid)
             {
                 DisplayErrorMsg("Misuse of or1 introduction");
@@ -469,7 +456,7 @@ namespace LogicCalculator
             if (row == -1)
                 return;
             string current_statement = statement_list[current_line].Expression;
-            Is_Valid = current_statement.Contains("V") || current_statement.Contains("∨");
+            Is_Valid = current_statement.Contains("∨");
             if (!Is_Valid)
             {
                 DisplayErrorMsg("Missing ∨ in or introduction");
@@ -477,9 +464,7 @@ namespace LogicCalculator
             }
 
             Is_Valid = current_statement.Contains("∨" + statement_list[row].Expression)
-                || current_statement.Contains("V" + statement_list[row].Expression)
-                || current_statement.Contains("∨(" + statement_list[row].Expression + ")")
-                || current_statement.Contains("V(" + statement_list[row].Expression + ")");
+                || current_statement.Contains("∨(" + statement_list[row].Expression + ")"); 
             if (!Is_Valid)
             {
                 DisplayErrorMsg("Misuse of or2 introduction");
@@ -532,9 +517,7 @@ namespace LogicCalculator
             string original_expression = statement_list[row].Expression,
                 current_expression = statement_list[current_line].Expression;
             Is_Valid = original_expression == "¬¬" + current_expression
-                || original_expression == "¬¬(" + current_expression + ")"
-                || original_expression == "~~" + current_expression
-                || original_expression == "~~(" + current_expression + ")";
+                || original_expression == "¬¬(" + current_expression + ")";
             if (!Is_Valid)
             {
                 DisplayErrorMsg("Misuse of Not Not Elimination");
@@ -546,8 +529,7 @@ namespace LogicCalculator
             int row = Get_Row(statement_list[current_line].First_segment);
             if (row == -1)
                 return;
-            Is_Valid = statement_list[current_line].Expression == "¬¬" + statement_list[row].Expression
-                || statement_list[current_line].Expression == "~~" + statement_list[row].Expression;
+            Is_Valid = statement_list[current_line].Expression == "¬¬" + statement_list[row].Expression;
             if (!Is_Valid)
             {
                 DisplayErrorMsg("Misuse of Not Not Introduction");
@@ -880,8 +862,8 @@ namespace LogicCalculator
 
         private bool Check_If_Not(string first, string second)
         {
-            return first == "~" + second || first == "¬" + second || second == "~" + first || second == "¬" + first
-            || first == "~(" + second+")" || first == "¬(" + second+")" || second == "~(" + first+")" || second == "¬(" + first+")";
+            return first == "¬" + second || second == "¬" + first
+            || first == "¬(" + second+")" ||  second == "¬(" + first+")";
         }
 
         private void DisplayErrorMsg(string msg)
