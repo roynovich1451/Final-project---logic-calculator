@@ -147,12 +147,16 @@ namespace LogicCalculator
         private void Proven_Elimination()
         {
             int proven_index = Get_Row(statement_list[current_line].First_segment);
+            if (statement_list[proven_index].Rule != "Proveni")
+            {
+                DisplayErrorMsg("Proven elimination first segment must point to 'Proven i' rule line");
+                return;
+            }
             HashSet<string> proven_data = GetData(statement_list[proven_index].Expression);
-            string msg = "Proven elimination first segment must be positive integer\nSecond segment must be positive integers separate by ','";
             List<int> data_indexes = Get_Rows_For_Proven(statement_list[current_line].Second_segment);
             if (data_indexes == null)
             {
-                DisplayErrorMsg(msg);
+                DisplayErrorMsg("Proven elimination first segment must be positive integer\nSecond segment must be positive integers separate by ','");
                 return;
             }
             HashSet<string> provided_data = new HashSet<string>();
@@ -162,23 +166,21 @@ namespace LogicCalculator
             }
             string proven_goal = GetGoal(statement_list[proven_index].Expression);
             string current_goal = ReplaceAll(statement_list[current_line].Expression);
-            bool data_check = Compare_Sets(proven_data, provided_data);
-            
-            if (!data_check)
-                msg = "Data given is not equivelant to the data needed" +
-                    "";
-            bool goal_check = !string.IsNullOrEmpty(proven_goal) &&
+            Is_Valid = Compare_Sets(proven_data, provided_data);
+
+            if (!Is_Valid)
+            {
+                DisplayErrorMsg("Data given is not equivelant to the data needed");
+                return;
+            }
+            Is_Valid = !string.IsNullOrEmpty(proven_goal) &&
                 !string.IsNullOrEmpty(current_goal) &&
                 proven_goal.Equals(current_goal);
-            if (!goal_check)
-            {
-                if (!string.IsNullOrEmpty(msg))
-                    msg += "\nAlso, ";
-                msg += "Goals are not the same";
-            }
-            Is_Valid = data_check && goal_check;
             if (!Is_Valid)
-                DisplayErrorMsg(msg);
+            {
+                DisplayErrorMsg($"Expression in current line must be '{proven_goal}'");
+                return;
+            }
             return;
         }
 
