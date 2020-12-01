@@ -1186,7 +1186,7 @@ namespace LogicCalculator
             int ret = IsBoxValid(checkedForBox[OPEN_BOX_LIST_INDEX], checkedForBox[CLOSE_BOX_LIST_INDEX]);
             if (ret == -ERRCOUNTBRAKETS)
             {
-                DisplayErrorMsg($"Error: Can't create box, checked rows are illegal parenthesis Validity", "Error");
+                DisplayErrorMsg($"Error: Can't create box, checked rows are half inside a box and half outside", "Error");
                 CheckMode(false);
                 return;
             }
@@ -1592,7 +1592,7 @@ namespace LogicCalculator
                     else if (ret == -ERRMISSINTEGER)
                         Expression_Error(row, "Missing positive integer in first segment");
                     else if (ret == -ERRINDEX)
-                        Expression_Error(row, "First segemnt given index out of bounds");
+                        Expression_Error(row, "First segment given index out of bounds");
                     return false;
                 }
             }
@@ -1610,7 +1610,7 @@ namespace LogicCalculator
                     else if (ret == -ERRMISSINTEGER)
                         Expression_Error(row, "Missing positive integer in Second segment");
                     else if (ret == -ERRINDEX)
-                        Expression_Error(row, "Second segemnt given index out of bounds");
+                        Expression_Error(row, "Second segment given index out of bounds");
                     return false;
                 }
             }
@@ -1628,7 +1628,7 @@ namespace LogicCalculator
                     else if (ret == -ERRMISSINTEGER)
                         Expression_Error(row, "Missing positive integer in Third segment");
                     else if (ret == -ERRINDEX)
-                        Expression_Error(row, "Third segemnt given index out of bounds");
+                        Expression_Error(row, "Third segment given index out of bounds");
                     return false;
                 }
             }
@@ -2173,7 +2173,7 @@ namespace LogicCalculator
             {
                 if(((Grid)spGridTable.Children[i]).Children[LABEL_INDEX] is Label lb)
                 {
-                    return int.Parse(lb.Content.ToString());
+                    return int.Parse(lb.Content.ToString())-1;
                 }
             }
             return 0;

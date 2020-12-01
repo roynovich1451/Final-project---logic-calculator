@@ -305,6 +305,11 @@ namespace LogicCalculator
         private void PBC()
         {
             List<int> rows = Get_Lines_From_Segment(statement_list[current_line].First_segment);
+            if (rows == null)
+            {
+                Is_Valid = false;
+                return;
+            }
             Is_Valid = statement_list[rows[rows.Count - 1]].Expression == "⊥";
             if (!Is_Valid)
             {
@@ -407,6 +412,11 @@ namespace LogicCalculator
         {
             List<int> first_segment_lines = Get_Lines_From_Segment(statement_list[current_line].Second_segment),
                       second_segment_lines = Get_Lines_From_Segment(statement_list[current_line].Third_segment);
+            if (first_segment_lines == null|| second_segment_lines==null)
+            {
+                Is_Valid = false;
+                return;
+            }
             int base_row = Get_Row(statement_list[current_line].First_segment);
             string current_expression = statement_list[current_line].Expression,
                    base_expression = statement_list[base_row].Expression,
@@ -479,8 +489,8 @@ namespace LogicCalculator
                 DisplayErrorMsg("Missing ⊥ at the previous row");
                 return;
             }
-            int first_line = Get_Lines_From_Segment(statement_list[current_line].First_segment)[0];
-
+            int first_line = Get_First_Line_From_Segment(statement_list[current_line].First_segment);           
+            Is_Valid=
             Is_Valid &= Check_If_Not(statement_list[first_line].Expression, statement_list[current_line].Expression);
             if (!Is_Valid)
                 DisplayErrorMsg("Missuse of Not Introduction");
@@ -538,9 +548,14 @@ namespace LogicCalculator
 
         private void Arrow_Introduction()
         {
-            List<int> lines = Get_Lines_From_Segment(statement_list[current_line].First_segment);
-            int start_row = lines[0],
-            end_row = lines[lines.Count - 1];
+            List<int> rows = Get_Lines_From_Segment(statement_list[current_line].First_segment);
+            if (rows == null)
+            {
+                Is_Valid = false;
+                return;
+            }
+            int start_row = rows[0],
+            end_row = rows[rows.Count - 1];
             string current_expression = statement_list[current_line].Expression;
 
             if (!current_expression.Contains("→"))
@@ -730,9 +745,15 @@ namespace LogicCalculator
 
         private void All_Introduction()
         {
-            List<int> line_numbers = Get_Lines_From_Segment(statement_list[current_line].First_segment);
+            List<int> rows = Get_Lines_From_Segment(statement_list[current_line].First_segment);
+            if (rows == null)
+            {
+                Is_Valid = false;
+                return;
+            }
+
             string current_expression = statement_list[current_line].Expression,
-                last_expression = statement_list[line_numbers[line_numbers.Count - 1]].Expression;
+                last_expression = statement_list[rows[rows.Count - 1]].Expression;
             char letter = Find_Letter(last_expression);
             current_expression.Replace(current_expression[4], letter);
             Is_Valid = current_expression.Substring(2) == last_expression;
@@ -776,6 +797,11 @@ namespace LogicCalculator
         }
         private void Exists_Elimination() {
             List<int> second_seg_rows= Get_Lines_From_Segment(statement_list[current_line].Second_segment);
+            if (second_seg_rows==null)
+            {
+                Is_Valid = false;
+                return;
+            }
             int previous_line=second_seg_rows[second_seg_rows.Count];
             string current_expression = statement_list[current_line].Expression,
                 previous_expression = statement_list[previous_line].Expression;
@@ -842,8 +868,18 @@ namespace LogicCalculator
             }
             else
                 ret.Add(Int32.Parse(seg));
-
+        
             return ret;
+        }
+
+        public int Get_First_Line_From_Segment(string seg)
+        {
+            int index = seg.IndexOf("-");
+            if (index == -1)
+            {
+                return -1;
+            }   
+            return Int32.Parse(seg.Substring(0, index));
         }
 
         private List<int> Get_Rows_For_Proven(string seg)
@@ -870,7 +906,6 @@ namespace LogicCalculator
         {
             Is_Valid = false;
             MessageBox.Show("Error at row " + current_line + "\n" + msg, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            return;
         }
 
         private bool My_Equal(string first, string second)
