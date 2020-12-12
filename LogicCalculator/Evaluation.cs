@@ -11,7 +11,6 @@ namespace LogicCalculator
         public bool Is_Valid { get; set; }
         private readonly List<Statement> statement_list;
         private readonly int current_line;
-        private readonly Regex predicate_regex;
         private static readonly int PREDICATE_LENGTH = 4;
 
         //([a-z]*)+[∧,∨,¬,=,∀,∃][a-z]* \/ ([a-z]*)+[∧,∨,¬,=,∀,∃]([a-z]*)
@@ -21,8 +20,6 @@ namespace LogicCalculator
             Is_Valid = false;
             this.statement_list = statement_list;
             current_line = statement_list.Count - 1;
-            predicate_regex = new Regex("[a-z|A-Z]+([a-z])");
-
             Handle_Rule(rule);
         }
 
@@ -210,13 +207,14 @@ namespace LogicCalculator
             int index = statement_list[0].Expression.IndexOf("⊢");
             if (index != -1)
                 statement_list[0].Expression = statement_list[0].Expression.Substring(0, index);
+            string current_expression = statement_list[current_line].Expression;
             foreach (string s in statement_list[0].Expression.Split(','))
             {
-                Is_Valid = (s == statement_list[current_line].Expression);
+                Is_Valid = (s == current_expression);
                 if (Is_Valid)
                     return;
             }
-            DisplayErrorMsg("Data doesn't exist in the original expression");
+            DisplayErrorMsg("Data: "+current_expression+" doesn't exist in the original expression");
         }
 
         private void Copy()
@@ -760,23 +758,21 @@ namespace LogicCalculator
         }
         private void All_Elimination()
         {
-            int index, previous_line = Get_Row(statement_list[current_line].First_segment);
+            int previous_line = Get_Row(statement_list[current_line].First_segment);
             string current_expression = statement_list[current_line].Expression,
                 previous_expression = statement_list[previous_line].Expression;
 
-            index = statement_list[current_line].Rule[previous_expression.IndexOf("∀")] + 1;
-            char letter = statement_list[current_line].Rule[index];
-            string all = "∀" + letter;
-
-            index = previous_expression.IndexOf(all) + 2;
-            if (index == -1)
+            char original_letter= statement_list[current_line].Rule[1],
+            current_letter =Find_Letter(statement_list[current_line].Expression);
+    
+            if (!previous_expression.Contains("∀"))
             {
-                DisplayErrorMsg("Missing " + all + " in row");
+                DisplayErrorMsg("Missing ∀ in previous row");
                 return;
-            }
+            }           
 
-            current_expression.Replace(Find_Letter(current_expression), letter);
-            Is_Valid = My_Equal(current_expression, previous_expression);
+            string to_check= "∀"+original_letter+"("+current_expression.Replace(Find_Letter(current_expression), original_letter)+")";
+            Is_Valid = previous_expression.Contains(to_check);
             if (!Is_Valid)
             {
                 DisplayErrorMsg("Misuse of all elimination");
@@ -821,7 +817,7 @@ namespace LogicCalculator
             char letter = '%';
             for (int i = 0; i < to_search.Length - PREDICATE_LENGTH; i++)
             {
-                if (predicate_regex.IsMatch(to_search.Substring(i, PREDICATE_LENGTH)))
+                if (Char.IsUpper(to_search[i]))
                 {
                     letter = to_search[i + 2];
                     break;
