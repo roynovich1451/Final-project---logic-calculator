@@ -2154,13 +2154,14 @@ namespace LogicCalculator
         }
         public bool Rec_Input_Check(string input, int row, int i = 0, int parentheses_count = 0, bool after_comma = false, bool after_operator = false, bool after_predicate = false)
         {
+            char c = input[i];
             if (i == input.Length)
             {
                 if (parentheses_count == 0)
                     return true;
+                Expression_Error(row, "Too many opener parentheses, problematic char is: " + c, i, input);
                 return false;
             }
-            char c = input[i];                                
 
             if (Char.IsNumber(c))
             {
@@ -2199,7 +2200,7 @@ namespace LogicCalculator
                 parentheses_count--;
                 if (parentheses_count < 0)
                 {
-                //    Expression_Error(row, "Too many closing parentheses, problematic char is: " + c, i, input);
+                    Expression_Error(row, "Too many closer parentheses, problematic char is: " + c, i, input);
                     return false;
                 }
             }
@@ -2207,7 +2208,7 @@ namespace LogicCalculator
             {
                 if (after_predicate)
                 {
-              //      Expression_Error(row, "Two predicate symbols in a row, problematic char is: " + c, i, input);
+                   Expression_Error(row, "Two predicate symbols in a row, problematic char is: " + c, i, input);
                     return false;
                 }
                 after_predicate = true;
@@ -2219,7 +2220,7 @@ namespace LogicCalculator
                 {
                     if (c != '¬')
                     {
-                    //    Expression_Error(row, "Two operators in a row, problematic char is: " + c, i, input);
+                        Expression_Error(row, "Two operators in a row, problematic char is: " + c, i, input);
                         return false;
                     }
                 }
@@ -2229,10 +2230,25 @@ namespace LogicCalculator
 
             if (Char.IsLetter(c))
             {
+                if (!after_operator && !after_predicate && i != 0)
+                {
+                    Expression_Error(row, "Two variables in a row, problematic char is: " + c, i);
+                    return false;
+                }
+                int j = i + 1;
+                for (; j < input.Length; j++)
+                {
+                    c = input[j];
+                    if (!Char.IsLetter(c))
+                        break;
+                }
+                i = j - 1;
+                after_predicate = after_operator = false;
                 return Rec_Input_Check(input,row, i + 1, parentheses_count, after_comma, after_operator, after_predicate);
             }
             if (Char.IsWhiteSpace(c))
                 return Rec_Input_Check(input,row, i + 1, parentheses_count, after_comma, after_operator, after_predicate);
+            Expression_Error(row, "Invalid symbol, problematic char is: " + c, i, input);
             return false;
         }
 
