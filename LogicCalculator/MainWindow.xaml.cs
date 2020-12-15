@@ -1585,14 +1585,14 @@ namespace LogicCalculator
                     Expression_Error(row, "First segment is empty");
                     return false;
                 }
-                else if ((ret = IsValidSegment(first_segment)) != 0)
+                else if ((ret = IsValidSegment(first_segment, row)) != 0)
                 {
                     if (ret == -ERRARGUMENT)
                         Expression_Error(row, "First segment is not a positive integer number");
                     else if (ret == -ERRMISSINTEGER)
                         Expression_Error(row, "Missing positive integer in first segment");
                     else if (ret == -ERRINDEX)
-                        Expression_Error(row, "First segment given index out of bounds");
+                        Expression_Error(row, "First segment given index must be smaller then row index");
                     return false;
                 }
             }
@@ -1603,14 +1603,14 @@ namespace LogicCalculator
                     Expression_Error(row, "Second segment is empty");
                     return false;
                 }
-                if ((ret = IsValidSegment(second_segment)) != 0)
+                if ((ret = IsValidSegment(second_segment, row)) != 0)
                 {
                     if (ret == -ERRARGUMENT)
                         Expression_Error(row, "Second segment is not a positive integer number");
                     else if (ret == -ERRMISSINTEGER)
                         Expression_Error(row, "Missing positive integer in Second segment");
                     else if (ret == -ERRINDEX)
-                        Expression_Error(row, "Second segment given index out of bounds");
+                        Expression_Error(row, "Second segment given index must be smaller then row index");
                     return false;
                 }
             }
@@ -1621,14 +1621,14 @@ namespace LogicCalculator
                     Expression_Error(row, "Third segment is empty");
                     return false;
                 }
-                if ((ret = IsValidSegment(third_segment)) != 0)
+                if ((ret = IsValidSegment(third_segment, row)) != 0)
                 {
                     if (ret == -ERRARGUMENT)
                         Expression_Error(row, "Third segment is not a positive integer number");
                     else if (ret == -ERRMISSINTEGER)
                         Expression_Error(row, "Missing positive integer in Third segment");
                     else if (ret == -ERRINDEX)
-                        Expression_Error(row, "Third segment given index out of bounds");
+                        Expression_Error(row, "Third segment given index must be smaller then row index");
                     return false;
                 }
             }
@@ -2252,9 +2252,8 @@ namespace LogicCalculator
             return false;
         }
 
-        public int IsValidSegment(string seg)
+        public int IsValidSegment(string seg, int currentRow)
         {
-            int maxNum = GetMaxIndex();
             string[] splitted = seg.Split(new Char[] { ',', '-' });
             if (seg.Contains('-') && (string.IsNullOrEmpty(splitted[1]) || string.IsNullOrEmpty(splitted[0])))
                 return -ERRMISSINTEGER;
@@ -2270,23 +2269,12 @@ namespace LogicCalculator
             {
                 if (!Int32.TryParse(s, out _))
                     return -ERRARGUMENT;
-                if (int.Parse(s) > maxNum)
-                    return -ERRINDEX;
+                if (int.Parse(s) >= currentRow)
+                    return -ERRINDEX;                  
             }
             return SUCCESS;
         }
 
-        private int GetMaxIndex()
-        {
-            for (int i = spGridTable.Children.Count - 1; i >= 0; i--)
-            {
-                if(((Grid)spGridTable.Children[i]).Children[LABEL_INDEX] is Label lb)
-                {
-                    return int.Parse(lb.Content.ToString())-1;
-                }
-            }
-            return 0;
-        }
         #endregion INPUT_CHECKS
 
         #region TESTING
