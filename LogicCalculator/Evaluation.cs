@@ -30,7 +30,7 @@ namespace LogicCalculator
             switch (rule)
             {
                 case "Proveni":
-                    //THIS ON VERIFIED IN MAINWINDOW\
+                    //THIS ON VERIFIED IN MAINWINDOW
                     Is_Valid = true;
                     break;
                 case "Provene":
@@ -118,9 +118,9 @@ namespace LogicCalculator
             }
         }
 
-        private HashSet<string> GetData(string s)
+        private List<string> GetData(string s)
         {
-            HashSet<string> ret = new HashSet<string>();
+            List<string> ret = new List<string>();
             string[] splited = s.Split('⊢');
             string[] all_data = splited[0].Split(',');
             foreach (var d in all_data)
@@ -141,44 +141,214 @@ namespace LogicCalculator
         {
             return s.Trim().Replace('^', '∧').Replace('V', '∨').Replace('~', '¬').Replace(" ", "");
         }
-        private void Proven_Elimination()
+
+        private void Proven_Elimination() //TODO: change this function for using 'match_datas'
         {
+            Dictionary<string, string> matches = new Dictionary<string, string>();
             int proven_index = Get_Row(statement_list[current_line].First_segment);
             if (statement_list[proven_index].Rule != "Proveni")
             {
                 DisplayErrorMsg("Proven elimination first segment must point to 'Proven i' rule line");
                 return;
             }
-            HashSet<string> proven_data = GetData(statement_list[proven_index].Expression);
+            List<string> proven_data = GetData(statement_list[proven_index].Expression);
             List<int> data_indexes = Get_Rows_For_Proven(statement_list[current_line].Second_segment);
             if (data_indexes == null)
             {
                 DisplayErrorMsg("Proven elimination first segment must be positive integer\nSecond segment must be positive integers separate by ','");
                 return;
             }
-            HashSet<string> provided_data = new HashSet<string>();
+            List<string> provided_data = new List<string>();
             foreach (int index in data_indexes)
             {
                 provided_data.Add(ReplaceAll(statement_list[index].Expression));
             }
+            if (proven_data.Count() != provided_data.Count())
+            {
+                DisplayErrorMsg($"Missmatch between provided data expected ({proven_data.Count()}) to actual given ({provided_data.Count()})");
+                return;
+            }
             string proven_goal = GetGoal(statement_list[proven_index].Expression);
             string current_goal = ReplaceAll(statement_list[current_line].Expression);
-            Is_Valid = Compare_Sets(proven_data, provided_data);
-
-            if (!Is_Valid)
+            // ------------ALL DATA RECIEVED-------------//
+            // ------------BUILD DICT-------------//
+            for (int i = 0; i < provided_data.Count(); i++)
             {
-                DisplayErrorMsg("Data given is not equivelant to the data needed");
+                matches = BuildDict(proven_data[i], provided_data[i], matches);
+                if (matches == null)
+                    return;
+            }
+            // ------------CHECK REUSLTS-------------//
+            Tuple<bool, string> ret;
+            for (int i = 0; i < provided_data.Count(); i++)
+            {
+                if(!(ret = ReplaceAndCompare(proven_data[i], provided_data[i], matches)).Item1)
+                {
+                    DisplayErrorMsg($"Line number {data_indexes[i]} expression expected to be: '{ret.Item2}' and not '{provided_data[i]}'");
+                    return;
+                }
+            }
+            if (!(ret = ReplaceAndCompare(proven_goal, current_goal, matches)).Item1)
+            {
+                DisplayErrorMsg($"Goal expression expected to be: '{ret.Item2}' and not '{current_goal}'");
                 return;
             }
-            Is_Valid = !string.IsNullOrEmpty(proven_goal) &&
-                !string.IsNullOrEmpty(current_goal) &&
-                proven_goal.Equals(current_goal);
-            if (!Is_Valid)
-            {
-                DisplayErrorMsg($"Expression in current line must be '{proven_goal}'");
-                return;
-            }
+            // ------------SUCCESS-------------//
+            Is_Valid = true;
             return;
+        }
+
+        private Dictionary<string, string> BuildDict(string proven, string data, Dictionary<string, string> matches)
+        { 
+            int p_proven = 0, p_data = 0; //string pointers
+            int proven_brackets_counter = 0, data_brackets_counter = 0; //check brackets level
+            if (proven.Length > data.Length)
+            {
+                DisplayErrorMsg($"Unable to generate dictionary, '{proven}' pattern don't match to '{data}'");
+                return null;
+            }
+            for (; p_proven < proven.Length && proven.Length != 1; p_proven++)
+            {
+                if (IsOperator(proven[p_proven]))
+                {
+                    if (!proven[p_proven].Equals(data[p_data]))
+                    {
+                        DisplayErrorMsg($"Unable to generate dictionary, string patterns don't match\nIndex {p_data} of '{data}' expected to be '{proven[p_proven]}' not '{data[p_data]}'");
+                        return null;
+                    }
+                    p_data++;
+                }
+                else if (proven[p_proven].Equals('('))
+                {
+                    if (!proven[p_proven].Equals(data[p_data]))
+                    {
+                        DisplayErrorMsg($"Unable to generate dictionary, string patterns don't match\nIndex {p_data} of '{data}' expected to be '{proven[p_proven]}' not '{data[p_data]}'");
+                        return null;
+                    }
+                    p_data++;
+                }
+                else if (proven[p_proven].Equals(')'))
+                {
+                    if (!proven[p_proven].Equals(data[p_data]))
+                    {
+                        DisplayErrorMsg($"Unable to generate dictionary, string patterns don't match\nIndex {p_data} of '{data}' expected to be '{proven[p_proven]}' not '{data[p_data]}'");
+                        return null;
+                    }
+                    p_data++;
+                }
+                else // VARIABLE
+                {
+                    string k = proven[p_proven].ToString();
+                    string v = "";
+                    data_brackets_counter = proven_brackets_counter;
+                    for (; p_data < data.Length; p_data++)
+                    {
+                        if (IsOperator(data[p_data]) && proven_brackets_counter == data_brackets_counter)
+                        {
+                            break;
+                        }
+                        else if (data[p_data].Equals('('))
+                        {
+
+                            data_brackets_counter++;
+                            if (proven_brackets_counter < data_brackets_counter - 1)
+                            {
+                                v = v + data[p_data];
+                            }
+                        }
+                        else if (data[p_data].Equals(')'))
+                        {
+                            data_brackets_counter--;
+                            if (proven_brackets_counter < data_brackets_counter)
+                            {
+                                v = v + data[p_data];
+                            }
+                            else if (proven_brackets_counter > data_brackets_counter)
+                            {
+                                break;
+                            }
+                            
+                        }
+                        else
+                        {
+                            v = v + data[p_data];
+                        }                
+                    }
+                    if (matches.ContainsKey(k))
+                    {
+                        if (!matches[k].Equals(v))
+                        {
+                            DisplayErrorMsg($"Duplicate key - value: '{k}' is already '{matches[k]}', can't be '{v}' also");
+                            return null;
+                        }
+                    }
+                    else 
+                    {
+                        matches.Add(k, v);
+                    }
+                }
+
+            }
+            if (proven.Length == 1)
+                if(!matches.ContainsKey(proven))
+                        matches.Add(proven, data);
+                else
+                {
+                    if (!matches[proven].Equals(data))
+                    {
+                        DisplayErrorMsg($"Duplicate key - value: '{proven}' is already '{matches[proven]}', can't be '{data}' also");
+                        return null;
+                    }
+                }
+            return matches;
+        }
+
+        private Tuple<bool, string> ReplaceAndCompare(string proven, string data, Dictionary<string, string> matches)
+        {
+            foreach (string k in matches.Keys)
+            {
+                if (proven.Contains(k))
+                {
+                    if (matches[k].Length > 1 && proven.Length > 1)
+                        proven = proven.Replace(k, $"({matches[k]})");
+                    else
+                        proven = proven.Replace(k, matches[k]);
+                }
+            }
+            return Tuple.Create(proven.Equals(data), proven);
+        }
+
+        private bool IsOperator(char c)
+        {
+            return c == '^' || c == 'v' || c == '|' || c == '¬' || c == '~' ||
+                c == '∧' || c == '→' || c == '∨' || c == '↔' || c == '⊢' ||
+                c == '⊥' || c == '=';
+        }
+
+        private Dictionary<string, string> match_datas(string gen, string actual, Dictionary<string, string> known)
+        {
+            Dictionary<string, string> ret = new Dictionary<string, string>();
+            int act_p = 0;
+            for (int gen_p=0; gen_p < gen.Length; gen_p++)
+            {
+                char gen_c = gen[gen_p];
+                if (!IsOperator(gen_c)) //variable
+                {
+                    int k = gen_p + 1;
+                    while (!IsOperator(gen[k]) && k < gen.Length)
+                        k++;
+                    char stop = gen[k];
+                    int r = act_p;
+                    while (!actual[r].Equals(stop) && r < actual.Length)
+                        r++;
+                    string key = gen.Substring(gen_p, k - gen_p);
+                    string value = actual.Substring(act_p, r-act_p);
+                    ret.Add(key, value);
+                }
+                else
+                    act_p++;
+            }
+            return ret;
         }
 
         private bool Compare_Sets(HashSet<string> s1, HashSet<string> s2)

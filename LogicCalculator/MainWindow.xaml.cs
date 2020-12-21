@@ -1750,7 +1750,7 @@ namespace LogicCalculator
                 return false;
 
             string lastRowInput = ReplaceAll(((TextBox)lastRow.Children[STATEMENT_INDEX]).Text);
-            string needToProof = GetGoal(tbEquation.Text);
+            string needToProof = ReplaceAll(GetGoal(tbEquation.Text));
             return lastRowInput.Equals(needToProof);
         }
         private string GetData(string s)
