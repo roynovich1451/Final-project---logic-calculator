@@ -1641,13 +1641,13 @@ namespace LogicCalculator
         {
             string msg = "All input is valid";
             statement_list.Clear();
-            string to_check = ReplaceAll(tbEquation.Text.Trim());
-            if (string.IsNullOrEmpty(to_check))
+            string main_expression = ReplaceAll(tbEquation.Text.Trim());
+            if (string.IsNullOrEmpty(main_expression))
             {
-                DisplayErrorMsg("Miss proof header", "Error");
+                DisplayErrorMsg("Main expresion is empty", "Error");
                 return;
             }
-            if (!IsValidLogicalEquivalent(to_check))
+            if (!IsValidLogicalEquivalent(main_expression))
             {
                 return;
             }
@@ -1657,7 +1657,7 @@ namespace LogicCalculator
                 return;
             }
 
-            statement_list.Add(new Statement(to_check, "first", "0"));
+            statement_list.Add(new Statement(main_expression, "first", "0"));
             string expression, rule, first_segment, second_segment, third_segment;
             int index;
             string header = "Conclusions";
@@ -1724,22 +1724,18 @@ namespace LogicCalculator
                 DisplayErrorMsg("Valid logical Equivalent must contain exactly one '⊢'", "Error");
                 return false;
             }
-          
+
             //VALIDATE WHAT SHOULD BE PROOF
             string goal = GetGoal(s);
             if (!IsValidExpression(goal, -1))
                 return false;
             //VALIDATE DATA
             string data = GetData(s);
-            string[] dataSplit = data.Split(',');
-            if (string.IsNullOrEmpty(dataSplit[0]) && dataSplit.Length == 1)
+            if (data == "")
                 return true;
-            foreach (string d in dataSplit)
+            if (!IsValidExpression(data, -1))
             {
-                if (!IsValidExpression(d, -1))
-                {
-                    return false;
-                }
+                return false;
             }
             return true;
         }
@@ -2005,7 +2001,7 @@ namespace LogicCalculator
                 c == '∧' || c == '→' || c == '∨' || c == '↔' || c == '⊢' ||
                 c == '⊥' || c == '=';
         }
-        public void Expression_Error(int row, string error, int index = -1,string expression="")
+        public void Expression_Error(int row, string error, int index = -1, string expression = "")
         {
             string error_message;
             if (row == -1)
@@ -2014,11 +2010,11 @@ namespace LogicCalculator
             }
             else
             {
-                error_message= "Error on row: \n" + row;
+                error_message = "Error on row: " + row + "\n";
             }
             if (expression != "")
             {
-                error_message += "Expression: "+expression+", ";
+                error_message += "Expression: " + expression + ", ";
             }
             if (index != -1)
             {
@@ -2030,9 +2026,8 @@ namespace LogicCalculator
         }
         public bool IsValidExpression(string input, int row)
         {
-            int parentheses_count = 0;
-            bool after_operator = false;
-            bool after_predicate = false;
+            int parentheses_count = 0, comma_parentheses = -1;
+            bool after_operator = false, after_predicate = false;
             int i = 0;
 
             //Check if input is empty
@@ -2046,10 +2041,7 @@ namespace LogicCalculator
             {
                 char c = input[i];
 
-                //Ignore spaces
-                if (Char.IsWhiteSpace(c))
-                    continue;
-
+                //Check Digit
                 if (Char.IsNumber(c))
                 {
                     if (i > 0)
@@ -2127,6 +2119,11 @@ namespace LogicCalculator
                     for (; j < input.Length; j++)
                     {
                         c = input[j];
+                        if (c == '(')
+                        {
+                            comma_parentheses = parentheses_count + 1;
+                            break;
+                        }
                         if (!Char.IsLetter(c))
                             break;
                     }
@@ -2135,9 +2132,17 @@ namespace LogicCalculator
                 }
                 else if (c == ',')
                 {
-                    Expression_Error(row, "An invalid character input, problematic char is: " + c, i);
-                    return false;
-
+                    if (comma_parentheses < parentheses_count&& row != -1)
+                    {
+                        Expression_Error(row, "A comma isn't allowed here, problematic char is: " + c, i);
+                        return false;
+                    }
+                    if (after_operator)
+                    {
+                        Expression_Error(row, "Two operators in a row, problematic char is: " + c, i);
+                        return false;
+                    }
+                    after_operator = true;
                 }
                 else
                 {
@@ -2151,105 +2156,6 @@ namespace LogicCalculator
                 return false;
             }
             return true;
-        }
-        public bool Rec_Input_Check(string input, int row, int i = 0, int parentheses_count = 0, bool after_comma = false, bool after_operator = false, bool after_predicate = false)
-        {
-            char c = input[i];
-            if (i == input.Length)
-            {
-                if (parentheses_count == 0)
-                    return true;
-                Expression_Error(row, "Too many opener parentheses, problematic char is: " + c, i, input);
-                return false;
-            }
-
-            if (Char.IsNumber(c))
-            {
-                if (i <= 0 || input[i] != '0' || (input[i - 1] != 'X' && input[i - 1] != 'Y'))
-                {
-                    Expression_Error(row, "Entering digits is not allowed, problematic char is: " + c, i, input);
-                    return false;
-                }
-            }
-
-            //Open parentheses
-            else if (c == '(')
-            {
-                if (i != 0 && input[i - 1] == ')')
-                {
-                    Expression_Error(row, "Missing an operator, problematic char is: " + c, i, input);
-                    return false;
-                }
-                after_operator = true;
-                after_predicate = false;
-                parentheses_count++;
-            }
-            //Close parentheses
-            else if (c == ')')
-            {
-                if (after_operator)
-                {
-                    Expression_Error(row, "Two operators in a row, problematic char is: " + c, i, input);
-                    return false;
-                }
-                if (after_predicate)
-                {
-                    Expression_Error(row, "Cant put ')' after predicate sign ", i);
-                    return false;
-                }
-                parentheses_count--;
-                if (parentheses_count < 0)
-                {
-                    Expression_Error(row, "Too many closer parentheses, problematic char is: " + c, i, input);
-                    return false;
-                }
-            }
-            else if (c == '∀' || c == '∃')
-            {
-                if (after_predicate)
-                {
-                   Expression_Error(row, "Two predicate symbols in a row, problematic char is: " + c, i, input);
-                    return false;
-                }
-                after_predicate = true;
-                after_operator = false;
-            }
-            else if (IsOperator(c))
-            {
-                if (after_operator)
-                {
-                    if (c != '¬')
-                    {
-                        Expression_Error(row, "Two operators in a row, problematic char is: " + c, i, input);
-                        return false;
-                    }
-                }
-                after_operator = true;
-                after_predicate = false;
-            }
-
-            if (Char.IsLetter(c))
-            {
-                if (!after_operator && !after_predicate && i != 0)
-                {
-                    Expression_Error(row, "Two variables in a row, problematic char is: " + c, i);
-                    return false;
-                }
-                int j = i + 1;
-                for (; j < input.Length; j++)
-                {
-                    c = input[j];
-                    if (!Char.IsLetter(c))
-                        break;
-                }
-                i = j - 1;
-                after_predicate = after_operator = false;
-                return Rec_Input_Check(input,row, i + 1, parentheses_count, after_comma, after_operator, after_predicate);
-            }
-            if (Char.IsWhiteSpace(c))
-                return Rec_Input_Check(input,row, i + 1, parentheses_count, after_comma, after_operator, after_predicate);
-            Expression_Error(row, "Invalid symbol, problematic char is: " + c, i, input);
-            return false;
         }
 
         public int IsValidSegment(string seg, int currentRow)
@@ -2270,7 +2176,7 @@ namespace LogicCalculator
                 if (!Int32.TryParse(s, out _))
                     return -ERRARGUMENT;
                 if (int.Parse(s) >= currentRow)
-                    return -ERRINDEX;                  
+                    return -ERRINDEX;
             }
             return SUCCESS;
         }
