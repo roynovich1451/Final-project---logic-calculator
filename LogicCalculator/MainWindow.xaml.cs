@@ -1636,7 +1636,24 @@ namespace LogicCalculator
             return true;
         }
 
-        //OREN
+        private int FindArgumentNumber(string input)
+        {
+            int argument_number = 0, parenthesis_number = 0;
+
+            for (int i = 0; i < input.Length; i++)
+            {
+                if (input[i] == '(')
+                    parenthesis_number++;
+                if (input[i] == ')')
+                    parenthesis_number--;
+                if (input[i] == ',')
+                    argument_number++;
+                if (parenthesis_number == 0)
+                    break;
+            }
+            return argument_number;
+        }
+
         private void HandleTableInput()
         {
             string msg = "All input is valid";
@@ -2024,9 +2041,9 @@ namespace LogicCalculator
         }
         public bool IsValidExpression(string input, int row)
         {
-            int parentheses_count = 0, comma_parentheses = -1,i=0;
+            int parentheses_count = 0, comma_parentheses = -1, i = 0;
             bool after_operator = false, after_predicate = false;
-            Dictionary<string, int>  func_dict = new Dictionary<string, int>();
+            Dictionary<string, int> func_dict = new Dictionary<string, int>();
             List<string> var_list = new List<string>();
 
             //Check if input is empty
@@ -2127,32 +2144,36 @@ namespace LogicCalculator
                         {
                             comma_parentheses = parentheses_count + 1;
                             to_add = input.Substring(i, j - i);
-                            /*
+                            int arg_num = FindArgumentNumber(input.Substring(j));
                             if (var_list.Contains(to_add))
                             {
-                                Expression_Error(row, "Trying to register string as var and function/relation, problematic string is: " + to_add, i);
+                                Expression_Error(row, "Trying to define string as function/relation after it was defined as var, problematic string is: " + to_add, i);
                                 return false;
                             }
-                            if (func_dict.ContainsKey(to_add))
+                            if (func_dict.ContainsKey(to_add) )
                             {
-
+                                if (func_dict[to_add] != arg_num)
+                                {
+                                    Expression_Error(row, "Trying to define function/relation with different amount of arguments in different places, problematic string is: " + to_add, i);
+                                    return false;
+                                }
                             }
-                            else
-                                func_dict.Add(input.Substring(i,j-i),0);
-                            */
+                            else if (!after_predicate)
+                                func_dict.Add(input.Substring(i, j - i), arg_num);
                             break;
                         }
                         if (!Char.IsLetter(c))
                         {
-                            /*
+
                             to_add = input.Substring(i, j - i);
                             if (func_dict.ContainsKey(to_add))
                             {
-                                Expression_Error(row, "Trying to register string as var and function/relation, problematic string is: " + to_add, i);
+                                Expression_Error(row, "Trying to register string as var after its registered as function/relation, problematic string is: " + to_add, i);
                                 return false;
                             }
-                            var_list.Add(input.Substring(i, j - i));
-                            */
+                            if (!after_predicate)
+                                var_list.Add(input.Substring(i, j - i));
+
                             break;
                         }
                     }

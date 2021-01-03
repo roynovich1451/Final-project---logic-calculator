@@ -130,7 +130,7 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <Button Name="btnAddLine" IsDefault="True" Click="BtnAddLine_Click" Content="New line" Margin="5"  Grid.ColumnSpan="2" Grid.Column="0"/>
+                            <Button Name="btnAddLine" IsDefault="True" Click="BtnAddLine_Click" Content="New Line" Margin="5"  Grid.ColumnSpan="2" Grid.Column="0"/>
                             <Button Name="btnClear" IsDefault="True" Click="BtnClear_Click" Content="Clear" Margin="5" Grid.Column="2" Visibility="Hidden"/>
                             <Button Name="btnRemove" IsDefault="True" Click="BtnRemove_Click" Content="Remove" Margin="5" Grid.Column="3"  Visibility="Hidden"/>
                             <Button Name="btnAddBefore" IsDefault="True" Click="BtnAddBefore_Click" Content="Add" Margin="5" Grid.Column="4"  Visibility="Hidden"/>
