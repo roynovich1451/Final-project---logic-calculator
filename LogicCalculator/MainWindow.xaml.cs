@@ -1592,7 +1592,7 @@ namespace LogicCalculator
                     else if (ret == -ERRMISSINTEGER)
                         Expression_Error(row, "Missing positive integer in first segment");
                     else if (ret == -ERRINDEX)
-                        Expression_Error(row, "First segment given index must be smaller then row index");
+                        Expression_Error(row, "First segment index must be smaller then row index");
                     return false;
                 }
             }
@@ -1610,7 +1610,7 @@ namespace LogicCalculator
                     else if (ret == -ERRMISSINTEGER)
                         Expression_Error(row, "Missing positive integer in Second segment");
                     else if (ret == -ERRINDEX)
-                        Expression_Error(row, "Second segment given index must be smaller then row index");
+                        Expression_Error(row, "Second segment index must be smaller then row index");
                     return false;
                 }
             }
@@ -1628,7 +1628,7 @@ namespace LogicCalculator
                     else if (ret == -ERRMISSINTEGER)
                         Expression_Error(row, "Missing positive integer in Third segment");
                     else if (ret == -ERRINDEX)
-                        Expression_Error(row, "Third segment given index must be smaller then row index");
+                        Expression_Error(row, "Third segment index must be smaller then row index");
                     return false;
                 }
             }
@@ -1644,7 +1644,7 @@ namespace LogicCalculator
             string main_expression = ReplaceAll(tbEquation.Text.Trim());
             if (string.IsNullOrEmpty(main_expression))
             {
-                DisplayErrorMsg("Main expresion is empty", "Error");
+                DisplayErrorMsg("Main expression is empty", "Error");
                 return;
             }
             if (!IsValidLogicalEquivalent(main_expression))
@@ -1762,7 +1762,7 @@ namespace LogicCalculator
 
         private string ReplaceAll(string s)
         {
-            return s.Trim().Replace('^', '∧').Replace('V', '∨').Replace('~', '¬').Replace(" ", "");
+            return s.Trim().Replace('^', '∧').Replace('V', '∨').Replace('~', '¬').Replace(" ", "").Replace('>', '→');
         }
         private bool IsValidBox(Grid row, string rule, string first_segment, string second_segment, string third_segment)
         {
@@ -1914,7 +1914,7 @@ namespace LogicCalculator
         }
         private void DisplayWarningMsg(string msg, string title)
         {
-            MessageBox.Show(msg, title, MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(msg, title, MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
         private void DisplayInfoMsg(string msg, string title)
@@ -1997,16 +1997,14 @@ namespace LogicCalculator
         #region INPUT_CHECKS
         private bool IsOperator(char c)
         {
-            return c == '^' || c == 'v' || c == '|' || c == '¬' || c == '~' ||
-                c == '∧' || c == '→' || c == '∨' || c == '↔' || c == '⊢' ||
-                c == '⊥' || c == '=';
+            return c == '¬' || c == '∧' || c == '→' || c == '∨' || c == '↔' || c == '⊢' || c == '⊥' || c == '=';
         }
         public void Expression_Error(int row, string error, int index = -1, string expression = "")
         {
             string error_message;
             if (row == -1)
             {
-                error_message = "Error in main logical expression given: \n";
+                error_message = "Error in main logical expression: \n";
             }
             else
             {
@@ -2026,9 +2024,10 @@ namespace LogicCalculator
         }
         public bool IsValidExpression(string input, int row)
         {
-            int parentheses_count = 0, comma_parentheses = -1;
+            int parentheses_count = 0, comma_parentheses = -1,i=0;
             bool after_operator = false, after_predicate = false;
-            int i = 0;
+            Dictionary<string, int>  func_dict = new Dictionary<string, int>();
+            List<string> var_list = new List<string>();
 
             //Check if input is empty
             if (input.Length == 0)
@@ -2079,6 +2078,8 @@ namespace LogicCalculator
                         return false;
                     }
                     parentheses_count--;
+                    if (comma_parentheses == parentheses_count)
+                        comma_parentheses = -1;
                     if (parentheses_count < 0)
                     {
                         Expression_Error(row, "Too many closing parentheses, problematic char is: " + c, i);
@@ -2097,13 +2098,15 @@ namespace LogicCalculator
                 }
                 else if (IsOperator(c))
                 {
-                    if (after_operator)
+                    if (i == input.Length - 1)
                     {
-                        if (c != '~' && c != '¬')
-                        {
-                            Expression_Error(row, "Two operators in a row, problematic char is: " + c, i);
-                            return false;
-                        }
+                        Expression_Error(row, "Expression cannot end with operator, problematic char is: " + c, i);
+                        return false;
+                    }
+                    if (after_operator && c != '¬')
+                    {
+                        Expression_Error(row, "Two operators in a row, problematic char is: " + c, i);
+                        return false;
                     }
                     after_operator = true;
                     after_predicate = false;
@@ -2119,20 +2122,51 @@ namespace LogicCalculator
                     for (; j < input.Length; j++)
                     {
                         c = input[j];
+                        string to_add;
                         if (c == '(')
                         {
                             comma_parentheses = parentheses_count + 1;
+                            to_add = input.Substring(i, j - i);
+                            /*
+                            if (var_list.Contains(to_add))
+                            {
+                                Expression_Error(row, "Trying to register string as var and function/relation, problematic string is: " + to_add, i);
+                                return false;
+                            }
+                            if (func_dict.ContainsKey(to_add))
+                            {
+
+                            }
+                            else
+                                func_dict.Add(input.Substring(i,j-i),0);
+                            */
                             break;
                         }
                         if (!Char.IsLetter(c))
+                        {
+                            /*
+                            to_add = input.Substring(i, j - i);
+                            if (func_dict.ContainsKey(to_add))
+                            {
+                                Expression_Error(row, "Trying to register string as var and function/relation, problematic string is: " + to_add, i);
+                                return false;
+                            }
+                            var_list.Add(input.Substring(i, j - i));
+                            */
                             break;
+                        }
                     }
                     i = j - 1;
                     after_predicate = after_operator = false;
                 }
                 else if (c == ',')
                 {
-                    if (comma_parentheses < parentheses_count&& row != -1)
+                    if (i == input.Length - 1)
+                    {
+                        Expression_Error(row, "Expression cannot end with comma, problematic char is: " + c, i);
+                        return false;
+                    }
+                    if (comma_parentheses < parentheses_count && row != -1)
                     {
                         Expression_Error(row, "A comma isn't allowed here, problematic char is: " + c, i);
                         return false;
@@ -2157,6 +2191,7 @@ namespace LogicCalculator
             }
             return true;
         }
+
 
         public int IsValidSegment(string seg, int currentRow)
         {

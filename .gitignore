@@ -18,3 +18,9 @@ LogicCalculator/LogicCalculator.csproj
 LogicCalculator/LogicCalculator.csproj
 *.csproj
 *.zip
+packages/System.Collections.4.3.0/ref/netcore50/zh-hans/System.Collections.xml
+*.xml
+*.p7s
+*.nupkg
+*.config
+*.config
