@@ -370,14 +370,14 @@ namespace LogicCalculator
             return;
         }
 
-          private void Data()
+        private void Data()
         {
             int index = statement_list[0].Expression.IndexOf("⊢");
             if (index != -1)
                 statement_list[0].Expression = statement_list[0].Expression.Substring(0, index);
             string current_expression = statement_list[current_line].Expression;
             string[] split = statement_list[0].Expression.Split(',');
-            for(int i=0;i<split.Length;i++)
+            for (int i = 0; i < split.Length; i++)
             {
                 Is_Valid = (split[i] == current_expression);
                 if (Is_Valid)
@@ -385,9 +385,9 @@ namespace LogicCalculator
                 string check = split[i];
                 if (i == split.Length - 1)
                     continue;
-                for (int j = i+1; j < split.Length; j++)
+                for (int j = i + 1; j < split.Length; j++)
                 {
-                    check +=","+ split[j];
+                    check += "," + split[j];
                     if (check.Length > current_expression.Length)
                         continue;
                     Is_Valid = (check == current_expression);
@@ -760,7 +760,7 @@ namespace LogicCalculator
             int index = current_expression.IndexOf('=');
             if (index == -1)
             {
-                DisplayErrorMsg("Missing = in row");
+                DisplayErrorMsg("Missing = in row "+current_line);
                 return;
             }
             Is_Valid = current_expression.Substring(0, index) ==
@@ -773,156 +773,41 @@ namespace LogicCalculator
             int index, first_line = Get_Row(statement_list[current_line].First_segment)
             , second_line = Get_Row(statement_list[current_line].Second_segment);
 
-
             string current_expression = statement_list[current_line].Expression,
                 first_expression = statement_list[first_line].Expression,
                 second_expression = statement_list[second_line].Expression,
-                first_left, first_right, second_left, second_right, current_left, current_right;
-
-            index = current_expression.IndexOf("=");
-            if (index == -1)
-            {
-                DisplayErrorMsg("Missing = in row");
-                return;
-            }
-            current_left = current_expression.Substring(0, index);
-            current_right = current_expression.Substring(index + 1);
+                left, right;
 
             index = first_expression.IndexOf("=");
             if (index == -1)
             {
-                DisplayErrorMsg("Missing = in row");
-                return;
-            }
-            first_left = first_expression.Substring(0, index);
-            first_right = first_expression.Substring(index + 1);
+                index = second_expression.IndexOf("=");
+                if (index == -1)
+                {
+                    DisplayErrorMsg("= symbol must be present in lines "+first_line+" or "+second_line);
+                    return;
+                }
+                else // = symbol is in second expression
+                {
+                    left = second_expression.Substring(0, index);
+                    right = second_expression.Substring(index + 1);
+                    Is_Valid = current_expression == first_expression.Replace(left, right) ||
+                   current_expression == first_expression.Replace(right, left);
 
-            index = second_expression.IndexOf("=");
-            if (index == -1)
-            {
-                DisplayErrorMsg("Missing = in row");
-                return;
-            }
-            second_left = second_expression.Substring(0, index);
-            second_right = second_expression.Substring(index + 1);
-
-            //first case
-            if (first_left == current_left)
-            {
-                if (first_right == second_left)
-                {
-                    Is_Valid = second_right == current_right;
-                    if (!Is_Valid)
-                    {
-                        DisplayErrorMsg("Misuse of equal elimination");
-                        return;
-                    }
-                }
-                else if (first_right == second_right)
-                {
-                    Is_Valid = second_left == current_right;
-                    if (!Is_Valid)
-                    {
-                        DisplayErrorMsg("Misuse of equal elimination");
-                        return;
-                    }
-                }
-                else
-                {
-                    Is_Valid = false;
-                    DisplayErrorMsg("Misuse of equal elimination");
-                    return;
                 }
             }
-            //second case
-            else if (first_left == current_right)
-            {
-                if (first_right == second_left)
-                {
-                    Is_Valid = second_right == current_left;
-                    if (!Is_Valid)
-                    {
-                        DisplayErrorMsg("Misuse of equal elimination");
-                        return;
-                    }
-                }
-                else if (first_right == second_right)
-                {
-                    Is_Valid = second_left == current_left;
-                    if (!Is_Valid)
-                    {
-                        DisplayErrorMsg("Misuse of equal elimination");
-                        return;
-                    }
-                }
-                else
-                {
-                    Is_Valid = false;
-                    DisplayErrorMsg("Misuse of equal elimination");
-                    return;
-                }
-            }
-
-            //third case
-            else if (first_right == current_left)
-            {
-                if (first_left == second_left)
-                {
-                    Is_Valid = second_right == current_right;
-                    if (!Is_Valid)
-                    {
-                        DisplayErrorMsg("Misuse of equal elimination");
-                        return;
-                    }
-                }
-                else if (first_left == second_right)
-                {
-                    Is_Valid = second_left == current_right;
-                    if (!Is_Valid)
-                    {
-                        DisplayErrorMsg("Misuse of equal elimination");
-                        return;
-                    }
-                }
-                else
-                {
-                    Is_Valid = false;
-                    DisplayErrorMsg("Misuse of equal elimination");
-                    return;
-                }
-            }
-            //fourth case
-            else if (first_right == current_right)
-            {
-                if (first_left == second_left)
-                {
-                    Is_Valid = second_right == current_left;
-                    if (!Is_Valid)
-                    {
-                        DisplayErrorMsg("Misuse of equal elimination");
-                        return;
-                    }
-                }
-                else if (first_left == second_right)
-                {
-                    Is_Valid = second_left == current_left;
-                    if (!Is_Valid)
-                    {
-                        DisplayErrorMsg("Misuse of equal elimination");
-                        return;
-                    }
-                }
-                else
-                {
-                    Is_Valid = false;
-                    DisplayErrorMsg("Misuse of equal elimination");
-                    return;
-                }
-            }
+            // = symbol is in first expression
             else
             {
-                Is_Valid = false;
+                left = first_expression.Substring(0, index);
+                right = first_expression.Substring(index + 1);
+                Is_Valid = current_expression == second_expression.Replace(left, right)||
+                    current_expression == second_expression.Replace(right, left);
+            }
+            if (!Is_Valid)
+            {
                 DisplayErrorMsg("Misuse of equal elimination");
+                return;
             }
         }
 
