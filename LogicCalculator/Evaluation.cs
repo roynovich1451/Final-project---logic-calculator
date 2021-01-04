@@ -370,21 +370,33 @@ namespace LogicCalculator
             return;
         }
 
-        private void Data()
+          private void Data()
         {
             int index = statement_list[0].Expression.IndexOf("⊢");
             if (index != -1)
                 statement_list[0].Expression = statement_list[0].Expression.Substring(0, index);
             string current_expression = statement_list[current_line].Expression;
-            foreach (string s in statement_list[0].Expression.Split(','))
+            string[] split = statement_list[0].Expression.Split(',');
+            for(int i=0;i<split.Length;i++)
             {
-                Is_Valid = (s == current_expression);
+                Is_Valid = (split[i] == current_expression);
                 if (Is_Valid)
                     return;
+                string check = split[i];
+                if (i == split.Length - 1)
+                    continue;
+                for (int j = i+1; j < split.Length; j++)
+                {
+                    check +=","+ split[j];
+                    if (check.Length > current_expression.Length)
+                        continue;
+                    Is_Valid = (check == current_expression);
+                    if (Is_Valid)
+                        return;
+                }
             }
             DisplayErrorMsg("Data: " + current_expression + " doesn't exist in the original expression");
         }
-
         private void Copy()
         {
             int row = Get_Row(statement_list[current_line].First_segment);
