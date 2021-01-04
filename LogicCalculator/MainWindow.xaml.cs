@@ -2052,6 +2052,11 @@ namespace LogicCalculator
                 Expression_Error(row, "No input", i);
                 return false;
             }
+            if(!Char.IsLetter(input[0])&&input[0]!= '¬' && input[0] != '(')
+            {
+                Expression_Error(row, "Invalid char at start of an expression , problematic char is: " + input[i], i);
+                return false;
+            }
 
             for (; i < input.Length; i++)
             {
@@ -2187,7 +2192,7 @@ namespace LogicCalculator
                         Expression_Error(row, "Expression cannot end with comma, problematic char is: " + c, i);
                         return false;
                     }
-                    if (comma_parentheses < parentheses_count && row != -1)
+                    if (comma_parentheses < parentheses_count && row != -1||Char.IsUpper(input[i-1]))
                     {
                         Expression_Error(row, "A comma isn't allowed here, problematic char is: " + c, i);
                         return false;
