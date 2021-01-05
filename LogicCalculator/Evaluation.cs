@@ -760,7 +760,7 @@ namespace LogicCalculator
             int index = current_expression.IndexOf('=');
             if (index == -1)
             {
-                DisplayErrorMsg("Missing = in row "+current_line);
+                DisplayErrorMsg("Missing = in row " + current_line);
                 return;
             }
             Is_Valid = current_expression.Substring(0, index) ==
@@ -784,15 +784,15 @@ namespace LogicCalculator
                 index = second_expression.IndexOf("=");
                 if (index == -1)
                 {
-                    DisplayErrorMsg("= symbol must be present in lines "+first_line+" or "+second_line);
+                    DisplayErrorMsg("= symbol must be present in lines " + first_line + " or " + second_line);
                     return;
                 }
                 else // = symbol is in second expression
                 {
                     left = second_expression.Substring(0, index);
                     right = second_expression.Substring(index + 1);
-                    Is_Valid = current_expression == first_expression.Replace(left, right) ||
-                   current_expression == first_expression.Replace(right, left);
+                    Is_Valid = first_expression == current_expression.Replace(left, right) ||
+                   first_expression == current_expression.Replace(right, left);
 
                 }
             }
@@ -801,8 +801,8 @@ namespace LogicCalculator
             {
                 left = first_expression.Substring(0, index);
                 right = first_expression.Substring(index + 1);
-                Is_Valid = current_expression == second_expression.Replace(left, right)||
-                    current_expression == second_expression.Replace(right, left);
+                Is_Valid = second_expression == current_expression.Replace(left, right) ||
+                    second_expression == current_expression.Replace(right, left);
             }
             if (!Is_Valid)
             {
