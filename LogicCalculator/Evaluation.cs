@@ -119,7 +119,7 @@ namespace LogicCalculator
                     Exists_Elimination();
                     break;
                 default:
-                    DisplayErrorMsg("Unknown rule (This is a programming bug and should not happen)\n rule is: "+rule);
+                    DisplayErrorMsg("Unknown rule (This is a programming bug and should not happen)\n rule is: " + rule);
                     break;
             }
         }
@@ -386,7 +386,7 @@ namespace LogicCalculator
             for (int i = 0; i < split.Length; i++)
             {
 
-                Is_Valid =My_Equal(split[i],current_expression);
+                Is_Valid = My_Equal(split[i], current_expression);
                 if (Is_Valid)
                     return;
                 string check = split[i];
@@ -397,7 +397,7 @@ namespace LogicCalculator
                     check += "," + split[j];
                     if (check.Length > current_expression.Length)
                         continue;
-                    Is_Valid = My_Equal(check , current_expression);
+                    Is_Valid = My_Equal(check, current_expression);
                     if (Is_Valid)
                         return;
                 }
@@ -831,9 +831,9 @@ namespace LogicCalculator
             string current_expression = statement_list[current_line].Expression,
                 previous_expression = statement_list[rows[rows.Count - 1]].Expression;
             string previous_letter = Find_Letter(previous_expression), current_letter = Find_Letter(current_expression);
-            current_expression=current_expression.Replace(current_letter, previous_letter);
-            Is_Valid = current_expression == "∀" +previous_letter+ previous_expression||
-                current_expression == "∀" + previous_letter + "("+ previous_expression +")";
+            current_expression = current_expression.Replace(current_letter, previous_letter);
+            Is_Valid = current_expression == "∀" + previous_letter + previous_expression ||
+                current_expression == "∀" + previous_letter + "(" + previous_expression + ")";
             if (!Is_Valid)
             {
                 DisplayErrorMsg("Misuse of all introduction");
@@ -852,9 +852,9 @@ namespace LogicCalculator
                 DisplayErrorMsg("Missing ∀ in previous row");
                 return;
             }
-
-            string to_check = "∀" + original_letter + "(" + current_expression.Replace(Find_Letter(current_expression), original_letter) + ")";
-            Is_Valid = previous_expression.Contains(to_check);
+            current_expression = current_expression.Replace(Find_Letter(current_expression), original_letter);
+            Is_Valid = previous_expression.Contains("∀" + original_letter + "(" + current_expression + ")") ||
+                previous_expression.Contains("∀" + original_letter + current_expression);
             if (!Is_Valid)
             {
                 DisplayErrorMsg("Misuse of all elimination");
@@ -866,10 +866,10 @@ namespace LogicCalculator
             string current_expression = statement_list[current_line].Expression,
                 previous_expression = statement_list[previous_line].Expression;
             string previous_letter = Find_Letter(previous_expression), current_letter = Find_Letter(current_expression);
-            current_expression=current_expression.Replace(current_letter, previous_letter);
+            current_expression = current_expression.Replace(current_letter, previous_letter);
             string check = "∃" + previous_letter + "(" + previous_expression + ")";
-            Is_Valid = current_expression == "∃"+previous_letter+previous_expression||
-                current_expression == "∃" + previous_letter +"("+ previous_expression+")";
+            Is_Valid = current_expression == "∃" + previous_letter + previous_expression ||
+                current_expression == "∃" + previous_letter + "(" + previous_expression + ")";
             if (!Is_Valid)
             {
                 DisplayErrorMsg("Misuse of exist introduction");
@@ -884,7 +884,7 @@ namespace LogicCalculator
                 Is_Valid = false;
                 return;
             }
-            int previous_line = second_seg_rows[second_seg_rows.Count-1];
+            int previous_line = second_seg_rows[second_seg_rows.Count - 1];
             string current_expression = statement_list[current_line].Expression,
                 previous_expression = statement_list[previous_line].Expression;
             Is_Valid = current_expression == previous_expression;
@@ -905,7 +905,7 @@ namespace LogicCalculator
             {
                 if (Char.IsUpper(to_search[i]))
                 {
-                    if(to_search[i+3]=='0')
+                    if (to_search[i + 3] == '0')
                         letter = to_search.Substring(i + 2, 2);
                     else
                         letter = to_search.Substring(i + 2, 1);
