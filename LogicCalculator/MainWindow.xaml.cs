@@ -47,6 +47,7 @@ namespace LogicCalculator
         private const int HYPHEN = 8;
         private const int MAX_HYPHEN_CHUNKS = 14;
         private const int MIN_HYPHEN_CHUNKS = 3;
+        private static readonly int TABLE_COL_NUM = 6;
         //private const int MAX_BOX_TEXT_LENGTH = 134;
         #endregion
 
@@ -85,10 +86,10 @@ namespace LogicCalculator
 
         #region VARIABLES
 
-        private int checked_checkboxes = 0;
         private readonly List<Statement> statement_list = new List<Statement>();
+        private string current_filename = "";
+        private int checked_checkboxes = 0;
         private int table_row_num = 0;
-        private static readonly int TABLE_COL_NUM = 6;
         private TextBox elementWithFocus;
         private readonly List<string> rules = new List<string> { "None","Data","Proven i","Proven e", "Assumption", "LEM", "PBC", "MP", "MT", "Copy"
                                                                  ,"∧i", "∧e1", "∧e2", "∨i1", "∨i2", "∨e", "¬¬e",
@@ -97,8 +98,6 @@ namespace LogicCalculator
 
         private int hyphen_chunks = MAX_HYPHEN_CHUNKS;
         private int spaces_chunks = MIN_HYPHEN_CHUNKS;
-        private int box_closers = 0;
-        private int box_openers = 0;
 
         #endregion VARIABLES
 
@@ -120,7 +119,7 @@ namespace LogicCalculator
             NewFile();
             elementWithFocus = tbEquation;
             Keyboard.Focus(elementWithFocus);
-            this.Title = "Logic Calculator";
+            this.Title = "Logic Proof Tool";
         }
         private void NewFile()
         {
@@ -140,16 +139,20 @@ namespace LogicCalculator
         {
             OpenFileDialog openFileDialog = new OpenFileDialog
             {
-                RestoreDirectory = true,
                 Filter = "doc files (*.docx)|*.docx",
+                FileName = current_filename,
+                RestoreDirectory = true,
                 FilterIndex = 2
             };
             if (openFileDialog.ShowDialog() == false)
                 return;
+
+            current_filename = openFileDialog.SafeFileName;
+            current_filename = current_filename.Substring(0, current_filename.Length - 5);
             string openFilePath = openFileDialog.FileName;
             if (FileInUse(openFilePath))
                 return;
-            this.Title = $"Logic Calculator - File: {openFileDialog.SafeFileName}, Last save: {DateTime.Now.ToString(new CultureInfo("ru-RU"))}";
+            this.Title = $"Logic Proof Tool - File: {current_filename}, Last saved: {DateTime.Now.ToString(new CultureInfo("ru-RU"))}";
             using (var document = DocX.Load(openFilePath))
             {
                 if (document.Tables.Count == 0)
@@ -203,13 +206,16 @@ namespace LogicCalculator
         {
             SaveFileDialog saveFileDialog = new SaveFileDialog
             {
-                RestoreDirectory = true,
                 Filter = "doc files (*.docx)|*.docx",
+                FileName = current_filename,
+                RestoreDirectory = true,
                 FilterIndex = 2
             };
             if (saveFileDialog.ShowDialog() == false) return;
+            current_filename = saveFileDialog.SafeFileName;
+            current_filename = current_filename.Substring(0, current_filename.Length - 5);
             string saveFilePath = saveFileDialog.FileName;
-            this.Title = $"Logic Calculator - File: {saveFileDialog.SafeFileName}, Last save: {DateTime.Now.ToString(new CultureInfo("ru-RU"))}";
+            this.Title = $"Logic Proof Tool - File: {current_filename}, Last saved: {DateTime.Now.ToString(new CultureInfo("ru-RU"))}";
             using (var document = DocX.Create(saveFilePath))
             {
                 // Add a title.
@@ -551,21 +557,11 @@ namespace LogicCalculator
         }
         private void HandleBox(BoxState state, int index)
         {
-
-            switch (state)
-            {
-                case BoxState.Close:
-                    spGridTable.Children.Insert(index, CreateBox(BoxState.Close));
-                    ++box_closers;
-                    break;
-
-                case BoxState.Open:
-                    spGridTable.Children.Insert(index, CreateBox(BoxState.Open));
-                    ++box_openers;
-                    break;
-            }
+            if (state == BoxState.Close)
+                spGridTable.Children.Insert(index, CreateBox(BoxState.Close));
+            else
+                spGridTable.Children.Insert(index, CreateBox(BoxState.Open));
             MasterCheck.Visibility = Visibility.Visible;
-
         }
         private Grid CreateRow(int index)
         {
@@ -1592,7 +1588,7 @@ namespace LogicCalculator
                     else if (ret == -ERRMISSINTEGER)
                         Expression_Error(row, "Missing positive integer in first segment");
                     else if (ret == -ERRINDEX)
-                        Expression_Error(row, "First segment index must be smaller then row index");
+                        Expression_Error(row, "First segment index must be smaller then row number");
                     return false;
                 }
             }
@@ -1610,7 +1606,7 @@ namespace LogicCalculator
                     else if (ret == -ERRMISSINTEGER)
                         Expression_Error(row, "Missing positive integer in Second segment");
                     else if (ret == -ERRINDEX)
-                        Expression_Error(row, "Second segment index must be smaller then row index");
+                        Expression_Error(row, "Second segment index must be smaller then row number");
                     return false;
                 }
             }
@@ -1628,7 +1624,7 @@ namespace LogicCalculator
                     else if (ret == -ERRMISSINTEGER)
                         Expression_Error(row, "Missing positive integer in Third segment");
                     else if (ret == -ERRINDEX)
-                        Expression_Error(row, "Third segment index must be smaller then row index");
+                        Expression_Error(row, "Third segment index must be smaller then row number");
                     return false;
                 }
             }
@@ -2014,7 +2010,7 @@ namespace LogicCalculator
         #region INPUT_CHECKS
         private bool IsOperator(char c)
         {
-            return c == '¬' || c == '∧' || c == '→' || c == '∨' || c == '↔' || c == '⊢' || c == '⊥' || c == '=';
+            return c == '¬' || c == '∧' || c == '→' || c == '∨' || c == '⊢' || c == '⊥' || c == '=';
         }
         public void Expression_Error(int row, string error, int index = -1, string expression = "")
         {
@@ -2052,7 +2048,9 @@ namespace LogicCalculator
                 Expression_Error(row, "No input", i);
                 return false;
             }
-            if(!Char.IsLetter(input[0])&&input[0]!= '¬' && input[0] != '(')
+            //Check starting char
+            if (!Char.IsLetter(input[0]) && input[0] != '¬' && input[0] != '(' &&
+                input[0] != '⊥' && input[0] != '∃' && input[0] != '∀')
             {
                 Expression_Error(row, "Invalid char at start of an expression , problematic char is: " + input[i], i);
                 return false;
@@ -2120,7 +2118,7 @@ namespace LogicCalculator
                 }
                 else if (IsOperator(c))
                 {
-                    if (i == input.Length - 1)
+                    if (i == input.Length - 1 && input[i] != '⊥')
                     {
                         Expression_Error(row, "Expression cannot end with operator, problematic char is: " + c, i);
                         return false;
@@ -2155,7 +2153,7 @@ namespace LogicCalculator
                                 Expression_Error(row, "Trying to define string as function/relation after it was defined as var, problematic string is: " + to_add, i);
                                 return false;
                             }
-                            if (func_dict.ContainsKey(to_add) )
+                            if (func_dict.ContainsKey(to_add))
                             {
                                 if (func_dict[to_add] != arg_num)
                                 {
@@ -2192,7 +2190,7 @@ namespace LogicCalculator
                         Expression_Error(row, "Expression cannot end with comma, problematic char is: " + c, i);
                         return false;
                     }
-                    if (comma_parentheses < parentheses_count && row != -1||Char.IsUpper(input[i-1]))
+                    if (comma_parentheses < parentheses_count && row != -1 || Char.IsUpper(input[i - 1]))
                     {
                         Expression_Error(row, "A comma isn't allowed here, problematic char is: " + c, i);
                         return false;
