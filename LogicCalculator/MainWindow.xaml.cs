@@ -24,7 +24,6 @@ namespace LogicCalculator
     public partial class MainWindow : Window
     {
         #region DEFINES
-
         #region GUI_DEFINES
         private const int COL_LABEL_WIDTH = 35;
         private const int COL_STATEMENT_WIDTH = 360;
@@ -34,7 +33,6 @@ namespace LogicCalculator
         private const int CHILD_MARGIN = 4;
         private const int THICKNESS = 2;
         #endregion
-
         #region BOX_DEFINES
         private enum BoxState
         {
@@ -42,7 +40,6 @@ namespace LogicCalculator
             Close,
             None
         }
-
         private const int SPACES = 6;
         private const int HYPHEN = 8;
         private const int MAX_HYPHEN_CHUNKS = 14;
@@ -50,7 +47,6 @@ namespace LogicCalculator
         private static readonly int TABLE_COL_NUM = 6;
         //private const int MAX_BOX_TEXT_LENGTH = 134;
         #endregion
-
         #region INDEX_DEFINES
         private const int CHECKBOX_INDEX = 0;
         private const int LABEL_INDEX = 1;
@@ -66,7 +62,6 @@ namespace LogicCalculator
         private const int CLOSE_BOX_LIST_INDEX = 1;
         //private const int TAB_EDITOR_INDEX = 1;
         #endregion
-
         #region ERROR_DEFINES
         private const int SUCCESS = 0;
         private const int ERRMISSLINE = 1;
@@ -79,13 +74,10 @@ namespace LogicCalculator
         private const int ERRMISSINTEGER = 8;
         private const int ERRARGUMENT = 9;
         private const int ERRINDEX = 10;
-
+        private const int ERRCOMMA = 11;
         #endregion
-
         #endregion DEFINES
-
         #region VARIABLES
-
         private readonly List<Statement> statement_list = new List<Statement>();
         private string current_filename = "";
         private int checked_checkboxes = 0;
@@ -98,14 +90,11 @@ namespace LogicCalculator
 
         private int hyphen_chunks = MAX_HYPHEN_CHUNKS;
         private int spaces_chunks = MIN_HYPHEN_CHUNKS;
-
         #endregion VARIABLES
-
         public MainWindow()
         {
             InitializeComponent();
         }
-
         #region MENUBAR_CLICKS
         private void MenuItemNew_Click(object sender, RoutedEventArgs e)
         {
@@ -285,9 +274,9 @@ namespace LogicCalculator
                 }
                 catch (Exception ex)
                 {
-                    DisplayErrorMsg(ex.Message, "Error while trying to save");
+                    Utility.DisplayErrorMsg(ex.Message + "\nError while trying to save");
                 }
-                DisplayInfoMsg("Created Document: " + saveFilePath, "Documented Created");
+                Utility.DisplayInfoMsg("Created Document: " + saveFilePath, "Documented Created");
             }
         }
         private void MenuItemExit_Click(object sender, RoutedEventArgs e)
@@ -304,19 +293,15 @@ namespace LogicCalculator
             }
             catch (Exception ex)
             {
-                DisplayErrorMsg(ex.Message, "Error while opening manual");
+                Utility.DisplayErrorMsg(ex.Message + "\nError while opening manual");
             }
         }
-
         private void MenuItem_About_Click(object sender, RoutedEventArgs e)
         {
-            DisplayInfoMsg("This software was made by Roy Novich and Oren Or", "About");
+            Utility.DisplayInfoMsg("This software was made by Roy Novich and Oren Or", "About");
         }
-
         #endregion MENUBAR_CLICKS
-
         #region DYNAMIC_GUI
-
         private void HandleGridVisability(Grid g, int needed)
         {
             foreach (UIElement child in g.Children)
@@ -715,7 +700,6 @@ namespace LogicCalculator
             }
         }
         #endregion DYNAMIC_GUI
-
         #region EVENTS
         private void MainTab_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -814,7 +798,6 @@ namespace LogicCalculator
             }
         }
         #endregion EVENTS
-
         #region BUTTON_CLICKS
         private void BtnAddLine_Click(object sender, RoutedEventArgs e)
         {
@@ -825,7 +808,7 @@ namespace LogicCalculator
         }
         private void CheckButton_click(object sender, RoutedEventArgs e)
         {
-            HandleTableInput();
+            CheckProof();
         }
         private void BtnOr_Click(object sender, RoutedEventArgs e)
         {
@@ -870,7 +853,6 @@ namespace LogicCalculator
                 AppendKeyboardChar(elementWithFocus, "¬");
             }
         }
-
         private void BtnForAll_Click(object sender, RoutedEventArgs e)
         {
             if (elementWithFocus != null)
@@ -878,7 +860,6 @@ namespace LogicCalculator
                 AppendKeyboardChar(elementWithFocus, "∀");
             }
         }
-
         private void BtnExists_Click(object sender, RoutedEventArgs e)
         {
             if (elementWithFocus != null)
@@ -886,7 +867,6 @@ namespace LogicCalculator
                 AppendKeyboardChar(elementWithFocus, "∃");
             }
         }
-
         private void BtnCapPsi_Click(object sender, RoutedEventArgs e)
         {
             if (elementWithFocus != null)
@@ -894,7 +874,6 @@ namespace LogicCalculator
                 AppendKeyboardChar(elementWithFocus, "Ψ");
             }
         }
-
         private void BtnCapPhi_Click(object sender, RoutedEventArgs e)
         {
             if (elementWithFocus != null)
@@ -902,7 +881,6 @@ namespace LogicCalculator
                 AppendKeyboardChar(elementWithFocus, "Φ");
             }
         }
-
         private void BtnCapChi_Click(object sender, RoutedEventArgs e)
         {
             if (elementWithFocus != null)
@@ -917,7 +895,6 @@ namespace LogicCalculator
                 AppendKeyboardChar(elementWithFocus, "Β");
             }
         }
-
         private void BtnCapGama_Click(object sender, RoutedEventArgs e)
         {
             if (elementWithFocus != null)
@@ -925,7 +902,6 @@ namespace LogicCalculator
                 AppendKeyboardChar(elementWithFocus, "Γ");
             }
         }
-
         private void BtnCapDelta_Click(object sender, RoutedEventArgs e)
         {
             if (elementWithFocus != null)
@@ -933,7 +909,6 @@ namespace LogicCalculator
                 AppendKeyboardChar(elementWithFocus, "Δ");
             }
         }
-
         private void BtnCapEpsilon_Click(object sender, RoutedEventArgs e)
         {
             if (elementWithFocus != null)
@@ -941,7 +916,6 @@ namespace LogicCalculator
                 AppendKeyboardChar(elementWithFocus, "Ε");
             }
         }
-
         private void BtnCapTeta_Click(object sender, RoutedEventArgs e)
         {
             if (elementWithFocus != null)
@@ -949,7 +923,6 @@ namespace LogicCalculator
                 AppendKeyboardChar(elementWithFocus, "Θ");
             }
         }
-
         private void BtnCapPai_Click(object sender, RoutedEventArgs e)
         {
             if (elementWithFocus != null)
@@ -957,7 +930,6 @@ namespace LogicCalculator
                 AppendKeyboardChar(elementWithFocus, "Π");
             }
         }
-
         private void BtnCapOmega_Click(object sender, RoutedEventArgs e)
         {
             if (elementWithFocus != null)
@@ -965,7 +937,6 @@ namespace LogicCalculator
                 AppendKeyboardChar(elementWithFocus, "Ω");
             }
         }
-
         private void BtnBeta_Click(object sender, RoutedEventArgs e)
         {
             if (elementWithFocus != null)
@@ -973,7 +944,6 @@ namespace LogicCalculator
                 AppendKeyboardChar(elementWithFocus, "β");
             }
         }
-
         private void BtnGama_Click(object sender, RoutedEventArgs e)
         {
             if (elementWithFocus != null)
@@ -981,7 +951,6 @@ namespace LogicCalculator
                 AppendKeyboardChar(elementWithFocus, "γ");
             }
         }
-
         private void BtnDelta_Click(object sender, RoutedEventArgs e)
         {
             if (elementWithFocus != null)
@@ -989,7 +958,6 @@ namespace LogicCalculator
                 AppendKeyboardChar(elementWithFocus, "δ");
             }
         }
-
         private void BtnEpsilon_Click(object sender, RoutedEventArgs e)
         {
             if (elementWithFocus != null)
@@ -997,7 +965,6 @@ namespace LogicCalculator
                 AppendKeyboardChar(elementWithFocus, "ε");
             }
         }
-
         private void BtnTeta_Click(object sender, RoutedEventArgs e)
         {
             if (elementWithFocus != null)
@@ -1005,7 +972,6 @@ namespace LogicCalculator
                 AppendKeyboardChar(elementWithFocus, "θ");
             }
         }
-
         private void BtnPai_Click(object sender, RoutedEventArgs e)
         {
             if (elementWithFocus != null)
@@ -1020,7 +986,6 @@ namespace LogicCalculator
                 AppendKeyboardChar(elementWithFocus, "φ");
             }
         }
-
         private void BtnChi_Click(object sender, RoutedEventArgs e)
         {
             if (elementWithFocus != null)
@@ -1029,7 +994,6 @@ namespace LogicCalculator
 
             }
         }
-
         private void BtnPsi_Click(object sender, RoutedEventArgs e)
         {
             if (elementWithFocus != null)
@@ -1051,7 +1015,6 @@ namespace LogicCalculator
                 AppendKeyboardChar(elementWithFocus, "X0");
             }
         }
-
         private void BtnY_Click(object sender, RoutedEventArgs e)
         {
             if (elementWithFocus != null)
@@ -1126,7 +1089,6 @@ namespace LogicCalculator
             }
             return ret;
         }
-
         private List<Grid> GetOuterBox(StackPanel spRows, Grid upperRow)
         {
             List<Grid> ret = new List<Grid>();
@@ -1174,7 +1136,7 @@ namespace LogicCalculator
         {
             if (checked_checkboxes != 2)
             {
-                DisplayErrorMsg("Error: Need to check exactly 2 rows if you want to create box", "Error");
+                Utility.DisplayErrorMsg("Error: Need to check exactly 2 rows if you want to create box");
                 return;
             }
 
@@ -1182,19 +1144,19 @@ namespace LogicCalculator
             int ret = IsBoxValid(checkedForBox[OPEN_BOX_LIST_INDEX], checkedForBox[CLOSE_BOX_LIST_INDEX]);
             if (ret == -ERRCOUNTBRAKETS)
             {
-                DisplayErrorMsg($"Error: Can't create box, checked rows are half inside a box and half outside", "Error");
+                Utility.DisplayErrorMsg($"Error: Can't create box, checked rows are half inside a box and half outside");
                 CheckMode(false);
                 return;
             }
             else if (ret == -ERRMISSLINE)
             {
-                DisplayErrorMsg($"Error: Can't create box, must be at least one line padding between 2 boxes", "Error");
+                Utility.DisplayErrorMsg($"Error: Can't create box, must be at least one line padding between 2 boxes");
                 CheckMode(false);
                 return;
             }
             else if (ret == -ERRBOXPADDING)
             {
-                DisplayErrorMsg($"Error: Can't create box, outer box must have at least one line padding", "Error");
+                Utility.DisplayErrorMsg($"Error: Can't create box, outer box must have at least one line padding");
                 RemoveBackgroundColor();
                 CheckMode(false);
                 return;
@@ -1250,7 +1212,7 @@ namespace LogicCalculator
             int ret = CheckAllBoxesPadding(pickedByUserRows);
             if (ret == -ERRBOXPADDING)
             {
-                DisplayErrorMsg("Error: after remove one of the boxes will be without lines inside\nPlease recheck rows", "ERROR");
+                Utility.DisplayErrorMsg("Error: after remove one of the boxes will be without lines inside\nPlease recheck rows");
                 RemoveBackgroundColor();
                 return;
             }
@@ -1263,13 +1225,13 @@ namespace LogicCalculator
             }
             if (ret == -ERRBOXMISSCLOSE)
             {
-                DisplayErrorMsg("Error: checked box missng it's closer\nPlease recheck rows", "ERROR");
+                Utility.DisplayErrorMsg("Error: checked box missng it's closer\nPlease recheck rows");
                 RemoveBackgroundColor();
                 return;
             }
             if (ret == -ERRBOXMISSOPEN)
             {
-                DisplayErrorMsg("Error: checked box missng it's opener\nPlease recheck rows", "ERROR");
+                Utility.DisplayErrorMsg("Error: checked box missng it's opener\nPlease recheck rows");
                 RemoveBackgroundColor();
                 return;
             }
@@ -1283,8 +1245,6 @@ namespace LogicCalculator
             HandleMasterCheck();
             CheckMode(false);
         }
-
-
         private int CheckBoxesForRemove(List<Grid> pickedByUserRows)
         {
             List<Grid> verified = new List<Grid>();
@@ -1308,7 +1268,7 @@ namespace LogicCalculator
                     Grid closerGrid = GetCloserGrid(spGridTable, row);
                     if (closerGrid == null)
                     {
-                        DisplayErrorMsg("something went wrong", "ERROR");
+                        Utility.DisplayErrorMsg("something went wrong");
                     }
                     if (((CheckBox)closerGrid.Children[CHECKBOX_INDEX]).IsChecked == false)
                     {
@@ -1324,7 +1284,6 @@ namespace LogicCalculator
             }
             return verified.Count;
         }
-
         private int CheckAllBoxesPadding(List<Grid> checkedRows)
         {
             foreach (Grid row in spGridTable.Children)
@@ -1337,7 +1296,7 @@ namespace LogicCalculator
                         boxOpenerIndex = spGridTable.Children.IndexOf(row);
                     if (CheckBoxPadding(boxOpenerIndex + 1, boxCloserIndex, checkedRows) == -ERRBOXPADDING)
                     {
-                        BrushBackgroundRed(tbOpen as UIElement);
+                        BrushBackgroundRed(tbOpen);
                         BrushBackgroundRed(boxCloser.Children[TEXT_BLOCK_INDEX]);
                         return -ERRBOXPADDING;
                     }
@@ -1346,7 +1305,6 @@ namespace LogicCalculator
             }
             return SUCCESS;
         }
-
         private int CheckBoxPadding(int boxOpenerIndex, int boxCloserIndex, List<Grid> checkedRows)
         {
             int ret = GetLineInsideBox(spGridTable, boxOpenerIndex, boxCloserIndex, checkedRows);
@@ -1386,7 +1344,6 @@ namespace LogicCalculator
             }
             return linesInBox;
         }
-
         private Grid GetCloserGrid(StackPanel sp, Grid row)
         {
             TextBlock tbOpener = row.Children[TEXT_BLOCK_INDEX] as TextBlock;
@@ -1403,7 +1360,6 @@ namespace LogicCalculator
             }
             return null;
         }
-
         private void RemoveBackgroundColor()
         {
             foreach (Grid row in spGridTable.Children)
@@ -1421,7 +1377,6 @@ namespace LogicCalculator
                 }
             }
         }
-
         private void BtnAddBefore_Click(object sender, RoutedEventArgs e)
         {
             List<Grid> pickedByUserRows = GetChecked();
@@ -1443,12 +1398,7 @@ namespace LogicCalculator
         #endregion BUTTON_CLICKS
 
         #region UTILITY
-        public static string Reverse(string s)
-        {
-            char[] charArray = s.ToCharArray();
-            Array.Reverse(charArray);
-            return new string(charArray);
-        }
+
         private void HandleMasterCheck()
         {
             if (spGridTable.Children.Count == 0)
@@ -1519,30 +1469,6 @@ namespace LogicCalculator
             MasterCheck.IsChecked = false;
             return gridList;
         }
-        public List<TextBox> GetAllTextBoxes()
-        {
-            UIElementCollection grids = spGridTable.Children;
-            List<TextBox> ret = new List<TextBox>();
-            foreach (Grid row in grids)
-            {
-                foreach (var child in row.Children)
-                {
-                    if (child is TextBox textbox)
-                    {
-                        ret.Add(textbox);
-                    }
-                    if (child is ComboBox combobox)
-                    {
-                        TextBox t = new TextBox
-                        {
-                            Text = combobox.Text
-                        };
-                        ret.Add(t);
-                    }
-                }
-            }
-            return ret;
-        }
         /*
         public List<Tuple<int, string>> GetBoxPairs()
         {
@@ -1560,78 +1486,6 @@ namespace LogicCalculator
             return ret;
         }
         */
-        private bool IsValidStatement(string expression, string rule, string first_segment,
-           string second_segment, string third_segment)
-        {
-            int row = statement_list.Count;
-            if (!IsValidExpression(expression, row))
-            {
-                return false;
-            }
-            if (string.IsNullOrEmpty(rule))
-            {
-                Expression_Error(row, "Rule is empty");
-                return false;
-            }
-            int ret;
-            if (first_segment != null)
-            {
-                if (first_segment == string.Empty)
-                {
-                    Expression_Error(row, "First segment is empty");
-                    return false;
-                }
-                else if ((ret = IsValidSegment(first_segment, row)) != 0)
-                {
-                    if (ret == -ERRARGUMENT)
-                        Expression_Error(row, "First segment is not a positive integer number");
-                    else if (ret == -ERRMISSINTEGER)
-                        Expression_Error(row, "Missing positive integer in first segment");
-                    else if (ret == -ERRINDEX)
-                        Expression_Error(row, "First segment index must be smaller then row number");
-                    return false;
-                }
-            }
-            if (second_segment != null)
-            {
-                if (second_segment == string.Empty)
-                {
-                    Expression_Error(row, "Second segment is empty");
-                    return false;
-                }
-                if ((ret = IsValidSegment(second_segment, row)) != 0)
-                {
-                    if (ret == -ERRARGUMENT)
-                        Expression_Error(row, "Second segment is not a positive integer number");
-                    else if (ret == -ERRMISSINTEGER)
-                        Expression_Error(row, "Missing positive integer in Second segment");
-                    else if (ret == -ERRINDEX)
-                        Expression_Error(row, "Second segment index must be smaller then row number");
-                    return false;
-                }
-            }
-            if (third_segment != null)
-            {
-                if (third_segment == string.Empty)
-                {
-                    Expression_Error(row, "Third segment is empty");
-                    return false;
-                }
-                if ((ret = IsValidSegment(third_segment, row)) != 0)
-                {
-                    if (ret == -ERRARGUMENT)
-                        Expression_Error(row, "Third segment is not a positive integer number");
-                    else if (ret == -ERRMISSINTEGER)
-                        Expression_Error(row, "Missing positive integer in Third segment");
-                    else if (ret == -ERRINDEX)
-                        Expression_Error(row, "Third segment index must be smaller then row number");
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
         private int FindArgumentNumber(string input)
         {
             int argument_number = 0, parenthesis_number = 0;
@@ -1649,15 +1503,14 @@ namespace LogicCalculator
             }
             return argument_number;
         }
-
-        private void HandleTableInput()
+        private void CheckProof()
         {
             string msg = "All input is valid";
             statement_list.Clear();
-            string main_expression = ReplaceAll(tbEquation.Text.Trim());
+            string main_expression = Utility.ReplaceAll(tbEquation.Text.Trim());
             if (string.IsNullOrEmpty(main_expression))
             {
-                DisplayErrorMsg("Main expression is empty", "Error");
+                Utility.DisplayErrorMsg("Main expression is empty");
                 return;
             }
             if (!IsValidLogicalEquivalent(main_expression))
@@ -1666,7 +1519,7 @@ namespace LogicCalculator
             }
             if (spGridTable.Children.Count == 0)
             {
-                DisplayErrorMsg("Nothing to check", "Error");
+                Utility.DisplayErrorMsg("Nothing to check");
                 return;
             }
 
@@ -1682,11 +1535,12 @@ namespace LogicCalculator
                 index = spGridTable.Children.IndexOf(row);
                 if (row.Children[LABEL_INDEX] is Label)
                 {
-                    expression = ReplaceAll(((TextBox)row.Children[STATEMENT_INDEX]).Text);
-                    rule = ReplaceAll(((ComboBox)row.Children[COMBOBOX_INDEX]).Text);
-                    first_segment = ((TextBox)row.Children[SEGMENT1_INDEX]).IsEnabled ? ReplaceAll(((TextBox)row.Children[SEGMENT1_INDEX]).Text) : null;
-                    second_segment = ((TextBox)row.Children[SEGMENT2_INDEX]).IsEnabled ? ReplaceAll(((TextBox)row.Children[SEGMENT2_INDEX]).Text) : null;
-                    third_segment = ((TextBox)row.Children[SEGMENT3_INDEX]).IsEnabled ? ReplaceAll(((TextBox)row.Children[SEGMENT3_INDEX]).Text) : null;
+                    expression = Utility.ReplaceAll(((TextBox)row.Children[STATEMENT_INDEX]).Text);
+                    rule = Utility.ReplaceAll(((ComboBox)row.Children[COMBOBOX_INDEX]).Text);
+                    first_segment = ((TextBox)row.Children[SEGMENT1_INDEX]).IsEnabled ? Utility.ReplaceAll(((TextBox)row.Children[SEGMENT1_INDEX]).Text) : null;
+                    second_segment = ((TextBox)row.Children[SEGMENT2_INDEX]).IsEnabled ? Utility.ReplaceAll(((TextBox)row.Children[SEGMENT2_INDEX]).Text) : null;
+                    third_segment = ((TextBox)row.Children[SEGMENT3_INDEX]).IsEnabled ? Utility.ReplaceAll(((TextBox)row.Children[SEGMENT3_INDEX]).Text) : null;
+
                     if (rule.Equals("Proveni"))
                     {
                         if (!IsValidLogicalEquivalent(expression))
@@ -1697,6 +1551,7 @@ namespace LogicCalculator
                         if (!IsValidStatement(expression, rule, first_segment, second_segment, third_segment))
                             return;
                     }
+
                     statement_list.Add(new Statement(expression, rule, first_segment, second_segment, third_segment));
                     Evaluation e = new Evaluation(statement_list, rule);
                     if (!e.Is_Valid)
@@ -1711,11 +1566,11 @@ namespace LogicCalculator
                     index = spGridTable.Children.IndexOf(row);
                     if (row.Children[LABEL_INDEX] is Label)
                     {
-                        expression = ReplaceAll(((TextBox)row.Children[STATEMENT_INDEX]).Text);
-                        rule = ReplaceAll(((ComboBox)row.Children[COMBOBOX_INDEX]).Text);
-                        first_segment = ((TextBox)row.Children[SEGMENT1_INDEX]).IsEnabled ? ReplaceAll(((TextBox)row.Children[SEGMENT1_INDEX]).Text) : null;
-                        second_segment = ((TextBox)row.Children[SEGMENT2_INDEX]).IsEnabled ? ReplaceAll(((TextBox)row.Children[SEGMENT2_INDEX]).Text) : null;
-                        third_segment = ((TextBox)row.Children[SEGMENT3_INDEX]).IsEnabled ? ReplaceAll(((TextBox)row.Children[SEGMENT3_INDEX]).Text) : null;
+                        expression = Utility.ReplaceAll(((TextBox)row.Children[STATEMENT_INDEX]).Text);
+                        rule = Utility.ReplaceAll(((ComboBox)row.Children[COMBOBOX_INDEX]).Text);
+                        first_segment = ((TextBox)row.Children[SEGMENT1_INDEX]).IsEnabled ? Utility.ReplaceAll(((TextBox)row.Children[SEGMENT1_INDEX]).Text) : null;
+                        second_segment = ((TextBox)row.Children[SEGMENT2_INDEX]).IsEnabled ? Utility.ReplaceAll(((TextBox)row.Children[SEGMENT2_INDEX]).Text) : null;
+                        third_segment = ((TextBox)row.Children[SEGMENT3_INDEX]).IsEnabled ? Utility.ReplaceAll(((TextBox)row.Children[SEGMENT3_INDEX]).Text) : null;
 
                         if (!IsValidBox(row, rule, first_segment, second_segment, third_segment))
                             return;
@@ -1726,40 +1581,18 @@ namespace LogicCalculator
             else
                 msg += ", but still didn't achived goal";
 
-            DisplayInfoMsg(msg, header);
+            Utility.DisplayInfoMsg(msg, header);
         }
-
-        private bool IsValidLogicalEquivalent(string s)
-        {
-            //VALIDATE HAS '⊢'
-            if (Regex.Matches(s, "⊢").Count != 1)
-            {
-                DisplayErrorMsg("Valid logical Equivalent must contain exactly one '⊢'", "Error");
-                return false;
-            }
-
-            //VALIDATE WHAT SHOULD BE PROOF
-            string goal = GetGoal(s);
-            if (!IsValidExpression(goal, -1))
-                return false;
-            //VALIDATE DATA
-            string data = GetData(s);
-            if (data == "")
-                return true;
-            if (!IsValidExpression(data, -1))
-            {
-                return false;
-            }
-            return true;
-        }
-
         private bool CheckGoalAchived(Grid lastRow)
         {
             if (lastRow.Children[TEXT_BLOCK_INDEX] is TextBlock)
+            {
+                //TODO
                 return false;
+            }
 
-            string lastRowInput = ReplaceAll(((TextBox)lastRow.Children[STATEMENT_INDEX]).Text);
-            string needToProof = ReplaceAll(GetGoal(tbEquation.Text));
+            string lastRowInput = Utility.ReplaceAll(((TextBox)lastRow.Children[STATEMENT_INDEX]).Text);
+            string needToProof = Utility.ReplaceAll(GetGoal(tbEquation.Text));
             return lastRowInput.Equals(needToProof);
         }
         private string GetData(string s)
@@ -1773,10 +1606,6 @@ namespace LogicCalculator
             return splited[1];
         }
 
-        private string ReplaceAll(string s)
-        {
-            return s.Trim().Replace('^', '∧').Replace('V', '∨').Replace('~', '¬').Replace(" ", "").Replace('>', '→');
-        }
         private bool IsValidBox(Grid row, string rule, string first_segment, string second_segment, string third_segment)
         {
 
@@ -1785,27 +1614,27 @@ namespace LogicCalculator
                 case "Assumption":
                     if (!HaveAboveOpener(spGridTable.Children.IndexOf(row)))
                     {
-                        DisplayErrorMsg($"Error: assumption at row {((Label)row.Children[LABEL_INDEX]).Content}," +
-                            $"\nmissing box opener above", "Error");
+                        Utility.DisplayErrorMsg($"Error: assumption at row {((Label)row.Children[LABEL_INDEX]).Content}," +
+                            $"\nmissing box opener above");
                         return false;
                     }
                     return true;
                 case "Copy":
                     if (!CopyFromLegalBox(row, first_segment))
                     {
-                        DisplayErrorMsg($"Error: Copy  at row {((Label)row.Children[LABEL_INDEX]).Content}," +
-                            $"\ncan use only for variable from current or upper box", "Error");
+                        Utility.DisplayErrorMsg($"Error: Copy  at row {((Label)row.Children[LABEL_INDEX]).Content}," +
+                            $"\ncan use only for variable from current or upper box");
                         return false;
                     }
                     return true;
                 case "∨e":
-                    List<int> firstbox = Evaluation.Get_Lines_From_Segment(second_segment),
-                        secondBox = Evaluation.Get_Lines_From_Segment(third_segment);
+                    List<int> firstbox = Utility.Get_Lines_From_Segment(second_segment),
+                        secondBox = Utility.Get_Lines_From_Segment(third_segment);
                     if (!HasWrapBox(firstbox[0], firstbox[firstbox.Count - 1]) ||
                         !HasWrapBox(secondBox[0], secondBox[secondBox.Count - 1]))
                     {
-                        DisplayErrorMsg($"Error: Or elimination at line {((Label)row.Children[LABEL_INDEX]).Content}," +
-                            $"\nlines mentioned in second and third segments must be wrapped with boxes", "Error");
+                        Utility.DisplayErrorMsg($"Error: Or elimination at line {((Label)row.Children[LABEL_INDEX]).Content}," +
+                            $"\nlines mentioned in second and third segments must be wrapped with boxes");
                         return false;
                     }
                     return true;
@@ -1817,11 +1646,11 @@ namespace LogicCalculator
                     List<int> box;
                     if (new Regex(@"∃.*e").IsMatch(rule))
                     {
-                        box = Evaluation.Get_Lines_From_Segment(second_segment);
+                        box = Utility.Get_Lines_From_Segment(second_segment);
                         segment = "second";
                     }
                     else
-                        box = Evaluation.Get_Lines_From_Segment(first_segment);
+                        box = Utility.Get_Lines_From_Segment(first_segment);
                     if (!HasWrapBox(box[0], box[box.Count - 1]))
                     {
                         string messageRule = "rule";
@@ -1833,8 +1662,8 @@ namespace LogicCalculator
                             messageRule = "All introdution";
                         else if (new Regex(@"∃.*e").IsMatch(rule))
                             messageRule = "Exist elimination";
-                        DisplayErrorMsg($"Error: {messageRule} at line {((Label)row.Children[LABEL_INDEX]).Content}," +
-                            $"\nlines mentioned in {segment} segment must be wrapped with box", "Error");
+                        Utility.DisplayErrorMsg($"Error: {messageRule} at line {((Label)row.Children[LABEL_INDEX]).Content}," +
+                            $"\nlines mentioned in {segment} segment must be wrapped with box");
                         return false;
                     }
                     return true;
@@ -1842,7 +1671,6 @@ namespace LogicCalculator
                     return true;
             }
         }
-
         private bool HasWrapBox(int open, int close)
         {
             int realOpenIndex = GetspGridIndex(open),
@@ -1882,7 +1710,6 @@ namespace LogicCalculator
             }
             return -ERRNOTFOUND;
         }
-
         private bool CopyFromLegalBox(Grid row, string first_segment)
         {
             int start = spGridTable.Children.IndexOf(row);
@@ -1907,7 +1734,6 @@ namespace LogicCalculator
             }
             return isValid;
         }
-
         private bool HaveAboveOpener(int index)
         {
             if (index == 0)
@@ -1920,60 +1746,6 @@ namespace LogicCalculator
             return false;
         }
 
-        private void DisplayErrorMsg(string msg, string title)
-        {
-            MessageBox.Show(msg, title, MessageBoxButton.OK, MessageBoxImage.Error);
-            return;
-        }
-        private void DisplayWarningMsg(string msg, string title)
-        {
-            MessageBox.Show(msg, title, MessageBoxButton.OK, MessageBoxImage.Warning);
-            return;
-        }
-        private void DisplayInfoMsg(string msg, string title)
-        {
-            MessageBox.Show(msg, title, MessageBoxButton.OK, MessageBoxImage.Information);
-            return;
-        }
-        public int FindOperator(string input, int start)
-        {
-            for (int i = start; i < input.Length; i++)
-            {
-                if (IsOperator(input[i]))
-                {
-                    return i;
-                }
-            }
-            return -1;
-        }
-        public List<string> GetAllTableInput()
-        {
-            UIElementCollection grids = spGridTable.Children;
-            List<string> ret = new List<string>();
-            foreach (var row in grids)
-            {
-                if (row is TextBlock block)
-                {
-                    ret.Add(block.Text);
-                }
-                else //grid
-                {
-                    Grid g = row as Grid;
-                    foreach (var child in g.Children)
-                    {
-                        if (child is TextBox textbox)
-                        {
-                            ret.Add(textbox.Text);
-                        }
-                        if (child is ComboBox combobox)
-                        {
-                            ret.Add(combobox.Text);
-                        }
-                    }
-                }
-            }
-            return ret;
-        }
         private bool FileInUse(string file)
         {
             try
@@ -1985,7 +1757,7 @@ namespace LogicCalculator
             }
             catch (IOException)
             {
-                DisplayErrorMsg($"Error: Fail to open {file}\nPlease close all file instance of file and try again", "Open failed");
+                Utility.DisplayErrorMsg($"Error: Fail to open {file}\nPlease close all open instances of said file and try again");
                 return true;
             }
             return false;
@@ -2007,10 +1779,106 @@ namespace LogicCalculator
         }
         #endregion KEYBOARD_FUNC
 
-        #region INPUT_CHECKS
-        private bool IsOperator(char c)
+        #region INPUT_CHECKS       
+        private bool IsValidStatement(string expression, string rule, string first_segment,
+   string second_segment, string third_segment)
         {
-            return c == '¬' || c == '∧' || c == '→' || c == '∨' || c == '⊢' || c == '⊥' || c == '=';
+            int row = statement_list.Count;
+            if (!IsValidExpression(expression, row))
+            {
+                return false;
+            }
+            if (string.IsNullOrEmpty(rule))
+            {
+                Expression_Error(row, "Rule is empty");
+                return false;
+            }
+            int ret;
+            if (first_segment != null)
+            {
+                if (first_segment == string.Empty)
+                {
+                    Expression_Error(row, "First segment is empty");
+                    return false;
+                }
+                else if ((ret = IsValidSegment(first_segment, row)) != 0)
+                {
+                    if (ret == -ERRARGUMENT)
+                        Expression_Error(row, "First segment is not a positive integer number");
+                    else if (ret == -ERRMISSINTEGER)
+                        Expression_Error(row, "Missing positive integer in first segment");
+                    else if (ret == -ERRINDEX)
+                        Expression_Error(row, "First segment index must be smaller then row number");
+                    else if (ret == -ERRCOMMA)
+                        Expression_Error(row, "Comma is only allowed in Proven e segments");
+                    return false;
+                }
+            }
+            if (second_segment != null)
+            {
+                if (second_segment == string.Empty)
+                {
+                    Expression_Error(row, "Second segment is empty");
+                    return false;
+                }
+                if ((ret = IsValidSegment(second_segment, row)) != 0)
+                {
+                    if (ret == -ERRARGUMENT)
+                        Expression_Error(row, "Second segment is not a positive integer number");
+                    else if (ret == -ERRMISSINTEGER)
+                        Expression_Error(row, "Missing positive integer in Second segment");
+                    else if (ret == -ERRINDEX)
+                        Expression_Error(row, "Second segment index must be smaller then row number");
+                    else if (ret == -ERRCOMMA)
+                        Expression_Error(row, "Comma is only allowed in Proven e segments");
+                    return false;
+                }
+            }
+            if (third_segment != null)
+            {
+                if (third_segment == string.Empty)
+                {
+                    Expression_Error(row, "Third segment is empty");
+                    return false;
+                }
+                if ((ret = IsValidSegment(third_segment, row)) != 0)
+                {
+                    if (ret == -ERRARGUMENT)
+                        Expression_Error(row, "Third segment is not a positive integer number");
+                    else if (ret == -ERRMISSINTEGER)
+                        Expression_Error(row, "Missing positive integer in Third segment");
+                    else if (ret == -ERRINDEX)
+                        Expression_Error(row, "Third segment index must be smaller then row number");
+                    else if (ret == -ERRCOMMA)
+                        Expression_Error(row, "Comma is only allowed in Proven e segments");
+                    return false;
+                }
+            }
+
+            return true;
+        }
+        private bool IsValidLogicalEquivalent(string s)
+        {
+            //VALIDATE HAS '⊢'
+            if (Regex.Matches(s, "⊢").Count != 1)
+            {
+                Utility.DisplayErrorMsg("Valid logical Equivalent must contain exactly one '⊢'");
+                return false;
+            }
+
+            //VALIDATE WHAT SHOULD BE PROOF
+            string goal = GetGoal(s);
+            if (!IsValidExpression(goal, -1))
+                return false;
+            //VALIDATE DATA
+            string data = GetData(s);
+            if (data == "")
+                return true;
+            if (!IsValidExpression(data, -1))
+            {
+                return false;
+            }
+            return true;
         }
         public void Expression_Error(int row, string error, int index = -1, string expression = "")
         {
@@ -2033,7 +1901,7 @@ namespace LogicCalculator
             }
             error_message += "\nError is: " + error;
 
-            DisplayErrorMsg(error_message, "Expression Check");
+            Utility.DisplayErrorMsg(error_message);
         }
         public bool IsValidExpression(string input, int row)
         {
@@ -2116,7 +1984,7 @@ namespace LogicCalculator
                     after_predicate = true;
                     after_operator = false;
                 }
-                else if (IsOperator(c))
+                else if (Utility.IsOperator(c))
                 {
                     if (i == input.Length - 1 && input[i] != '⊥')
                     {
@@ -2215,8 +2083,6 @@ namespace LogicCalculator
             }
             return true;
         }
-
-
         public int IsValidSegment(string seg, int currentRow)
         {
             string[] splitted = seg.Split(new Char[] { ',', '-' });
@@ -2224,6 +2090,8 @@ namespace LogicCalculator
                 return -ERRMISSINTEGER;
             if (seg.Contains(','))
             {
+                if (statement_list[currentRow].Rule != "proven")
+                    return -ERRCOMMA;
                 foreach (string s in splitted)
                 {
                     if (string.IsNullOrEmpty(s))
@@ -2239,20 +2107,6 @@ namespace LogicCalculator
             }
             return SUCCESS;
         }
-
         #endregion INPUT_CHECKS
-
-        #region TESTING
-        public void PrintInputList(List<string> l)
-        {
-            foreach (string t in l)
-            {
-                Console.WriteLine(t);
-            }
-        }
-
-        #endregion TESTING       
-
-
     }
 }
