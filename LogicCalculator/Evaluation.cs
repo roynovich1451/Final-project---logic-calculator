@@ -95,20 +95,28 @@ namespace LogicCalculator
                     Equal_Elimination();
                     break;
                 case "∀xi":
+                    All_Introduction("∀x");
+                    break;
                 case "∀yi":
-                    All_Introduction();
+                    All_Introduction("∀y");
                     break;
                 case "∀xe":
+                    All_Elimination("∀x");
+                    break;
                 case "∀ye":
-                    All_Elimination();
+                    All_Elimination("∀y");
                     break;
                 case "∃xi":
+                    Exists_Introduction("∃x");
+                    break;
                 case "∃yi":
-                    Exists_Introduction();
+                    Exists_Introduction("∃y");
                     break;
                 case "∃xe":
+                    Exists_Elimination("∃x");
+                    break;
                 case "∃ye":
-                    Exists_Elimination();
+                    Exists_Elimination("∃y");
                     break;
                 default:
                     Utility.DisplayErrorMsg("Unknown rule (This is a programming bug and should not happen)\n rule is: " + rule, current_line);
@@ -718,6 +726,7 @@ namespace LogicCalculator
                 Utility.DisplayErrorMsg("Misuse of Arrow Introduction", current_line);
             }
         }
+
         #region PREDICATES
         private void Equal_Introduction()
         {
@@ -779,19 +788,48 @@ namespace LogicCalculator
                 return;
             }
         }
-        private void All_Introduction()
+        private void All_Elimination(string rule)
+        {//TODO 2018_7B
+            int previous_line = Utility.Get_Row(statement_list[current_line].First_segment, current_line);
+            string current_expression = statement_list[current_line].Expression,
+                previous_expression = statement_list[previous_line].Expression,
+                original_contents = Utility.Get_Parenthesis_Contents(previous_expression, rule),
+                current_contents = Utility.Get_Parenthesis_Contents(current_expression, rule);
+
+            if (!previous_expression.Contains(rule))
+            {
+                Utility.DisplayErrorMsg("Missing " + rule + " in previous row", previous_line);
+                Is_Valid = false;
+                return;
+            }
+            previous_expression = previous_expression.Substring(2).Replace(rule[1].ToString(), current_contents);
+            Is_Valid = current_expression.Contains(previous_expression);
+            if (!Is_Valid)
+            {
+                Utility.DisplayErrorMsg("Misuse of all elimination", current_line);
+            }
+        }
+        private void All_Introduction(String rule)
         {
             List<int> rows = Utility.Get_Lines_From_Segment(statement_list[current_line].First_segment, current_line);
             Is_Valid = rows != null;
             if (!Is_Valid)
             {
-                Utility.DisplayErrorMsg("Misuse of all introduction", current_line);
                 return;
             }
 
             string current_expression = statement_list[current_line].Expression,
                 previous_expression = statement_list[rows[rows.Count - 1]].Expression;
-            string previous_letter = Utility.Find_Letter(previous_expression), current_letter = Utility.Find_Letter(current_expression);
+            string previous_letter = Utility.Find_Letter(previous_expression),
+                current_letter = Utility.Find_Letter(current_expression);
+
+            if (!current_expression.Contains(rule))
+            {
+                Utility.DisplayErrorMsg("Missing " + rule + " in current row", current_line);
+                Is_Valid = false;
+                return;
+            }
+
             current_expression = current_expression.Replace(current_letter, previous_letter);
             Is_Valid = current_expression == "∀" + previous_letter + previous_expression ||
                 current_expression == "∀" + previous_letter + "(" + previous_expression + ")";
@@ -800,35 +838,26 @@ namespace LogicCalculator
                 Utility.DisplayErrorMsg("Misuse of all introduction", current_line);
             }
         }
-        private void All_Elimination()
+        private void Exists_Introduction(string rule)
         {
             int previous_line = Utility.Get_Row(statement_list[current_line].First_segment, current_line);
             string current_expression = statement_list[current_line].Expression,
-                previous_expression = statement_list[previous_line].Expression;
+                previous_expression = statement_list[previous_line].Expression,
+                previous_letter = Utility.Find_Letter(previous_expression),
+                current_letter = Utility.Find_Letter(current_expression);
 
-            string original_letter = statement_list[current_line].Rule[1].ToString();
-
-            Is_Valid = previous_expression.Contains("∀");
-            if (!Is_Valid)
+            if (!current_expression.Contains(rule))
             {
-                Utility.DisplayErrorMsg("Missing ∀ in previous row", current_line);
+                Utility.DisplayErrorMsg("Missing " + rule + " in current row", current_line);
+                Is_Valid = false;
                 return;
             }
-            current_expression = current_expression.Replace(Utility.Find_Letter(current_expression), original_letter);
-            Is_Valid = previous_expression.Contains("∀" + original_letter + "(" + current_expression + ")") ||
-                previous_expression.Contains("∀" + original_letter + current_expression);
-            if (!Is_Valid)
-            {
-                Utility.DisplayErrorMsg("Misuse of all elimination", current_line);
-            }
-        }
-        private void Exists_Introduction()
-        {
-            int previous_line = Utility.Get_Row(statement_list[current_line].First_segment, current_line);
-            string current_expression = statement_list[current_line].Expression,
-                previous_expression = statement_list[previous_line].Expression;
-            string previous_letter = Utility.Find_Letter(previous_expression), current_letter = Utility.Find_Letter(current_expression);
-            current_expression = current_expression.Replace(current_letter, previous_letter);
+            //**********DEBUG********************
+            string let = rule[1].ToString();
+            string f = "∃" + previous_letter + previous_expression;
+            string s= "∃" + previous_letter + "(" + previous_expression + ")";
+            //**********DEBUG********************
+            current_expression = current_expression.Replace(rule[1].ToString(), previous_letter);
             Is_Valid = current_expression == "∃" + previous_letter + previous_expression ||
                 current_expression == "∃" + previous_letter + "(" + previous_expression + ")";
             if (!Is_Valid)
@@ -836,19 +865,34 @@ namespace LogicCalculator
                 Utility.DisplayErrorMsg("Misuse of exist introduction", current_line);
             }
         }
-        private void Exists_Elimination()
+        private void Exists_Elimination(string rule)
         {
-            List<int> second_seg_rows = Utility.Get_Lines_From_Segment(statement_list[current_line].Second_segment, current_line);
-            Is_Valid = second_seg_rows == null;
+            //TODO check for double cases ∃x(P(x))^∃x(Q(x))
+            int previous_line = Utility.Get_Last_Line_From_Segment(statement_list[current_line].Second_segment);
+            Is_Valid = previous_line != 1;
             if (!Is_Valid)
             {
-                Utility.DisplayErrorMsg("Misuse of exist elimination", current_line);
                 return;
             }
-            int previous_line = second_seg_rows[second_seg_rows.Count - 1];
             string current_expression = statement_list[current_line].Expression,
-                previous_expression = statement_list[previous_line].Expression;
-            Is_Valid = current_expression == previous_expression;
+                previous_expression = statement_list[previous_line].Expression,
+                previous_contents = Utility.Get_Parenthesis_Contents(previous_expression, rule),
+                current_contents = Utility.Get_Parenthesis_Contents(current_expression, rule);
+            if (!previous_expression.Contains(rule))
+            {
+                Utility.DisplayErrorMsg("Missing " + rule + " in previous row", current_line);
+                Is_Valid = false;
+                return;
+            }
+            if (!current_expression.Contains(rule))
+            {
+                Utility.DisplayErrorMsg("Missing " + rule + " in current row", current_line);
+                Is_Valid = false;
+                return;
+            }
+
+            current_expression = current_expression.Replace(current_contents, previous_contents);
+            Is_Valid = Utility.Equal_With_Parenthesis(current_expression, previous_expression);
             if (!Is_Valid)
             {
                 Utility.DisplayErrorMsg("Misuse of exist elimination", current_line);
