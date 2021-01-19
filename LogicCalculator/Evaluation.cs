@@ -789,21 +789,19 @@ namespace LogicCalculator
             }
         }
         private void All_Elimination(string rule)
-        {//TODO 2018_7B
+        {
             int previous_line = Utility.Get_Row(statement_list[current_line].First_segment, current_line);
             string current_expression = statement_list[current_line].Expression,
-                previous_expression = statement_list[previous_line].Expression,
-                original_contents = Utility.Get_Parenthesis_Contents(previous_expression, rule),
-                current_contents = Utility.Get_Parenthesis_Contents(current_expression, rule);
-
+                previous_expression = statement_list[previous_line].Expression;
+              
             if (!previous_expression.Contains(rule))
             {
                 Utility.DisplayErrorMsg("Missing " + rule + " in previous row", previous_line);
                 Is_Valid = false;
                 return;
             }
-            previous_expression = previous_expression.Substring(2).Replace(rule[1].ToString(), current_contents);
-            Is_Valid = current_expression.Contains(previous_expression);
+
+            Is_Valid = Utility.Predicate_Check(previous_expression,rule,current_expression);
             if (!Is_Valid)
             {
                 Utility.DisplayErrorMsg("Misuse of all elimination", current_line);
@@ -838,33 +836,7 @@ namespace LogicCalculator
                 Utility.DisplayErrorMsg("Misuse of all introduction", current_line);
             }
         }
-        private void Exists_Introduction(string rule)
-        {
-            int previous_line = Utility.Get_Row(statement_list[current_line].First_segment, current_line);
-            string current_expression = statement_list[current_line].Expression,
-                previous_expression = statement_list[previous_line].Expression,
-                previous_letter = Utility.Find_Letter(previous_expression),
-                current_letter = Utility.Find_Letter(current_expression);
-
-            if (!current_expression.Contains(rule))
-            {
-                Utility.DisplayErrorMsg("Missing " + rule + " in current row", current_line);
-                Is_Valid = false;
-                return;
-            }
-            //**********DEBUG********************
-            string let = rule[1].ToString();
-            string f = "∃" + previous_letter + previous_expression;
-            string s= "∃" + previous_letter + "(" + previous_expression + ")";
-            //**********DEBUG********************
-            current_expression = current_expression.Replace(rule[1].ToString(), previous_letter);
-            Is_Valid = current_expression == "∃" + previous_letter + previous_expression ||
-                current_expression == "∃" + previous_letter + "(" + previous_expression + ")";
-            if (!Is_Valid)
-            {
-                Utility.DisplayErrorMsg("Misuse of exist introduction", current_line);
-            }
-        }
+        
         private void Exists_Elimination(string rule)
         {
             //TODO check for double cases ∃x(P(x))^∃x(Q(x))
@@ -896,6 +868,25 @@ namespace LogicCalculator
             if (!Is_Valid)
             {
                 Utility.DisplayErrorMsg("Misuse of exist elimination", current_line);
+            }
+        }
+        private void Exists_Introduction(string rule)
+        {
+            int previous_line = Utility.Get_Row(statement_list[current_line].First_segment, current_line);
+            string current_expression = statement_list[current_line].Expression,
+                previous_expression = statement_list[previous_line].Expression;
+
+            if (!current_expression.Contains(rule))
+            {
+                Utility.DisplayErrorMsg("Missing " + rule + " in current row", current_line);
+                Is_Valid = false;
+                return;
+            }
+
+            Is_Valid = Utility.Predicate_Check(current_expression, rule, previous_expression);
+            if (!Is_Valid)
+            {
+                Utility.DisplayErrorMsg("Misuse of exist introduction", current_line);
             }
         }
         #endregion 

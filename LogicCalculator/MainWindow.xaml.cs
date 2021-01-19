@@ -203,19 +203,18 @@ namespace LogicCalculator
             if (saveFileDialog.ShowDialog() == false) return;
             current_filename = saveFileDialog.SafeFileName;
             current_filename = current_filename.Substring(0, current_filename.Length - 5);
-            string saveFilePath = saveFileDialog.FileName;
+            string saveFilePath = saveFileDialog.FileName;           
             this.Title = $"Logic Proof Tool - File: {current_filename}, Last saved: {DateTime.Now.ToString(new CultureInfo("ru-RU"))}";
             using (var document = DocX.Create(saveFilePath))
             {
                 // Add a title.
                 document.InsertParagraph("Logic Tool Results\n").FontSize(16d).Bold(true).UnderlineStyle(UnderlineStyle.singleLine);
-
                 //Add the proof table
                 switch (mainTab.SelectedIndex)
                 {
                     case TAB_PROOF_INDEX:
                         //Add the main expression
-                        document.SetDefaultFont(new Font("Arial Unicode MS"), 10);
+                        document.SetDefaultFont(new Font("Cambria Math"), 10);
                         document.InsertParagraph("Main Expression:\n" + tbEquation.Text + '\n').FontSize(13d);
                         int row_num = spGridTable.Children.Count;
                         Table proof_table = document.AddTable(row_num + 1, TABLE_COL_NUM);
@@ -270,15 +269,17 @@ namespace LogicCalculator
                         document.InsertParagraph(tbEditor.Text).FontSize(12d);
                         break;
                 }
+                if (FileInUse(saveFilePath))
+                    return;
                 try
                 {
                     document.Save();
+                    Utility.DisplayInfoMsg("Created Document: " + saveFilePath, "Documented Created");
                 }
                 catch (Exception ex)
                 {
                     Utility.DisplayErrorMsg(ex.Message + "\nError while trying to save");
                 }
-                Utility.DisplayInfoMsg("Created Document: " + saveFilePath, "Documented Created");
             }
         }
         private void MenuItemExit_Click(object sender, RoutedEventArgs e)
@@ -1174,7 +1175,7 @@ namespace LogicCalculator
         private void BtnClear_Click(object sender, RoutedEventArgs e)
         {
             List<Grid> pickedByUserRows = GetChecked();
-            MessageBoxResult res = MessageBox.Show($"Warning: You are about to CLEAR {pickedByUserRows.Count} lines\nPlease confirm",
+            MessageBoxResult res = MessageBox.Show($"Warning: You are about to clear {pickedByUserRows.Count} lines\nPlease confirm",
                 "Confirmation", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
             if (res == MessageBoxResult.Cancel)
                 return;
@@ -1208,7 +1209,7 @@ namespace LogicCalculator
         private void BtnRemove_Click(object sender, RoutedEventArgs e)
         {
             List<Grid> pickedByUserRows = GetChecked();
-            MessageBoxResult res = MessageBox.Show($"Warning: You are about to REMOVE {pickedByUserRows.Count} lines\nPlease confirm",
+            MessageBoxResult res = MessageBox.Show($"Warning: You are about to remove {pickedByUserRows.Count} lines\nPlease confirm",
                 "Confirmation", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
             if (res == MessageBoxResult.Cancel) return;
             int ret = CheckAllBoxesPadding(pickedByUserRows);
@@ -1382,7 +1383,7 @@ namespace LogicCalculator
         private void BtnAddBefore_Click(object sender, RoutedEventArgs e)
         {
             List<Grid> pickedByUserRows = GetChecked();
-            MessageBoxResult res = MessageBox.Show($"Warning: You are about to Add {pickedByUserRows.Count} lines\nPlease confirm",
+            MessageBoxResult res = MessageBox.Show($"Warning: You are about to add {pickedByUserRows.Count} lines\nPlease confirm",
                 "Confirmation", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
             if (res == MessageBoxResult.Cancel) return;
             foreach (Grid row in pickedByUserRows)
@@ -1762,7 +1763,7 @@ namespace LogicCalculator
             }
             catch (IOException)
             {
-                Utility.DisplayErrorMsg($"Error: Failed to open {file}\nPlease close all open instances of said file and try again");
+                Utility.DisplayErrorMsg($"Error: Failed to open/save {file}\nPlease close all open instances of said file and try again");
                 return true;
             }
             return false;

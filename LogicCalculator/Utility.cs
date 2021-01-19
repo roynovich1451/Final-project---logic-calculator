@@ -58,6 +58,44 @@ namespace LogicCalculator
             }
             return s.Substring(i, j - i);
         }
+        internal static bool Predicate_Check(string original, string rule,string to_check)
+        {
+            int i, j, counter = 1;
+            List<string> ret=new List<string>();
+            i = original.IndexOf(rule);
+
+            if (i == -1)                
+                return false;            
+
+            for (; i < original.Length; i++)
+            {
+                if (original[i] == '(')
+                    break;
+            }
+
+            for (j=i; j < original.Length; j++)
+            {
+                if (original[j] == '(')
+                    counter++;
+                if (original[j] == ')')
+                    counter--;
+                if (counter <= 0)
+                    break;
+                if (original[j] == rule[1])
+                {
+                    ret.Add(original.Substring(i+1, j - (i+1)));
+                    i = j;
+                }
+            }
+            ret.Add(original.Substring(i + 1, j - (i + 1)));
+            foreach (string s in ret)
+            {
+                if (!to_check.Contains(s))
+                    return false;
+            }
+            return true;
+        }
+
         #region Segment_Handeling
         internal static int Get_Row(string s, int current_line)
         {
