@@ -100,7 +100,7 @@ namespace LogicCalculator
         {
             if (!string.IsNullOrEmpty(tbEquation.Text) || spGridTable.Children.Count != 0 || !string.IsNullOrEmpty(tbEditor.Text))
             {
-                MessageBoxResult res = MessageBox.Show("Warning: You are about to open new file,\nYou will loose not saved data\ncontinue?"
+                MessageBoxResult res = MessageBox.Show("Warning: You are about to open new file,\nYou will lose not saved data\ncontinue?"
                 , "Warning", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
                 if (res == MessageBoxResult.Cancel)
                     return;
@@ -215,22 +215,24 @@ namespace LogicCalculator
                 {
                     case TAB_PROOF_INDEX:
                         //Add the main expression
-                        document.InsertParagraph("Logical Expression: " + tbEquation.Text + '\n').FontSize(14d);
+                        document.SetDefaultFont(new Font("Arial Unicode MS"), 10);
+                        document.InsertParagraph("Main Expression:\n" + tbEquation.Text + '\n').FontSize(13d);
                         int row_num = spGridTable.Children.Count;
                         Table proof_table = document.AddTable(row_num + 1, TABLE_COL_NUM);
                         proof_table.AutoFit = AutoFit.Contents;
                         proof_table.Alignment = Alignment.center;
                         proof_table.Design = TableDesign.None;
+
                         Xceed.Document.NET.Border b = new Xceed.Document.NET.Border(BorderStyle.Tcbs_double, BorderSize.one, 1, Color.Transparent);
                         proof_table.SetBorder(TableBorderType.InsideH, b);
 
 
-                        proof_table.Rows[0].Cells[0].Paragraphs.First().Append("Line").UnderlineStyle(UnderlineStyle.singleLine).Alignment = Alignment.center;
-                        proof_table.Rows[0].Cells[1].Paragraphs.First().Append("Expression").UnderlineStyle(UnderlineStyle.singleLine).Alignment = Alignment.center;
-                        proof_table.Rows[0].Cells[2].Paragraphs.First().Append("Rule").UnderlineStyle(UnderlineStyle.singleLine).Alignment = Alignment.center;
-                        proof_table.Rows[0].Cells[3].Paragraphs.First().Append("First Segment").UnderlineStyle(UnderlineStyle.singleLine).Alignment = Alignment.center;
-                        proof_table.Rows[0].Cells[4].Paragraphs.First().Append("Second Segment").UnderlineStyle(UnderlineStyle.singleLine).Alignment = Alignment.center;
-                        proof_table.Rows[0].Cells[5].Paragraphs.First().Append("Third Segment").UnderlineStyle(UnderlineStyle.singleLine).Alignment = Alignment.center;
+                        proof_table.Rows[0].Cells[0].Paragraphs.First().Append("Line").UnderlineStyle(UnderlineStyle.singleLine);
+                        proof_table.Rows[0].Cells[1].Paragraphs.First().Append("Expression").UnderlineStyle(UnderlineStyle.singleLine);
+                        proof_table.Rows[0].Cells[2].Paragraphs.First().Append("Rule").UnderlineStyle(UnderlineStyle.singleLine);
+                        proof_table.Rows[0].Cells[3].Paragraphs.First().Append("First Segment").UnderlineStyle(UnderlineStyle.singleLine);
+                        proof_table.Rows[0].Cells[4].Paragraphs.First().Append("Second Segment").UnderlineStyle(UnderlineStyle.singleLine);
+                        proof_table.Rows[0].Cells[5].Paragraphs.First().Append("Third Segment").UnderlineStyle(UnderlineStyle.singleLine);
 
                         string expression, rule, first_segment, second_segment, third_segment, line_num;
                         //Fill the proof table
@@ -243,23 +245,23 @@ namespace LogicCalculator
                                 line_num = ((Label)row.Children[LABEL_INDEX]).Content.ToString();
                                 expression = ((TextBox)row.Children[STATEMENT_INDEX]).Text.Replace(" ", string.Empty);
                                 rule = ((ComboBox)row.Children[COMBOBOX_INDEX]).Text;
-                                first_segment = ((TextBox)row.Children[SEGMENT1_INDEX]).IsEnabled ? ((TextBox)row.Children[SEGMENT1_INDEX]).Text.Replace(" ", string.Empty) : null;
-                                second_segment = ((TextBox)row.Children[SEGMENT2_INDEX]).IsEnabled ? ((TextBox)row.Children[SEGMENT2_INDEX]).Text.Replace(" ", string.Empty) : null;
-                                third_segment = ((TextBox)row.Children[SEGMENT3_INDEX]).IsEnabled ? ((TextBox)row.Children[SEGMENT3_INDEX]).Text.Replace(" ", string.Empty) : null;
-                                proof_table.Rows[i].Cells[0].Paragraphs.First().Append(line_num).Alignment = Alignment.center;
-                                proof_table.Rows[i].Cells[1].Paragraphs.First().Append(expression).Alignment = Alignment.center;
-                                proof_table.Rows[i].Cells[2].Paragraphs.First().Append(rule).Alignment = Alignment.center;
-                                proof_table.Rows[i].Cells[3].Paragraphs.First().Append(first_segment).Alignment = Alignment.center;
-                                proof_table.Rows[i].Cells[4].Paragraphs.First().Append(second_segment).Alignment = Alignment.center;
-                                proof_table.Rows[i].Cells[5].Paragraphs.First().Append(third_segment).Alignment = Alignment.center;
+                                first_segment = ((TextBox)row.Children[SEGMENT1_INDEX]).IsEnabled ? ((TextBox)row.Children[SEGMENT1_INDEX]).Text.Replace(" ", string.Empty) : "";
+                                second_segment = ((TextBox)row.Children[SEGMENT2_INDEX]).IsEnabled ? ((TextBox)row.Children[SEGMENT2_INDEX]).Text.Replace(" ", string.Empty) : "";
+                                third_segment = ((TextBox)row.Children[SEGMENT3_INDEX]).IsEnabled ? ((TextBox)row.Children[SEGMENT3_INDEX]).Text.Replace(" ", string.Empty) : "";
+                                proof_table.Rows[i].Cells[0].Paragraphs.First().Append(line_num);
+                                proof_table.Rows[i].Cells[1].Paragraphs.First().Append(expression);
+                                proof_table.Rows[i].Cells[2].Paragraphs.First().Append(rule);
+                                proof_table.Rows[i].Cells[3].Paragraphs.First().Append(first_segment);
+                                proof_table.Rows[i].Cells[4].Paragraphs.First().Append(second_segment);
+                                proof_table.Rows[i].Cells[5].Paragraphs.First().Append(third_segment);
                             }
                             else
                             {
                                 proof_table.Rows[i].MergeCells(0, TABLE_COL_NUM - 1);
-                                proof_table.Rows[i].Cells[0].Paragraphs.First().Append(block.Text).Alignment = Alignment.center;
+                                proof_table.Rows[i].Cells[0].Paragraphs.First().Append(block.Text);
                             }
                         }
-
+                   
                         document.InsertTable(proof_table);
                         // Save this document to disk.
                         break;
@@ -293,7 +295,7 @@ namespace LogicCalculator
             }
             catch (Exception ex)
             {
-                Utility.DisplayErrorMsg(ex.Message + "\nError while opening manual");
+                Utility.DisplayErrorMsg(ex.Message + "\nError while opening the user manual");
             }
         }
         private void MenuItem_About_Click(object sender, RoutedEventArgs e)
@@ -1136,7 +1138,7 @@ namespace LogicCalculator
         {
             if (checked_checkboxes != 2)
             {
-                Utility.DisplayErrorMsg("Error: Need to check exactly 2 rows if you want to create box");
+                Utility.DisplayErrorMsg("Error: Need to mark exactly 2 rows if you want to create box");
                 return;
             }
 
@@ -1212,7 +1214,7 @@ namespace LogicCalculator
             int ret = CheckAllBoxesPadding(pickedByUserRows);
             if (ret == -ERRBOXPADDING)
             {
-                Utility.DisplayErrorMsg("Error: after remove one of the boxes will be without lines inside\nPlease recheck rows");
+                Utility.DisplayErrorMsg("Error: after removing those lines one of the boxes will be empty\nPlease remove the surrounding box");
                 RemoveBackgroundColor();
                 return;
             }
@@ -1225,13 +1227,13 @@ namespace LogicCalculator
             }
             if (ret == -ERRBOXMISSCLOSE)
             {
-                Utility.DisplayErrorMsg("Error: checked box missng it's closer\nPlease recheck rows");
+                Utility.DisplayErrorMsg("Error: Chosen box opener is missing its closer");
                 RemoveBackgroundColor();
                 return;
             }
             if (ret == -ERRBOXMISSOPEN)
             {
-                Utility.DisplayErrorMsg("Error: checked box missng it's opener\nPlease recheck rows");
+                Utility.DisplayErrorMsg("Error: Chosen box closer is missing its opener");
                 RemoveBackgroundColor();
                 return;
             }
@@ -1268,7 +1270,7 @@ namespace LogicCalculator
                     Grid closerGrid = GetCloserGrid(spGridTable, row);
                     if (closerGrid == null)
                     {
-                        Utility.DisplayErrorMsg("something went wrong");
+                        Utility.DisplayErrorMsg("oops Something went wrong in CheckBoxesForRemove");
                     }
                     if (((CheckBox)closerGrid.Children[CHECKBOX_INDEX]).IsChecked == false)
                     {
@@ -1508,6 +1510,7 @@ namespace LogicCalculator
             string msg = "All input is valid";
             statement_list.Clear();
             string main_expression = Utility.ReplaceAll(tbEquation.Text.Trim());
+
             if (string.IsNullOrEmpty(main_expression))
             {
                 Utility.DisplayErrorMsg("Main expression is empty");
@@ -1614,7 +1617,7 @@ namespace LogicCalculator
                 case "Assumption":
                     if (!HaveAboveOpener(spGridTable.Children.IndexOf(row)))
                     {
-                        Utility.DisplayErrorMsg($"Error: assumption at row {((Label)row.Children[LABEL_INDEX]).Content}," +
+                        Utility.DisplayErrorMsg($"Error: Assumption at row {((Label)row.Children[LABEL_INDEX]).Content}," +
                             $"\nmissing box opener above");
                         return false;
                     }
@@ -1622,8 +1625,8 @@ namespace LogicCalculator
                 case "Copy":
                     if (!CopyFromLegalBox(row, first_segment))
                     {
-                        Utility.DisplayErrorMsg($"Error: Copy  at row {((Label)row.Children[LABEL_INDEX]).Content}," +
-                            $"\ncan use only for variable from current or upper box");
+                        Utility.DisplayErrorMsg($"Error: Copy at row {((Label)row.Children[LABEL_INDEX]).Content}," +
+                            $"\ncan use only for variable from current or previous box");
                         return false;
                     }
                     return true;
@@ -1712,27 +1715,29 @@ namespace LogicCalculator
         }
         private bool CopyFromLegalBox(Grid row, string first_segment)
         {
-            int start = spGridTable.Children.IndexOf(row);
-            bool isValid = true;
+            int start = spGridTable.Children.IndexOf(row),counter=0;
+
             for (int i = start - 1; i >= 0; i--)
             {
                 Grid currentRow = spGridTable.Children[i] as Grid;
                 if (currentRow.Children[LABEL_INDEX] is Label lb)
                 {
                     if (lb.Content.ToString() == first_segment)
-                        break;
+                        return true;
                 }
                 else
                 {
                     TextBlock tb = currentRow.Children[TEXT_BLOCK_INDEX] as TextBlock;
                     if (tb.Text.Contains("┌"))
-                        isValid = true;
-                    else
-                        isValid = false;
+                        counter++;
+                    else if (tb.Text.Contains("┐"))
+                        counter--;
+                    if (counter < 0)
+                        return false;
                 }
 
             }
-            return isValid;
+            return true;
         }
         private bool HaveAboveOpener(int index)
         {
@@ -1757,7 +1762,7 @@ namespace LogicCalculator
             }
             catch (IOException)
             {
-                Utility.DisplayErrorMsg($"Error: Fail to open {file}\nPlease close all open instances of said file and try again");
+                Utility.DisplayErrorMsg($"Error: Failed to open {file}\nPlease close all open instances of said file and try again");
                 return true;
             }
             return false;
@@ -1862,7 +1867,7 @@ namespace LogicCalculator
             //VALIDATE HAS '⊢'
             if (Regex.Matches(s, "⊢").Count != 1)
             {
-                Utility.DisplayErrorMsg("Valid logical Equivalent must contain exactly one '⊢'");
+                Utility.DisplayErrorMsg("Valid logical equivalent must contain exactly one '⊢'");
                 return false;
             }
 
