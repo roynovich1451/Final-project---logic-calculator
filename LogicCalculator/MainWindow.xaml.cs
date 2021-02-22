@@ -203,7 +203,7 @@ namespace LogicCalculator
             if (saveFileDialog.ShowDialog() == false) return;
             current_filename = saveFileDialog.SafeFileName;
             current_filename = current_filename.Substring(0, current_filename.Length - 5);
-            string saveFilePath = saveFileDialog.FileName;           
+            string saveFilePath = saveFileDialog.FileName;
             this.Title = $"Logic Proof Tool - File: {current_filename}, Last saved: {DateTime.Now.ToString(new CultureInfo("ru-RU"))}";
             using (var document = DocX.Create(saveFilePath))
             {
@@ -260,7 +260,7 @@ namespace LogicCalculator
                                 proof_table.Rows[i].Cells[0].Paragraphs.First().Append(block.Text);
                             }
                         }
-                   
+
                         document.InsertTable(proof_table);
                         // Save this document to disk.
                         break;
@@ -1544,6 +1544,7 @@ namespace LogicCalculator
                     first_segment = ((TextBox)row.Children[SEGMENT1_INDEX]).IsEnabled ? Utility.ReplaceAll(((TextBox)row.Children[SEGMENT1_INDEX]).Text) : null;
                     second_segment = ((TextBox)row.Children[SEGMENT2_INDEX]).IsEnabled ? Utility.ReplaceAll(((TextBox)row.Children[SEGMENT2_INDEX]).Text) : null;
                     third_segment = ((TextBox)row.Children[SEGMENT3_INDEX]).IsEnabled ? Utility.ReplaceAll(((TextBox)row.Children[SEGMENT3_INDEX]).Text) : null;
+                    statement_list.Add(new Statement(expression, rule, first_segment, second_segment, third_segment));
 
                     if (rule.Equals("Proveni"))
                     {
@@ -1556,7 +1557,6 @@ namespace LogicCalculator
                             return;
                     }
 
-                    statement_list.Add(new Statement(expression, rule, first_segment, second_segment, third_segment));
                     Evaluation e = new Evaluation(statement_list, rule);
                     if (!e.Is_Valid)
                         return;
@@ -1583,7 +1583,7 @@ namespace LogicCalculator
                 msg += ", proof success!";
             }
             else
-                msg += ", but still didn't achived goal";
+                msg += ", but still didn't achieve the goal";
 
             Utility.DisplayInfoMsg(msg, header);
         }
@@ -1594,7 +1594,6 @@ namespace LogicCalculator
                 //TODO
                 return false;
             }
-
             string lastRowInput = Utility.ReplaceAll(((TextBox)lastRow.Children[STATEMENT_INDEX]).Text);
             string needToProof = Utility.ReplaceAll(GetGoal(tbEquation.Text));
             return lastRowInput.Equals(needToProof);
@@ -1716,7 +1715,7 @@ namespace LogicCalculator
         }
         private bool CopyFromLegalBox(Grid row, string first_segment)
         {
-            int start = spGridTable.Children.IndexOf(row),counter=0;
+            int start = spGridTable.Children.IndexOf(row), counter = 0;
 
             for (int i = start - 1; i >= 0; i--)
             {
@@ -2096,7 +2095,7 @@ namespace LogicCalculator
                 return -ERRMISSINTEGER;
             if (seg.Contains(','))
             {
-                if (statement_list[currentRow].Rule != "proven")
+                if (statement_list[currentRow - 1].Rule != "Provene")
                     return -ERRCOMMA;
                 foreach (string s in splitted)
                 {

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Windows;
 
@@ -9,7 +8,7 @@ namespace LogicCalculator
     static class Utility
     {
         internal static readonly int PREDICATE_LENGTH = 3;
-        
+
         internal static string ReplaceAll(string s)
         {
             return s.Trim().Replace('^', '∧').Replace('V', '∨').Replace('~', '¬').Replace(" ", "").Replace('>', '→');
@@ -58,22 +57,27 @@ namespace LogicCalculator
             }
             return s.Substring(i, j - i);
         }
-        internal static bool Predicate_Check(string original, string rule,string to_check)
+        internal static bool Predicate_Check(string original, string rule, string to_check)
         {
-            int i, j, counter = 1;
-            List<string> ret=new List<string>();
+            int i, j, counter = 0, start;
+            string temp;
+            List<string> ret = new List<string>();
             i = original.IndexOf(rule);
-
-            if (i == -1)                
-                return false;            
-
+            
+            if (i == -1 || original.Substring(0, i) != to_check.Substring(0, i))
+                return false;
+            //"∀xP(x)→¬Q(x)"
+            //"∀x(P(x)→¬Q(x))"
             for (; i < original.Length; i++)
             {
                 if (original[i] == '(')
+                {
+                    counter++;
                     break;
+                }
             }
-
-            for (j=i; j < original.Length; j++)
+            start = i+2;
+            for (j = i + 1; j < original.Length; j++)
             {
                 if (original[j] == '(')
                     counter++;
@@ -83,11 +87,16 @@ namespace LogicCalculator
                     break;
                 if (original[j] == rule[1])
                 {
-                    ret.Add(original.Substring(i+1, j - (i+1)));
+                    ret.Add(original.Substring(i + 1, j - i - 1));
                     i = j;
                 }
             }
-            ret.Add(original.Substring(i + 1, j - (i + 1)));
+            temp = original.Substring(i + 1, j - i - 1);
+            if (temp.Length > 1)
+                ret.Add(temp.Substring(0, temp.Length - 1));
+            j++;           
+            if (j < original.Length && original.Substring(j, original.Length - j) != to_check.Substring(j - start, to_check.Length - j + start))
+                return false;
             foreach (string s in ret)
             {
                 if (!to_check.Contains(s))
@@ -199,7 +208,7 @@ namespace LogicCalculator
         internal static void DisplayErrorMsg(string msg, int current_line = -1)
         {
             if (current_line != -1)
-                msg = "Error at row " + current_line + "\n" + msg;
+                msg = "Error at row " + (current_line) + "\n" + msg;
             MessageBox.Show(msg, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
         internal static void DisplayWarningMsg(string msg, string title)

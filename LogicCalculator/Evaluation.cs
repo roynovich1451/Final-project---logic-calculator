@@ -409,7 +409,7 @@ namespace LogicCalculator
                 left_part = first_expression.Substring(0, index);
                 right_part = first_expression.Substring(index + 1);
 
-                Is_Valid = !Utility.Check_If_Not(right_part, second_expression);
+                Is_Valid = Utility.Check_If_Not(right_part, second_expression);
                 if (!Is_Valid)
                 {
                     Utility.DisplayErrorMsg("MT missing ¬", current_line);
@@ -420,11 +420,11 @@ namespace LogicCalculator
             {
                 index = second_expression.IndexOf("→");
                 Is_Valid = index != -1;
-                if (!Is_Valid)
+                if (Is_Valid)
                 {
                     left_part = second_expression.Substring(0, index);
                     right_part = second_expression.Substring(index + 1);
-                    Is_Valid = !Utility.Check_If_Not(right_part, first_expression);
+                    Is_Valid = Utility.Check_If_Not(right_part, first_expression);
                     if (!Is_Valid)
                     {
                         Utility.DisplayErrorMsg("MT missing ¬", current_line);
@@ -516,7 +516,7 @@ namespace LogicCalculator
             Is_Valid = original_expression.Contains("∧");
             if (!Is_Valid)
             {
-                Utility.DisplayErrorMsg("Missing ∧ in and elimination", current_line);
+                Utility.DisplayErrorMsg("Missing ∧ in row "+row, current_line);
                 return;
             }
             Is_Valid = original_expression.Contains(current_expression + "∧")
@@ -761,8 +761,7 @@ namespace LogicCalculator
                 Is_Valid = index != -1;
                 if (!Is_Valid)
                 {
-
-                    Utility.DisplayErrorMsg("= symbol must be present in lines " + first_line + " or " + second_line, current_line);
+                    Utility.DisplayErrorMsg("= symbol must be present in line " + first_line + " or " + second_line, current_line);
                     return;
                 }
                 else // = symbol is in second expression
@@ -771,11 +770,9 @@ namespace LogicCalculator
                     right = second_expression.Substring(index + 1);
                     Is_Valid = first_expression == current_expression.Replace(left, right) ||
                    first_expression == current_expression.Replace(right, left);
-
                 }
             }
-            // = symbol is in first expression
-            else
+            else // = symbol is in first expression
             {
                 left = first_expression.Substring(0, index);
                 right = first_expression.Substring(index + 1);
@@ -793,7 +790,7 @@ namespace LogicCalculator
             int previous_line = Utility.Get_Row(statement_list[current_line].First_segment, current_line);
             string current_expression = statement_list[current_line].Expression,
                 previous_expression = statement_list[previous_line].Expression;
-              
+
             if (!previous_expression.Contains(rule))
             {
                 Utility.DisplayErrorMsg("Missing " + rule + " in previous row", previous_line);
@@ -801,7 +798,7 @@ namespace LogicCalculator
                 return;
             }
 
-            Is_Valid = Utility.Predicate_Check(previous_expression,rule,current_expression);
+            Is_Valid = Utility.Predicate_Check(previous_expression, rule, current_expression);
             if (!Is_Valid)
             {
                 Utility.DisplayErrorMsg("Misuse of all elimination", current_line);
@@ -836,7 +833,7 @@ namespace LogicCalculator
                 Utility.DisplayErrorMsg("Misuse of all introduction", current_line);
             }
         }
-        
+
         private void Exists_Elimination(string rule)
         {
             //TODO check for double cases ∃x(P(x))^∃x(Q(x))
