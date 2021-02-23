@@ -80,11 +80,13 @@
                             <ColumnDefinition Width="233*"/>
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="90"/>
+                            <RowDefinition Height="120"/>
                             <RowDefinition Height="7*"/>
                             <RowDefinition Height="50"/>
                         </Grid.RowDefinitions>
                         <StackPanel Name="spLogicExpression" VerticalAlignment="Center" Grid.ColumnSpan="4" Margin="0,5,-0.6,5.4">
+                            <TextBlock Text="Question Title" TextAlignment="Center" FontWeight="Bold"/>
+                            <TextBox Name="tbQTitle" TextAlignment="Center" Margin="200,0" />
                             <TextBlock Text="Enter a valid logical expression" TextAlignment="Center" FontWeight="Bold"/>
                             <TextBox Name="tbEquation" TextAlignment="Center" Margin="80,0"/>
                             <Grid Margin="0,5,0,0">
@@ -99,7 +101,7 @@
                                 </Grid.ColumnDefinitions>
 
                                 <!--TABLE HEADER-->
-                                <CheckBox Name="MasterCheck" Margin="0,0,6,0" IsChecked="False" Visibility="Hidden"
+                                <CheckBox Name="MasterCheck" Margin="0,0,6,15" IsChecked="False" Visibility="Hidden"
                                           VerticalAlignment="Center" HorizontalAlignment="Center" Click="Chb_click"/>
                                 <Label Content="Line" HorizontalAlignment="Center" FontWeight="Bold" Grid.Column="1"/>
                                 <Label Content="Statement" HorizontalAlignment="Center" Grid.Column="2" FontWeight="Bold"/>
@@ -115,7 +117,7 @@
                                 </Label>
                             </Grid>
                         </StackPanel>
-                        <ScrollViewer Grid.ColumnSpan="4" Margin="0,90,-0.6,49.4" Grid.RowSpan="3" ScrollViewer.VerticalScrollBarVisibility="Auto">
+                        <ScrollViewer Grid.ColumnSpan="4" Grid.RowSpan="1" Grid.Row="1" ScrollViewer.VerticalScrollBarVisibility="Auto">
                             <StackPanel Name="spGridTable">
 
                             </StackPanel>
