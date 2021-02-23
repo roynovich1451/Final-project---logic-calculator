@@ -19,8 +19,12 @@ namespace LogicCalculator
         #region RULES
         private void Handle_Rule(string rule)
         {
+
             switch (rule)
             {
+                case "X0/Y0i":
+                    Var_Introduction();
+                    break;
                 case "Proveni":
                     //THIS ON VERIFIED IN MAINWINDOW
                     Is_Valid = true;
@@ -29,7 +33,8 @@ namespace LogicCalculator
                     Proven_Elimination();
                     break;
                 case "None":
-                    None();
+                    //TODO: check if needed (None rule)
+                    Var_Introduction();
                     break;
                 case "Data":
                     Data();
@@ -123,6 +128,16 @@ namespace LogicCalculator
                     break;
             }
         }
+
+        private void Var_Introduction()
+        {
+            Is_Valid = statement_list[current_line].Expression.Equals("X0") ||
+                statement_list[current_line].Expression.Equals("Y0");
+            if (!Is_Valid)
+                Utility.DisplayErrorMsg("Expression in rule must be X0 or Y0", current_line);
+            return;
+        }
+
         private List<string> GetData(string s)
         {
             List<string> ret = new List<string>();
@@ -314,14 +329,7 @@ namespace LogicCalculator
             }
             return Tuple.Create(proven.Equals(data), proven);
         }
-        private void None()
-        {
-            Is_Valid = statement_list[current_line].Expression.Equals("X0") ||
-                statement_list[current_line].Expression.Equals("Y0");
-            if (!Is_Valid)
-                Utility.DisplayErrorMsg("Empty rule must be X0 or Y0", current_line);
-            return;
-        }
+   
         private void Data()
         {
             int index = statement_list[0].Expression.IndexOf("⊢");
@@ -516,7 +524,7 @@ namespace LogicCalculator
             Is_Valid = original_expression.Contains("∧");
             if (!Is_Valid)
             {
-                Utility.DisplayErrorMsg("Missing ∧ in row "+row, current_line);
+                Utility.DisplayErrorMsg("Missing ∧ in row " + row, current_line);
                 return;
             }
             Is_Valid = original_expression.Contains(current_expression + "∧")
