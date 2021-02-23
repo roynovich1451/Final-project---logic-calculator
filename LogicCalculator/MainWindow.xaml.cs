@@ -27,7 +27,7 @@ namespace LogicCalculator
         #region GUI_DEFINES
         private const int COL_LABEL_WIDTH = 35;
         private const int COL_STATEMENT_WIDTH = 360;
-        private const int COL_SEGMENT_WIDTH = 60;
+        private const int COL_SEGMENT_WIDTH = 65;
         private const int COL_COMBOBOX_WIDTH = 95;
         private const int COL_TEXTBLOCK_WIDTH = COL_LABEL_WIDTH + COL_STATEMENT_WIDTH + COL_COMBOBOX_WIDTH + (3 * COL_SEGMENT_WIDTH);
         private const int CHILD_MARGIN = 4;
@@ -141,55 +141,64 @@ namespace LogicCalculator
             string openFilePath = openFileDialog.FileName;
             if (FileInUse(openFilePath))
                 return;
-            this.Title = $"Logic Proof Tool - File: {current_filename}, Last saved: {DateTime.Now.ToString(new CultureInfo("ru-RU"))}";
-            using (var document = DocX.Load(openFilePath))
+
+            try
             {
-                if (document.Tables.Count == 0)
+                using (var document = DocX.Load(openFilePath))
                 {
-                    tbEditor.Text = document.Text;
-                    mainTab.SelectedIndex = TAB_EDITOR_INDEX;
-                    return;
-                }
-                else
-                {
-                    mainTab.SelectedIndex = TAB_PROOF_INDEX;
-                    string expression, rule, first_segment, second_segment, third_segment;
-                    //Clear Table
-
-                    spGridTable.Children.Clear();
-                    table_row_num = 0;
-                    tbEquation.Text = document.Paragraphs[1].Text.Substring(20).Trim();
-                    Table proof_table = document.Tables[0];
-
-                    for (int i = 1; i < proof_table.Rows.Count; i++)
+                    if (document.Tables.Count == 0)
                     {
-                        if (proof_table.Rows[i].Cells[0].Paragraphs.First().Text.Contains("┌"))
-                        {
-                            spGridTable.Children.Add(CreateBox(BoxState.Open));
-                        }
-                        else if (proof_table.Rows[i].Cells[0].Paragraphs.First().Text.Contains("┘"))
-                        {
-                            spGridTable.Children.Add(CreateBox(BoxState.Close));
-                        }
-                        else
-                        {
-                            Grid current_row = CreateRow(-1);
+                        tbEditor.Text = document.Text;
+                        mainTab.SelectedIndex = TAB_EDITOR_INDEX;
+                        return;
+                    }
+                    else
+                    {
+                        mainTab.SelectedIndex = TAB_PROOF_INDEX;
+                        string expression, rule, first_segment, second_segment, third_segment;
 
-                            expression = proof_table.Rows[i].Cells[1].Paragraphs.First().Text.Replace(" ", string.Empty);
-                            rule = proof_table.Rows[i].Cells[2].Paragraphs.First().Text;
-                            first_segment = proof_table.Rows[i].Cells[3].Paragraphs.First().Text.Replace(" ", string.Empty);
-                            second_segment = proof_table.Rows[i].Cells[4].Paragraphs.First().Text.Replace(" ", string.Empty);
-                            third_segment = proof_table.Rows[i].Cells[5].Paragraphs.First().Text.Replace(" ", string.Empty);
-                            ((TextBox)current_row.Children[STATEMENT_INDEX]).Text = expression;
-                            ((ComboBox)current_row.Children[COMBOBOX_INDEX]).SelectedItem = rule;
-                            ((TextBox)current_row.Children[SEGMENT1_INDEX]).Text = first_segment;
-                            ((TextBox)current_row.Children[SEGMENT2_INDEX]).Text = second_segment;
-                            ((TextBox)current_row.Children[SEGMENT3_INDEX]).Text = third_segment;
+                        //Clear Table
+                        spGridTable.Children.Clear();
+                        table_row_num = 0;
+                        tbEquation.Text = document.Paragraphs[0].Text.Trim().Substring(17);
+                        Table proof_table = document.Tables[0];
+
+                        for (int i = 1; i < proof_table.Rows.Count; i++)
+                        {
+                            if (proof_table.Rows[i].Cells[0].Paragraphs.First().Text.Contains("┌"))
+                            {
+                                spGridTable.Children.Add(CreateBox(BoxState.Open));
+                            }
+                            else if (proof_table.Rows[i].Cells[0].Paragraphs.First().Text.Contains("┘"))
+                            {
+                                spGridTable.Children.Add(CreateBox(BoxState.Close));
+                            }
+                            else
+                            {
+                                Grid current_row = CreateRow(-1);
+
+                                expression = proof_table.Rows[i].Cells[1].Paragraphs.First().Text.Replace(" ", string.Empty);
+                                rule = proof_table.Rows[i].Cells[2].Paragraphs.First().Text;
+                                first_segment = proof_table.Rows[i].Cells[3].Paragraphs.First().Text.Replace(" ", string.Empty);
+                                second_segment = proof_table.Rows[i].Cells[4].Paragraphs.First().Text.Replace(" ", string.Empty);
+                                third_segment = proof_table.Rows[i].Cells[5].Paragraphs.First().Text.Replace(" ", string.Empty);
+                                ((TextBox)current_row.Children[STATEMENT_INDEX]).Text = expression;
+                                ((ComboBox)current_row.Children[COMBOBOX_INDEX]).SelectedItem = rule;
+                                ((TextBox)current_row.Children[SEGMENT1_INDEX]).Text = first_segment;
+                                ((TextBox)current_row.Children[SEGMENT2_INDEX]).Text = second_segment;
+                                ((TextBox)current_row.Children[SEGMENT3_INDEX]).Text = third_segment;
+                            }
                         }
                     }
                 }
+                this.Title = $"Logic Proof Tool - File: {current_filename}, Last saved: {DateTime.Now.ToString(new CultureInfo("ru-RU"))}";
+                HandleMasterCheck();
             }
-            HandleMasterCheck();
+            catch (Exception ex)
+            {
+                this.Title = $"Logic Proof Tool";
+                Utility.DisplayErrorMsg("Unknown error while trying to open file, the file is probably not formatted correctly");
+            }
         }
         private void MenuItemSave_Click(object sender, RoutedEventArgs e)
         {
@@ -204,18 +213,16 @@ namespace LogicCalculator
             current_filename = saveFileDialog.SafeFileName;
             current_filename = current_filename.Substring(0, current_filename.Length - 5);
             string saveFilePath = saveFileDialog.FileName;
-            this.Title = $"Logic Proof Tool - File: {current_filename}, Last saved: {DateTime.Now.ToString(new CultureInfo("ru-RU"))}";
+
             using (var document = DocX.Create(saveFilePath))
             {
-                // Add a title.
-                document.InsertParagraph("Logic Tool Results\n").FontSize(16d).Bold(true).UnderlineStyle(UnderlineStyle.singleLine);
                 //Add the proof table
                 switch (mainTab.SelectedIndex)
                 {
                     case TAB_PROOF_INDEX:
                         //Add the main expression
                         document.SetDefaultFont(new Font("Cambria Math"), 10);
-                        document.InsertParagraph("Main Expression:\n" + tbEquation.Text + '\n').FontSize(13d);
+                        document.InsertParagraph("Main Expression: " + tbEquation.Text + '\n').FontSize(13d);
                         int row_num = spGridTable.Children.Count;
                         Table proof_table = document.AddTable(row_num + 1, TABLE_COL_NUM);
                         proof_table.AutoFit = AutoFit.Contents;
@@ -274,6 +281,7 @@ namespace LogicCalculator
                 try
                 {
                     document.Save();
+                    this.Title = $"Logic Proof Tool - File: {current_filename}, Last saved: {DateTime.Now.ToString(new CultureInfo("ru-RU"))}";
                     Utility.DisplayInfoMsg("Created Document: " + saveFilePath, "Documented Created");
                 }
                 catch (Exception ex)
@@ -1547,7 +1555,7 @@ namespace LogicCalculator
                         return;
                 }
             }
-            bool isGoalAchived = CheckGoalAchived(spGridTable.Children[spGridTable.Children.Count - 1] as Grid);
+            bool isGoalAchived = CheckGoalAchieved(spGridTable.Children[spGridTable.Children.Count - 1] as Grid);
             if (isGoalAchived)
             {
                 foreach (Grid row in spGridTable.Children)
@@ -1572,16 +1580,16 @@ namespace LogicCalculator
 
             Utility.DisplayInfoMsg(msg, header);
         }
-        private bool CheckGoalAchived(Grid lastRow)
+
+        private bool CheckGoalAchieved(Grid lastRow)
         {
             if (lastRow.Children[TEXT_BLOCK_INDEX] is TextBlock)
             {
-                //TODO
                 return false;
             }
             string lastRowInput = Utility.ReplaceAll(((TextBox)lastRow.Children[STATEMENT_INDEX]).Text);
             string needToProof = Utility.ReplaceAll(GetGoal(tbEquation.Text));
-            return lastRowInput.Equals(needToProof);
+            return Utility.Equal_With_Parenthesis(lastRowInput, needToProof);
         }
         private string GetData(string s)
         {
