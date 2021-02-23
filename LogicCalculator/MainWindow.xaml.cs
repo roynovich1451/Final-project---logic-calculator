@@ -536,19 +536,19 @@ namespace LogicCalculator
         {
             if (state == true)
             {
-                btnAddBefore.Visibility = Visibility.Visible;
-                btnRemove.Visibility = Visibility.Visible;
-                btnClear.Visibility = Visibility.Visible;
-                btnAddLine.Visibility = Visibility.Hidden;
-                btncheckButton.Visibility = Visibility.Hidden;
+                btnAddBefore.IsEnabled = true;
+                btnRemove.IsEnabled = true;
+                btnClear.IsEnabled = true;
+                btnAddLine.IsEnabled = false;
+                btncheckButton.IsEnabled = false;
             }
             else
             {
-                btnAddBefore.Visibility = Visibility.Hidden;
-                btnRemove.Visibility = Visibility.Hidden;
-                btnClear.Visibility = Visibility.Hidden;
-                btnAddLine.Visibility = Visibility.Visible;
-                btncheckButton.Visibility = Visibility.Visible;
+                btnAddBefore.IsEnabled = false;
+                btnRemove.IsEnabled =false;
+                btnClear.IsEnabled = false;
+                btnAddLine.IsEnabled = true;
+                btncheckButton.IsEnabled = true;
             }
         }
         private void HandleBox(BoxState state, int index)
@@ -715,9 +715,9 @@ namespace LogicCalculator
         private void MainTab_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (mainTab.SelectedIndex == TAB_PROOF_INDEX)
-                btnCreateBox.Visibility = Visibility.Visible;
+                btnCreateBox.IsEnabled = true;
             else
-                btnCreateBox.Visibility = Visibility.Hidden;
+                btnCreateBox.IsEnabled = false;
         }
         private void Chb_click(object sender, RoutedEventArgs e)
         {
