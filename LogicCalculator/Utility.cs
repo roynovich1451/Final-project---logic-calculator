@@ -9,6 +9,12 @@ namespace LogicCalculator
     {
         internal static readonly int PREDICATE_LENGTH = 3;
 
+        internal static string Reverse(string s)
+        {
+            char[] charArray = s.ToCharArray();
+            Array.Reverse(charArray);
+            return new string(charArray);
+        }
         internal static string ReplaceAll(string s)
         {
             return s.Trim().Replace('^', '∧').Replace('V', '∨').Replace('~', '¬').Replace(" ", "").Replace('>', '→');
@@ -66,8 +72,7 @@ namespace LogicCalculator
             
             if (i == -1 || original.Substring(0, i) != to_check.Substring(0, i))
                 return false;
-            //"∀xP(x)→¬Q(x)"
-            //"∀x(P(x)→¬Q(x))"
+
             for (; i < original.Length; i++)
             {
                 if (original[i] == '(')
