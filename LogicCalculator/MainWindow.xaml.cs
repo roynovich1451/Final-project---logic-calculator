@@ -83,7 +83,7 @@ namespace LogicCalculator
         private int checked_checkboxes = 0;
         private int table_row_num = 0;
         private TextBox elementWithFocus;
-        private readonly List<string> rules = new List<string> { "None","Data","Proven i","Proven e", "Assumption", "LEM", "PBC", "MP", "MT", "Copy"
+        private readonly List<string> rules = new List<string> { "None", "X0/Y0 i", "Data", "Proven i", "Proven e", "Assumption", "LEM", "PBC", "MP", "MT", "Copy"
                                                                  ,"∧i", "∧e1", "∧e2", "∨i1", "∨i2", "∨e", "¬¬e",
                                                                  "¬¬i", "→i", "⊥e", "¬i", "¬e", "→i",
                                                                  "=i","=e","∀x i","∀x e","∃x i","∃x e","∀y i","∀y e","∃y i","∃y e" };
@@ -752,6 +752,7 @@ namespace LogicCalculator
                 case "None":
                 case "=i":
                 case "Proven i":
+                case "X0/Y0i":
                     HandleGridVisability(parent, 0);
                     //handleBox(cmb, location);
                     break;
@@ -1472,23 +1473,7 @@ namespace LogicCalculator
             MasterCheck.IsChecked = false;
             return gridList;
         }
-        /*
-        public List<Tuple<int, string>> GetBoxPairs()
-        {
-            UIElementCollection grids = spGridTable.Children;
-            List<Tuple<int, string>> ret = new List<Tuple<int, string>>();
-            int index = 0;
-            foreach (Grid row in grids)
-            {
-                if (row.Children[TEXT_BLOCK_INDEX] is TextBlock block)
-                {
-                    ret.Add(new Tuple<int, string>(index, block.Text));
-                }
-                index++;
-            }
-            return ret;
-        }
-        */
+
         private int FindArgumentNumber(string input)
         {
             int argument_number = 0, parenthesis_number = 0;
@@ -1614,7 +1599,7 @@ namespace LogicCalculator
 
             switch (rule)
             {
-                case "Assumption":
+                case "X0/Y0i":
                     if (!HaveAboveOpener(spGridTable.Children.IndexOf(row)))
                     {
                         Utility.DisplayErrorMsg($"Error: Assumption at row {((Label)row.Children[LABEL_INDEX]).Content}," +
@@ -1622,6 +1607,30 @@ namespace LogicCalculator
                         return false;
                     }
                     return true;
+
+                case "Assumption":
+                    //In case of "Var i" rule above ignore check [Var i should check if box opener exists]
+                    int curr_index = spGridTable.Children.IndexOf(row);
+                   
+                    if (curr_index > 0)
+                    {
+                        Grid aboveRow = spGridTable.Children[curr_index - 1] as Grid;
+                        if (aboveRow.Children.Count > 2 && aboveRow.Children[COMBOBOX_INDEX] is ComboBox cmb)
+                        {
+                            if (Utility.ReplaceAll(cmb.SelectedItem.ToString()).Equals("X0/Y0i"))
+                                return true;
+                        }
+
+                    }
+                    //In regular case
+                    if (!HaveAboveOpener(curr_index))
+                    {
+                        Utility.DisplayErrorMsg($"Error: Assumption at row {((Label)row.Children[LABEL_INDEX]).Content}," +
+                            $"\nmissing box opener above");
+                        return false;
+                    }
+                    return true;
+
                 case "Copy":
                     if (!CopyFromLegalBox(row, first_segment))
                     {
@@ -1630,6 +1639,7 @@ namespace LogicCalculator
                         return false;
                     }
                     return true;
+
                 case "∨e":
                     List<int> firstbox = Utility.Get_Lines_From_Segment(second_segment),
                         secondBox = Utility.Get_Lines_From_Segment(third_segment);
@@ -1641,6 +1651,7 @@ namespace LogicCalculator
                         return false;
                     }
                     return true;
+
                 case "¬i":
                 case "→i":
                 case var a when new Regex(@"∀.*i").IsMatch(a):
@@ -1670,6 +1681,7 @@ namespace LogicCalculator
                         return false;
                     }
                     return true;
+
                 default:
                     return true;
             }
