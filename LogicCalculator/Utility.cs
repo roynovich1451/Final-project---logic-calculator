@@ -8,12 +8,13 @@ namespace LogicCalculator
     static class Utility
     {
         internal static readonly int PREDICATE_LENGTH = 3;
-
-        internal static string Reverse(string s)
-        {
-            char[] charArray = s.ToCharArray();
-            Array.Reverse(charArray);
-            return new string(charArray);
+        internal static string FlipByOperator(string s,char op)        {
+           
+            if (s[0] == '(')
+                s = s.Substring(1, s.Length - 2);
+            int index = s.IndexOf(op);
+            s = s.Substring(index + 1) + op + s.Substring(0, index);
+            return s;
         }
         internal static string ReplaceAll(string s)
         {
@@ -37,6 +38,7 @@ namespace LogicCalculator
         }
         internal static string Get_Parenthesis_Contents(string s, string start)
         {
+            ///searches for parameter start in string s. if found searches for the closest '(' and returns the string between matching ')'
             int i, j, counter = 1;
 
             i = s.IndexOf(start);
@@ -68,12 +70,12 @@ namespace LogicCalculator
             int i, j, counter = 0, start;
             string temp;
             List<string> ret = new List<string>();
-            i = original.IndexOf(rule);
-            
+           
+            i = original.IndexOf(rule);            //find index of predicate rule
             if (i == -1 || original.Substring(0, i) != to_check.Substring(0, i))
                 return false;
 
-            for (; i < original.Length; i++)
+            for (; i < original.Length; i++)       //skip until reaching '('
             {
                 if (original[i] == '(')
                 {
@@ -81,7 +83,7 @@ namespace LogicCalculator
                     break;
                 }
             }
-            start = i+2;
+            start = i+2;                           //save starting index
             for (j = i + 1; j < original.Length; j++)
             {
                 if (original[j] == '(')
@@ -90,7 +92,7 @@ namespace LogicCalculator
                     counter--;
                 if (counter <= 0)
                     break;
-                if (original[j] == rule[1])
+                if (original[j] == rule[1])        //save all needed strings in the list
                 {
                     ret.Add(original.Substring(i + 1, j - i - 1));
                     i = j;
@@ -98,7 +100,7 @@ namespace LogicCalculator
             }
             temp = original.Substring(i + 1, j - i - 1);
             if (temp.Length > 1)
-                ret.Add(temp.Substring(0, temp.Length - 1));
+                ret.Add(temp.Substring(0, temp.Length - 1));//add the last string only if its legit
             j++;           
             if (j < original.Length && original.Substring(j, original.Length - j) != to_check.Substring(j - start, to_check.Length - j + start))
                 return false;

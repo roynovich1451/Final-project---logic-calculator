@@ -747,8 +747,8 @@ namespace LogicCalculator
                 Utility.DisplayErrorMsg("Missing = in row " + current_line, current_line);
                 return;
             }
-            Is_Valid = current_expression.Substring(0, index) ==
-                current_expression.Substring(index + 1);
+            Is_Valid = Utility.Equal_With_Parenthesis(current_expression.Substring(0, index),
+                current_expression.Substring(index + 1));
             if (!Is_Valid)
                 Utility.DisplayErrorMsg("Equal introduction format is t1=t1", current_line);
         }
@@ -760,7 +760,14 @@ namespace LogicCalculator
             string current_expression = statement_list[current_line].Expression,
                 first_expression = statement_list[first_line].Expression,
                 second_expression = statement_list[second_line].Expression,
-                left, right;
+                left, right, reverse;
+
+            if (first_expression[0] == '('&&first_expression[first_expression.Length-1]==')')
+                first_expression = first_expression.Substring(1, first_expression.Length - 2);
+            if (second_expression[0] == '(' && second_expression[second_expression.Length-1] == ')')
+                second_expression = second_expression.Substring(1, second_expression.Length - 2);
+            if (current_expression[0] == '(' && current_expression[current_expression.Length-1] == ')')
+                current_expression = current_expression.Substring(1, current_expression.Length - 2);
 
             index = first_expression.IndexOf("=");
             if (index == -1)
@@ -772,20 +779,39 @@ namespace LogicCalculator
                     Utility.DisplayErrorMsg("= symbol must be present in line " + first_line + " or " + second_line, current_line);
                     return;
                 }
-                else // = symbol is in second expression
+                else // '=' symbol is in second expression
                 {
                     left = second_expression.Substring(0, index);
                     right = second_expression.Substring(index + 1);
-                    Is_Valid = first_expression == current_expression.Replace(left, right) ||
-                   first_expression == current_expression.Replace(right, left);
+
+                    Is_Valid = Utility.Equal_With_Parenthesis(first_expression, current_expression.Replace(left, right)) ||
+                        Utility.Equal_With_Parenthesis(first_expression, current_expression.Replace(right, left));
+                        
+                    if (!Is_Valid)
+                    {
+                        Utility.DisplayErrorMsg("Misuse of equal elimination", current_line);
+                        return;
+                    }
+                    if (!Is_Valid && first_expression.Contains('='))
+                    {
+                        reverse = Utility.FlipByOperator(first_expression, '=');
+                        Is_Valid = Utility.Equal_With_Parenthesis(reverse, current_expression.Replace(left, right)) ||
+                            Utility.Equal_With_Parenthesis(reverse, current_expression.Replace(right, left));
+                    }
                 }
             }
-            else // = symbol is in first expression
+            else // '=' symbol is in first expression
             {
                 left = first_expression.Substring(0, index);
                 right = first_expression.Substring(index + 1);
-                Is_Valid = second_expression == current_expression.Replace(left, right) ||
-                    second_expression == current_expression.Replace(right, left);
+                Is_Valid = Utility.Equal_With_Parenthesis(second_expression, current_expression.Replace(left, right)) ||
+                        Utility.Equal_With_Parenthesis(second_expression, current_expression.Replace(right, left));
+                if (!Is_Valid&&second_expression.Contains('='))
+                {
+                    reverse = Utility.FlipByOperator(first_expression, '=');
+                    Is_Valid = Utility.Equal_With_Parenthesis(reverse, current_expression.Replace(left, right)) ||
+                        Utility.Equal_With_Parenthesis(reverse, current_expression.Replace(right, left));
+                }
             }
             if (!Is_Valid)
             {
@@ -841,7 +867,6 @@ namespace LogicCalculator
                 Utility.DisplayErrorMsg("Misuse of all introduction", current_line);
             }
         }
-
         private void Exists_Elimination(string rule)
         {
             //TODO check for double cases ∃x(P(x))^∃x(Q(x))
@@ -895,33 +920,6 @@ namespace LogicCalculator
             }
         }
         #endregion 
-        #endregion
-        #region UTILITY
-        private Dictionary<string, string> Match_Data(string gen, string actual, Dictionary<string, string> known)
-        {
-            Dictionary<string, string> ret = new Dictionary<string, string>();
-            int act_p = 0;
-            for (int gen_p = 0; gen_p < gen.Length; gen_p++)
-            {
-                char gen_c = gen[gen_p];
-                if (!Utility.IsOperator(gen_c)) //variable
-                {
-                    int k = gen_p + 1;
-                    while (!Utility.IsOperator(gen[k]) && k < gen.Length)
-                        k++;
-                    char stop = gen[k];
-                    int r = act_p;
-                    while (!actual[r].Equals(stop) && r < actual.Length)
-                        r++;
-                    string key = gen.Substring(gen_p, k - gen_p);
-                    string value = actual.Substring(act_p, r - act_p);
-                    ret.Add(key, value);
-                }
-                else
-                    act_p++;
-            }
-            return ret;
-        }
-        #endregion UTILITY
+        #endregion        
     }
 }
