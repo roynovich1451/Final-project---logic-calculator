@@ -276,6 +276,7 @@ namespace LogicCalculator
                         document.InsertParagraph(tbEditor.Text).FontSize(12d);
                         break;
                 }
+                
                 if (FileInUse(saveFilePath))
                     return;
                 try
@@ -1784,6 +1785,10 @@ namespace LogicCalculator
 
         private bool FileInUse(string file)
         {
+            if (!File.Exists(file))
+            {
+                return false;
+            }
             try
             {
                 using (FileStream stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.None))
@@ -1791,9 +1796,9 @@ namespace LogicCalculator
                     stream.Close();
                 }
             }
-            catch (IOException)
+            catch (IOException e)
             {
-                Utility.DisplayErrorMsg($"Error: Failed to open/save {file}\nPlease close all open instances of said file and try again");
+                Utility.DisplayErrorMsg($"Error: Failed to open/save {file}\nPlease close all open instances of said file and try again , {e.Message}");
                 return true;
             }
             return false;
