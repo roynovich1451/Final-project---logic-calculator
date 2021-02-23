@@ -160,7 +160,17 @@ namespace LogicCalculator
                         //Clear Table
                         spGridTable.Children.Clear();
                         table_row_num = 0;
-                        tbEquation.Text = document.Paragraphs[0].Text.Trim().Substring(17);
+                        string firstParagraph = document.Paragraphs[0].Text.Trim();
+                        if (firstParagraph.Contains("Q:"))
+                        {
+                            tbQTitle.Text = document.Paragraphs[0].Text.Trim().Substring(2);
+                            tbEquation.Text = document.Paragraphs[1].Text.Trim().Substring(17);
+                        }
+                        else
+                        {
+                            tbEquation.Text = document.Paragraphs[0].Text.Trim().Substring(17);
+                        }
+                        
                         Table proof_table = document.Tables[0];
 
                         for (int i = 1; i < proof_table.Rows.Count; i++)
@@ -222,7 +232,9 @@ namespace LogicCalculator
                     case TAB_PROOF_INDEX:
                         //Add the main expression
                         document.SetDefaultFont(new Font("Cambria Math"), 10);
-                        document.InsertParagraph("Main Expression: " + tbEquation.Text + '\n').FontSize(13d);
+                        if (!String.IsNullOrEmpty(tbQTitle.Text.Trim()))
+                            document.InsertParagraph("Q: " + tbQTitle.Text.Trim() + '\n').FontSize(13d);
+                        document.InsertParagraph("Main Expression: " + tbEquation.Text.Trim() + '\n').FontSize(13d);
                         int row_num = spGridTable.Children.Count;
                         Table proof_table = document.AddTable(row_num + 1, TABLE_COL_NUM);
                         proof_table.AutoFit = AutoFit.Contents;
@@ -276,6 +288,7 @@ namespace LogicCalculator
                         document.InsertParagraph(tbEditor.Text).FontSize(12d);
                         break;
                 }
+                
                 if (FileInUse(saveFilePath))
                     return;
                 try
@@ -1784,6 +1797,10 @@ namespace LogicCalculator
 
         private bool FileInUse(string file)
         {
+            if (!File.Exists(file))
+            {
+                return false;
+            }
             try
             {
                 using (FileStream stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.None))
@@ -1791,9 +1808,9 @@ namespace LogicCalculator
                     stream.Close();
                 }
             }
-            catch (IOException)
+            catch (IOException e)
             {
-                Utility.DisplayErrorMsg($"Error: Failed to open/save {file}\nPlease close all open instances of said file and try again");
+                Utility.DisplayErrorMsg($"Error: Failed to open/save {file}\nPlease close all open instances of said file and try again , {e.Message}");
                 return true;
             }
             return false;
