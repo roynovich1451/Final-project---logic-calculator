@@ -364,7 +364,7 @@ namespace LogicCalculator
             Is_Valid = row != -1;
             if (!Is_Valid)
             {
-                Utility.DisplayErrorMsg("copy fk", current_line);
+                Utility.DisplayErrorMsg("copy", current_line);
                 return;
             }
             Is_Valid = statement_list[row].Expression == statement_list[current_line].Expression;

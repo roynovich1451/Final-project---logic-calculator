@@ -1727,25 +1727,36 @@ namespace LogicCalculator
         }
         private bool CopyFromLegalBox(Grid row, string first_segment)
         {
-            int start = spGridTable.Children.IndexOf(row), counter = 0;
-
+            int start = spGridTable.Children.IndexOf(row);//, counter = 0;
+            //bool boxClosed = false;
+            bool isValid = true;
+            int unvalidBoxSize = -1;
             for (int i = start - 1; i >= 0; i--)
             {
                 Grid currentRow = spGridTable.Children[i] as Grid;
                 if (currentRow.Children[LABEL_INDEX] is Label lb)
                 {
                     if (lb.Content.ToString() == first_segment)
-                        return true;
+                    {
+                        return isValid;
+                    }
                 }
                 else
                 {
                     TextBlock tb = currentRow.Children[TEXT_BLOCK_INDEX] as TextBlock;
                     if (tb.Text.Contains("┌"))
-                        counter++;
-                    else if (tb.Text.Contains("┐"))
-                        counter--;
-                    if (counter < 0)
-                        return false;
+                    {
+                        if (unvalidBoxSize == tb.Text.Length)
+                        {
+                            isValid = true;
+                        }
+                    }
+                    if (tb.Text.Contains("└") && isValid == true)
+                    {
+                        isValid = false;
+                        unvalidBoxSize = tb.Text.Length;
+                    }
+                        
                 }
 
             }
