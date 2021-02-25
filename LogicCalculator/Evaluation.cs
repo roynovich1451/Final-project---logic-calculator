@@ -125,12 +125,13 @@ namespace LogicCalculator
             }
         }
 
+        // X0/Y0 intro
         private void Var_Introduction()
         {
             Is_Valid = statement_list[current_line].Expression.Equals("X0") ||
                 statement_list[current_line].Expression.Equals("Y0");
             if (!Is_Valid)
-                Utility.DisplayErrorMsg("Expression in rule must be X0 or Y0", current_line);
+                Utility.DisplayErrorMsg("Expression in X0/Y0i rule must be X0 or Y0", current_line);
             return;
         }
 
@@ -369,12 +370,12 @@ namespace LogicCalculator
             }
             Is_Valid = statement_list[row].Expression == statement_list[current_line].Expression;
             if (!Is_Valid)
-                Utility.DisplayErrorMsg("Values should be equal", current_line);
+                Utility.DisplayErrorMsg("Copy: \""+statement_list[row].Expression+"\" should be equal to \""+ statement_list[current_line].Expression+"\"", current_line);
         }
         private void MP()
         {
             int first_row = Utility.Get_Row(statement_list[current_line].First_segment, current_line),
-            second_row = Utility.Get_Row(statement_list[current_line].Second_segment, current_line);
+            index,second_row = Utility.Get_Row(statement_list[current_line].Second_segment, current_line);
             Is_Valid = first_row != -1 && second_row != -1;
             if (!Is_Valid)
             {
@@ -384,7 +385,22 @@ namespace LogicCalculator
             string first_expression = statement_list[first_row].Expression,
                   second_expression = statement_list[second_row].Expression,
                   current_expression = statement_list[current_line].Expression;
-            Is_Valid = (first_expression == second_expression + "→" + current_expression)
+
+            index = first_expression.IndexOf("→");
+
+            //if the first expression contains ->
+            if (index != -1)
+            {
+                index= second_expression.IndexOf("→");
+                if (index == -1)
+                {
+                    Is_Valid = false;
+                    Utility.DisplayErrorMsg("MP called without → in lines mentioned in the segment boxes", current_line);
+                    return;
+                }
+            }
+
+                Is_Valid = (first_expression == second_expression + "→" + current_expression)
                 || (first_expression == second_expression + "→(" + current_expression + ")")
                 || (second_expression == first_expression + "→" + current_expression)
                 || (second_expression == first_expression + "→(" + current_expression + ")")
@@ -420,7 +436,7 @@ namespace LogicCalculator
                 Is_Valid = Utility.Check_If_Not(right_part, second_expression);
                 if (!Is_Valid)
                 {
-                    Utility.DisplayErrorMsg("MT missing ¬", current_line);
+                    Utility.DisplayErrorMsg("MT: missing ¬", current_line);
                     return;
                 }
             }
@@ -435,19 +451,19 @@ namespace LogicCalculator
                     Is_Valid = Utility.Check_If_Not(right_part, first_expression);
                     if (!Is_Valid)
                     {
-                        Utility.DisplayErrorMsg("MT missing ¬", current_line);
+                        Utility.DisplayErrorMsg("MT: missing ¬", current_line);
                         return;
                     }
                 }
                 else
                 {
-                    Utility.DisplayErrorMsg("MT was called without →", current_line);
+                    Utility.DisplayErrorMsg("MT was called without → in lines mentioned in segment boxes", current_line);
                     return;
                 }
             }
             Is_Valid = current_expression == "¬" + left_part;
             if (!Is_Valid)
-                Utility.DisplayErrorMsg("Misuse of MT", current_line);
+                Utility.DisplayErrorMsg("MT: \"" + left_part + "\" must be the negation of \"" + current_expression + "\"", current_line);
         }
         private void PBC()
         {
@@ -460,12 +476,12 @@ namespace LogicCalculator
             Is_Valid = statement_list[rows[rows.Count - 1]].Expression == "⊥";
             if (!Is_Valid)
             {
-                Utility.DisplayErrorMsg("Missing ⊥ at the previous line", current_line);
+                Utility.DisplayErrorMsg("PBC: Missing ⊥ at the previous line", current_line);
                 return;
             }
             Is_Valid &= Utility.Check_If_Not(statement_list[current_line].Expression, statement_list[rows[0]].Expression);
             if (!Is_Valid)
-                Utility.DisplayErrorMsg("Misuse of PBC", current_line);
+                Utility.DisplayErrorMsg("PBC: \"" + statement_list[current_line].Expression + "\" must be the negation of \"" + statement_list[rows[0]].Expression + "\"", current_line);
         }
         private void LEM()
         {
@@ -474,7 +490,7 @@ namespace LogicCalculator
             Is_Valid = index != -1;
             if (!Is_Valid)
             {
-                Utility.DisplayErrorMsg("LEM without V or ∨", current_line);
+                Utility.DisplayErrorMsg("LEM must contain ∨", current_line);
                 return;
             }
             left_part = expression.Substring(0, index);
@@ -482,7 +498,7 @@ namespace LogicCalculator
             Is_Valid = Utility.Check_If_Not(left_part, right_part);
             if (!Is_Valid)
             {
-                Utility.DisplayErrorMsg("Misuse of LEM", current_line);
+                Utility.DisplayErrorMsg("LEM \"" + left_part+ "\" must be the negation of \"" + right_part+ "\"", current_line);
             }
         }
         private void And_Introduction()
@@ -509,7 +525,9 @@ namespace LogicCalculator
             Is_Valid = Utility.Equal_With_Operator(current, first, second, "∧");
             if (!Is_Valid)
             {
-                Utility.DisplayErrorMsg("Misuse of And Introduction", current_line);
+                Utility.DisplayErrorMsg("∧i: \"" + current + "\" should be equal to \"" +
+                    first + "∧"+ second+ "\" or \""
+                    + second + "∧" + first  + "\"", current_line);
             }
         }
         private void And_Elimination_One()
@@ -525,14 +543,15 @@ namespace LogicCalculator
             Is_Valid = original_expression.Contains("∧");
             if (!Is_Valid)
             {
-                Utility.DisplayErrorMsg("Missing ∧ in row " + row, current_line);
+                Utility.DisplayErrorMsg("Missing ∧ in 'and elimination 1'" + row, current_line);
                 return;
             }
             Is_Valid = original_expression.Contains(current_expression + "∧")
              || original_expression.Contains("(" + current_expression + ")∧");
             if (!Is_Valid)
             {
-                Utility.DisplayErrorMsg("Misuse of And Elimination 1", current_line);
+                Utility.DisplayErrorMsg("∧e1: \"" + original_expression + "\" should be equal to \"" +
+                    current_expression + "\" ∧ <something>", current_line);
             }
         }
         private void And_Elimination_Two()
@@ -549,7 +568,7 @@ namespace LogicCalculator
             Is_Valid = original_expression.Contains("∧");
             if (!Is_Valid)
             {
-                Utility.DisplayErrorMsg("Missing ∧ in and elimination", current_line);
+                Utility.DisplayErrorMsg("Missing ∧ in 'and elimination 2'", current_line);
                 return;
             }
             Is_Valid = original_expression.Contains("∧" + current_expression) ||
@@ -557,7 +576,8 @@ namespace LogicCalculator
 
             if (!Is_Valid)
             {
-                Utility.DisplayErrorMsg("Misuse of And Elimination 2", current_line);
+                Utility.DisplayErrorMsg("∧e2: \"" + original_expression + "\" should be equal to " +
+                    " <something> ∧\"" + current_expression + "\" ", current_line);
             }
         }
         private void Or_Elimination()
@@ -587,13 +607,13 @@ namespace LogicCalculator
 
             if (!Is_Valid)
             {
-                Utility.DisplayErrorMsg(current_expression + " Should be equal to " + first_segment_end + " and to " + second_segment_end, current_line);
+                Utility.DisplayErrorMsg("∨e: " + current_expression + " Should be equal to " + first_segment_end + " and to " + second_segment_end, current_line);
                 return;
             }
             Is_Valid = Utility.Equal_With_Operator(base_expression, first_segment_start, second_segment_start, "∨");
             if (!Is_Valid)
             {
-                Utility.DisplayErrorMsg(base_expression + " Should be equal to " + first_segment_start + "∨" + second_segment_start, current_line);
+                Utility.DisplayErrorMsg("∨e: " + base_expression + " Should be equal to " + first_segment_start + "∨" + second_segment_start, current_line);
                 return;
             }
         }
@@ -609,14 +629,15 @@ namespace LogicCalculator
             Is_Valid = current_expression.Contains("∨");
             if (!Is_Valid)
             {
-                Utility.DisplayErrorMsg("Missing ∨ in or introduction", current_line);
+                Utility.DisplayErrorMsg("Missing ∨ in 'or introduction 1'", current_line);
                 return;
             }
             Is_Valid = current_expression.Contains(statement_list[row].Expression + "∨")
                 || current_expression.Contains("(" + statement_list[row].Expression + ")∨");
             if (!Is_Valid)
             {
-                Utility.DisplayErrorMsg("Misuse of or1 introduction", current_line);
+                Utility.DisplayErrorMsg("∨i1: \"" + current_expression + "\" should be equal to " +
+                   statement_list[row].Expression + "∨ <something>", current_line);
             }
         }
         private void Or_Introduction_Two()
@@ -627,19 +648,20 @@ namespace LogicCalculator
             {
                 return;
             }
-            string current_statement = statement_list[current_line].Expression;
-            Is_Valid = current_statement.Contains("∨");
+            string current_expression = statement_list[current_line].Expression;
+            Is_Valid = current_expression.Contains("∨");
             if (!Is_Valid)
             {
-                Utility.DisplayErrorMsg("Missing ∨ in or introduction", current_line);
+                Utility.DisplayErrorMsg("Missing ∨ in 'or introduction 2'", current_line);
                 return;
             }
 
-            Is_Valid = current_statement.Contains("∨" + statement_list[row].Expression)
-                || current_statement.Contains("∨(" + statement_list[row].Expression + ")");
+            Is_Valid = current_expression.Contains("∨" + statement_list[row].Expression)
+                || current_expression.Contains("∨(" + statement_list[row].Expression + ")");
             if (!Is_Valid)
             {
-                Utility.DisplayErrorMsg("Misuse of or2 introduction", current_line);
+                Utility.DisplayErrorMsg("∨i2: \"" + current_expression + "\" should be equal to <something> ∨ \"" +
+                   statement_list[row].Expression+"\"", current_line);
             }
         }
         private void Not_Introduction()
@@ -654,7 +676,7 @@ namespace LogicCalculator
             Is_Valid =
             Is_Valid &= Utility.Check_If_Not(statement_list[first_line].Expression, statement_list[current_line].Expression);
             if (!Is_Valid)
-                Utility.DisplayErrorMsg("Missuse of Not Introduction", current_line);
+                Utility.DisplayErrorMsg(statement_list[first_line].Expression+" should be the negation of "+ statement_list[current_line].Expression, current_line);
         }
         private void Not_Elimination()
         {
@@ -664,16 +686,16 @@ namespace LogicCalculator
                 Utility.DisplayErrorMsg("Missing ⊥ at the current row", current_line);
                 return;
             }
-            int first_row = Utility.Get_Row(statement_list[current_line].First_segment, current_line),
-                second_row = Utility.Get_Row(statement_list[current_line].Second_segment, current_line);
-            Is_Valid = first_row != -1&& second_row != -1;            
+            int first_line = Utility.Get_Row(statement_list[current_line].First_segment, current_line),
+                second_line = Utility.Get_Row(statement_list[current_line].Second_segment, current_line);
+            Is_Valid = first_line != -1&& second_line != -1;            
             if (!Is_Valid)
             {
                 return;
             }
-            Is_Valid = Utility.Check_If_Not(statement_list[first_row].Expression, statement_list[second_row].Expression);
+            Is_Valid = Utility.Check_If_Not(statement_list[first_line].Expression, statement_list[second_line].Expression);
             if (!Is_Valid)
-                Utility.DisplayErrorMsg("Missuse of Not Elimination (⊥e)", current_line);
+                Utility.DisplayErrorMsg(statement_list[first_line].Expression + " should be the negation of " + statement_list[second_line].Expression, current_line);
         }
         private void Contradiction_Elimination()
         {
@@ -685,7 +707,7 @@ namespace LogicCalculator
             }
             Is_Valid = statement_list[prev_row].Expression == "⊥";
             if (!Is_Valid)
-                Utility.DisplayErrorMsg("Missing ⊥ at the mentioned row", current_line);
+                Utility.DisplayErrorMsg("Missing ⊥ at the row mentioned in the segment box", current_line);
         }
         private void Not_Not_Elimination()
         {
@@ -701,7 +723,7 @@ namespace LogicCalculator
                 || original_expression == "¬¬(" + current_expression + ")";
             if (!Is_Valid)
             {
-                Utility.DisplayErrorMsg("Misuse of Not Not Elimination", current_line);
+                Utility.DisplayErrorMsg(original_expression+ " should be equal to ¬¬" + current_expression, current_line);
             }
         }
         private void Not_Not_Introduction()
@@ -733,19 +755,24 @@ namespace LogicCalculator
             Is_Valid = current_expression.Contains("→");
             if (!Is_Valid)
             {
-                Utility.DisplayErrorMsg("Missing → in row", current_line);
+                Utility.DisplayErrorMsg("Missing → in 'arrow introduction", current_line);
+                return;
+            }
+            Is_Valid = statement_list[start_row].Rule == "Assumption";
+            if (!Is_Valid)
+            {
+                Utility.DisplayErrorMsg("The first segment provided in arrow introduction must start with assumption", current_line);
                 return;
             }
 
-            Is_Valid = statement_list[start_row].Rule == "Assumption" &&
-                    current_expression == statement_list[start_row].Expression + "→" + statement_list[end_row].Expression
+            Is_Valid = current_expression == statement_list[start_row].Expression + "→" + statement_list[end_row].Expression
                     || current_expression == "(" + statement_list[start_row].Expression + ")→" + statement_list[end_row].Expression
                     || current_expression == statement_list[start_row].Expression + "→(" + statement_list[end_row].Expression + ")"
                     || current_expression == "(" + statement_list[start_row].Expression + ")→(" + statement_list[end_row].Expression + ")";
 
             if (!Is_Valid)
             {
-                Utility.DisplayErrorMsg("Misuse of Arrow Introduction", current_line);
+                Utility.DisplayErrorMsg(current_expression+ " should be equal to "+ statement_list[start_row].Expression + "→" + statement_list[end_row].Expression, current_line);
             }
         }
 
