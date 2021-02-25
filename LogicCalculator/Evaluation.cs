@@ -14,7 +14,7 @@ namespace LogicCalculator
             Is_Valid = false;
             this.statement_list = statement_list;
             current_line = statement_list.Count - 1;
-            Handle_Rule(rule);
+            Handle_Rule(rule);            
         }
         #region RULES
         private void Handle_Rule(string rule)
@@ -376,7 +376,12 @@ namespace LogicCalculator
         {
             int first_row = Utility.Get_Row(statement_list[current_line].First_segment, current_line),
             index,second_row = Utility.Get_Row(statement_list[current_line].Second_segment, current_line);
-            Is_Valid = first_row != -1 && second_row != -1;
+            Is_Valid = first_row != -1;
+            if (!Is_Valid)
+            {
+                return;
+            }
+            Is_Valid = second_row != -1;
             if (!Is_Valid)
             {
                 return;
@@ -415,7 +420,12 @@ namespace LogicCalculator
         {
             int first_row = Utility.Get_Row(statement_list[current_line].First_segment, current_line),
             second_row = Utility.Get_Row(statement_list[current_line].Second_segment, current_line), index;
-            Is_Valid = first_row != -1 && second_row != -1;
+            Is_Valid = first_row != -1;
+            if (!Is_Valid)
+            {
+                return;
+            }
+            Is_Valid = second_row != -1;
             if (!Is_Valid)
             {
                 return;
@@ -503,9 +513,15 @@ namespace LogicCalculator
         }
         private void And_Introduction()
         {
-            int first_row = Utility.Get_Row(statement_list[current_line].First_segment, current_line),
-            second_row = Utility.Get_Row(statement_list[current_line].Second_segment, current_line);
-            Is_Valid = first_row != -1 && second_row != -1;
+            int first_line = Utility.Get_Row(statement_list[current_line].First_segment, current_line);
+            Is_Valid = first_line != -1;
+            if (!Is_Valid)
+            {
+                return;
+            }
+
+            int second_line = Utility.Get_Row(statement_list[current_line].Second_segment, current_line);
+            Is_Valid = second_line != -1;
             if (!Is_Valid)
             {
                 return;
@@ -520,8 +536,8 @@ namespace LogicCalculator
                 return;
             }
 
-            string first = statement_list[first_row].Expression;
-            string second = statement_list[second_row].Expression;
+            string first = statement_list[first_line].Expression;
+            string second = statement_list[second_line].Expression;
             Is_Valid = Utility.Equal_With_Operator(current, first, second, "∧");
             if (!Is_Valid)
             {
@@ -642,8 +658,8 @@ namespace LogicCalculator
         }
         private void Or_Introduction_Two()
         {
-            int row = Utility.Get_Row(statement_list[current_line].First_segment, current_line);
-            Is_Valid = row != -1;
+            int line = Utility.Get_Row(statement_list[current_line].First_segment, current_line);
+            Is_Valid = line != -1;
             if (!Is_Valid)
             {
                 return;
@@ -656,12 +672,12 @@ namespace LogicCalculator
                 return;
             }
 
-            Is_Valid = current_expression.Contains("∨" + statement_list[row].Expression)
-                || current_expression.Contains("∨(" + statement_list[row].Expression + ")");
+            Is_Valid = current_expression.Contains("∨" + statement_list[line].Expression)
+                || current_expression.Contains("∨(" + statement_list[line].Expression + ")");
             if (!Is_Valid)
             {
                 Utility.DisplayErrorMsg("∨i2: \"" + current_expression + "\" should be equal to <something> ∨ \"" +
-                   statement_list[row].Expression+"\"", current_line);
+                   statement_list[line].Expression+"\"", current_line);
             }
         }
         private void Not_Introduction()
@@ -686,9 +702,14 @@ namespace LogicCalculator
                 Utility.DisplayErrorMsg("Missing ⊥ at the current row", current_line);
                 return;
             }
-            int first_line = Utility.Get_Row(statement_list[current_line].First_segment, current_line),
-                second_line = Utility.Get_Row(statement_list[current_line].Second_segment, current_line);
-            Is_Valid = first_line != -1&& second_line != -1;            
+            int first_line = Utility.Get_Row(statement_list[current_line].First_segment, current_line);
+            Is_Valid = first_line != -1;
+            if (!Is_Valid)
+            {
+                return;
+            }
+            int second_line = Utility.Get_Row(statement_list[current_line].Second_segment, current_line);
+            Is_Valid = second_line != -1;
             if (!Is_Valid)
             {
                 return;
@@ -785,20 +806,26 @@ namespace LogicCalculator
             Is_Valid = index != -1;
             if (!Is_Valid)
             {
-                Utility.DisplayErrorMsg("Missing = in row " + current_line, current_line);
+                Utility.DisplayErrorMsg("Missing = in 'equal introduction' " + current_line, current_line);
                 return;
             }
             Is_Valid = Utility.Equal_With_Parenthesis(current_expression.Substring(0, index),
                 current_expression.Substring(index + 1));
             if (!Is_Valid)
-                Utility.DisplayErrorMsg("Equal introduction format is t1=t1", current_line);
+                Utility.DisplayErrorMsg("=i:"+current_expression.Substring(0, index)+
+                    " should be equal to "+ current_expression.Substring(index + 1), current_line);
         }
         private void Equal_Elimination()
         {
-            int index, first_line = Utility.Get_Row(statement_list[current_line].First_segment, current_line)
-            , second_line = Utility.Get_Row(statement_list[current_line].Second_segment, current_line);
+            int index, first_line = Utility.Get_Row(statement_list[current_line].First_segment, current_line);
 
-            Is_Valid = first_line != -1&& second_line != -1;
+            Is_Valid = first_line != -1;
+            if (!Is_Valid)
+            {
+                return;
+            }
+            int second_line = Utility.Get_Row(statement_list[current_line].Second_segment, current_line);
+            Is_Valid = second_line != -1;
             if (!Is_Valid)
             {
                 return;
