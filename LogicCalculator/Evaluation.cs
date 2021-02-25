@@ -740,11 +740,11 @@ namespace LogicCalculator
             }
             string original_expression = statement_list[row].Expression,
                 current_expression = statement_list[current_line].Expression;
-            Is_Valid = original_expression == "¬¬" + current_expression
-                || original_expression == "¬¬(" + current_expression + ")";
+            Is_Valid = Utility.Equal_With_Parenthesis(original_expression ,"¬¬" + current_expression)
+                || Utility.Equal_With_Parenthesis(original_expression , "¬¬(" + current_expression + ")");
             if (!Is_Valid)
             {
-                Utility.DisplayErrorMsg(original_expression+ " should be equal to ¬¬" + current_expression, current_line);
+                Utility.DisplayErrorMsg(original_expression+ " should be equal to ¬¬(" + current_expression + ")", current_line);
             }
         }
         private void Not_Not_Introduction()
@@ -755,10 +755,23 @@ namespace LogicCalculator
             {
                 return;
             }
-            Is_Valid = statement_list[current_line].Expression == "¬¬" + statement_list[row].Expression;
+            string original_expression = statement_list[row].Expression,
+               current_expression = statement_list[current_line].Expression;
+            bool contains_operator = false;
+            foreach (char c in statement_list[row].Expression) {
+                if (Utility.IsOperator(c)) {
+                    contains_operator = true;
+                    break;
+                }
+            }
+            if (contains_operator)
+                Is_Valid = current_expression == "¬¬(" + original_expression + ")" ;            
+            else
+                Is_Valid = current_expression == "¬¬" + original_expression ||
+                    current_expression == "¬¬(" + original_expression + ")";
             if (!Is_Valid)
             {
-                Utility.DisplayErrorMsg("Misuse of Not Not Introduction", current_line);
+                Utility.DisplayErrorMsg(current_expression + " should be equal to ¬¬(" + original_expression + ")", current_line);
             }
         }
         private void Arrow_Introduction()

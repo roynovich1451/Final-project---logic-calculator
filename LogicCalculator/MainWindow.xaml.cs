@@ -203,7 +203,7 @@ namespace LogicCalculator
                 this.Title = $"Logic Proof Tool - File: {current_filename}, Last saved: {DateTime.Now.ToString(new CultureInfo("ru-RU"))}";
                 HandleMasterCheck();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 this.Title = $"Logic Proof Tool";
                 Utility.DisplayErrorMsg("Unknown error while trying to open file, the file is probably not formatted correctly");
