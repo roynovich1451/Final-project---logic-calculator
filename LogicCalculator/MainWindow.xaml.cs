@@ -83,10 +83,9 @@ namespace LogicCalculator
         private int checked_checkboxes = 0;
         private int table_row_num = 0;
         private TextBox elementWithFocus;
-        private readonly List<string> rules = new List<string> { "None", "X0/Y0 i", "Data", "Proven i", "Proven e", "Assumption", "LEM", "PBC", "MP", "MT", "Copy"
-                                                                 ,"∧i", "∧e1", "∧e2", "∨i1", "∨i2", "∨e", "¬¬e",
-                                                                 "¬¬i", "→i", "⊥e", "¬i", "¬e", "→i",
-                                                                 "=i","=e","∀x i","∀x e","∃x i","∃x e","∀y i","∀y e","∃y i","∃y e" };
+        private readonly List<string> rules = new List<string> { "Assumption", "Data", "Proven i", "Proven e",  "LEM", "PBC", "MP", "MT", "Copy",
+                                                                 "∧i", "∧e1", "∧e2", "∨i1", "∨i2", "∨e", "¬¬e", "¬¬i", "→i", "⊥e", "¬i", "¬e",
+                                                                 "X0/Y0 i", "=i", "=e", "∀x i","∀x e","∃x i","∃x e","∀y i","∀y e","∃y i","∃y e" };
 
         private int hyphen_chunks = MAX_HYPHEN_CHUNKS;
         private int spaces_chunks = MIN_HYPHEN_CHUNKS;
@@ -770,7 +769,6 @@ namespace LogicCalculator
                 case "Data":
                 case "Assumption":
                 case "LEM":
-                case "None":
                 case "=i":
                 case "Proven i":
                 case "X0/Y0i":
