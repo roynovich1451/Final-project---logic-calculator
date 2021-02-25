@@ -165,6 +165,7 @@ namespace LogicCalculator
             if (statement_list[proven_index].Rule != "Proveni")
             {
                 Utility.DisplayErrorMsg("Proven elimination first segment must point to 'Proven i' rule line", current_line);
+                Is_Valid = false;
                 return;
             }
             List<string> proven_data = GetData(statement_list[proven_index].Expression);
@@ -172,6 +173,7 @@ namespace LogicCalculator
             if (data_indexes == null)
             {
                 Utility.DisplayErrorMsg("Proven elimination first segment must be positive integer\nSecond segment must be positive integers separate by ','", current_line);
+                Is_Valid = false;
                 return;
             }
             List<string> provided_data = new List<string>();
@@ -182,6 +184,7 @@ namespace LogicCalculator
             if (proven_data.Count() != provided_data.Count())
             {
                 Utility.DisplayErrorMsg($"Missmatch between provided data expected ({proven_data.Count()}) to actual given ({provided_data.Count()})", current_line);
+                Is_Valid = false;
                 return;
             }
             string proven_goal = GetGoal(statement_list[proven_index].Expression);
@@ -191,8 +194,10 @@ namespace LogicCalculator
             for (int i = 0; i < provided_data.Count(); i++)
             {
                 matches = BuildDict(proven_data[i], provided_data[i], matches);
-                if (matches == null)
+                if (matches == null) {
+                    Is_Valid = false;
                     return;
+                }
             }
             // ------------CHECK RESULTS-------------//
             Tuple<bool, string> ret;
@@ -201,12 +206,14 @@ namespace LogicCalculator
                 if (!(ret = ReplaceAndCompare(proven_data[i], provided_data[i], matches)).Item1)
                 {
                     Utility.DisplayErrorMsg($"Line number {data_indexes[i]} expression expected to be: '{ret.Item2}' and not '{provided_data[i]}'", current_line);
+                    Is_Valid = false;
                     return;
                 }
             }
             if (!(ret = ReplaceAndCompare(proven_goal, current_goal, matches)).Item1)
             {
                 Utility.DisplayErrorMsg($"Goal expression expected to be: '{ret.Item2}' and not '{current_goal}'", current_line);
+                Is_Valid = false;
                 return;
             }
             // ------------SUCCESS-------------//
