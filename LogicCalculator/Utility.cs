@@ -20,6 +20,12 @@ namespace LogicCalculator
         {
             return s.Trim().Replace('^', '∧').Replace('V', '∨').Replace('~', '¬').Replace(" ", "").Replace('>', '→');
         }
+        internal static string RemoveRedundant(string s)
+        {
+            while (s.Length>2&&s[0] == '(' && s[s.Length - 1] == ')')
+                s = s.Substring(1, s.Length - 2);
+            return s;
+        }
         internal static string Find_Letter(string to_search)
         {
             string letter = "error in Find_Letter";
@@ -175,7 +181,6 @@ namespace LogicCalculator
             }
             return Int32.Parse(seg.Substring(index + 1, seg.Length - index - 1));
         }
-
         internal static List<int> Get_Rows_For_Proven(string seg)
         {
             List<int> ret = new List<int>();
@@ -193,20 +198,46 @@ namespace LogicCalculator
         #region Checks
         internal static bool IsOperator(char c)
         {
-            return c == '¬' || c == '∧' || c == '→' || c == '∨' || c == '⊢' || c == '⊥' || c == '=';
+            return  c == '∧' || c == '→' || c == '∨' || c == '⊢' || c == '⊥' || c == '¬' || c == '=';
         }
-
-        internal static bool Check_If_Not(string first, string second)
+        internal static bool HasOperatorInside(string s)
         {
-            return first == "¬" + second || second == "¬" + first
-            || first == "¬(" + second + ")" || second == "¬(" + first + ")";
+            if (s[0] == '(')
+                return false;
+            foreach(char c in s)
+            {
+                if (c == '∧' || c == '→' || c == '∨' || c == '⊢' || c == '⊥' || c == '=')//this is different from IsOperator because we don't check for '¬' 
+                    return true;
+            }
+            return false;
+        }
+        internal static bool Check_If_Not(string left, string right)
+        {
+            left = RemoveRedundant(left);
+            right = RemoveRedundant(right);
+            
+            while(left[0]== '¬'&&right[0]== '¬')
+            {
+                right = right.Substring(1);
+                left = left.Substring(1);
+            }
+            if (left[0] == '¬')
+                left = left.Substring(1);
+            else if (right[0] == '¬')
+                right = right.Substring(1);
+            else return false;
+            return Equal_With_Parenthesis(left, right);
         }
         internal static bool Equal_With_Parenthesis(string first, string second)
         {
+            first = RemoveRedundant(first);
+            second = RemoveRedundant(second);
             return first == second || '(' + first + ')' == second || first == '(' + second + ')' || '(' + first + ')' == '(' + second + ')';
         }
         internal static bool Equal_With_Operator(string expression, string first, string second, string op)
         {
+            first = RemoveRedundant(first);
+            second = RemoveRedundant(second);
             return expression == first + op + second || expression == '(' + first + ')' + op + second || expression == first + op + '(' + second + ')' || expression == '(' + first + ')' + op + '(' + second + ')' ||
                 expression == second + op + first || expression == '(' + second + ')' + op + first || expression == second + op + '(' + first + ')' || expression == '(' + second + ')' + op + '(' + first + ')';
         }

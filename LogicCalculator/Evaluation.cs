@@ -375,7 +375,7 @@ namespace LogicCalculator
             {               
                 return;
             }
-            Is_Valid = statement_list[row].Expression == statement_list[current_line].Expression;
+            Is_Valid =Utility.Equal_With_Parenthesis (statement_list[row].Expression , statement_list[current_line].Expression);
             if (!Is_Valid)
                 Utility.DisplayErrorMsg("Copy: \""+statement_list[row].Expression+"\" should be equal to \""+ statement_list[current_line].Expression+"\"", current_line);
         }
@@ -401,7 +401,7 @@ namespace LogicCalculator
             index = first_expression.IndexOf("→");
 
             //if the first expression contains ->
-            if (index != -1)
+            if (index == -1)
             {
                 index= second_expression.IndexOf("→");
                 if (index == -1)
@@ -478,7 +478,6 @@ namespace LogicCalculator
                     return;
                 }
             }
-            Is_Valid = current_expression == "¬" + left_part;
             if (!Is_Valid)
                 Utility.DisplayErrorMsg("MT: \"" + left_part + "\" must be the negation of \"" + current_expression + "\"", current_line);
         }
@@ -747,6 +746,11 @@ namespace LogicCalculator
             }
             string original_expression = statement_list[row].Expression,
                 current_expression = statement_list[current_line].Expression;
+            if (!original_expression.Contains("¬¬"))
+            {
+
+                Utility.DisplayErrorMsg("'Not Not Elimination' called without ¬¬", current_line);
+            }
             Is_Valid = Utility.Equal_With_Parenthesis(original_expression ,"¬¬" + current_expression)
                 || Utility.Equal_With_Parenthesis(original_expression , "¬¬(" + current_expression + ")");
             if (!Is_Valid)
@@ -791,7 +795,9 @@ namespace LogicCalculator
             }
             int start_row = rows[0],
             end_row = rows[rows.Count - 1];
-            string current_expression = statement_list[current_line].Expression;
+            string current_expression = statement_list[current_line].Expression,
+                start_expression = statement_list[start_row].Expression,
+                end_expression= statement_list[end_row].Expression;            
 
             Is_Valid = current_expression.Contains("→");
             if (!Is_Valid)
@@ -806,10 +812,10 @@ namespace LogicCalculator
                 return;
             }
 
-            Is_Valid = current_expression == statement_list[start_row].Expression + "→" + statement_list[end_row].Expression
-                    || current_expression == "(" + statement_list[start_row].Expression + ")→" + statement_list[end_row].Expression
-                    || current_expression == statement_list[start_row].Expression + "→(" + statement_list[end_row].Expression + ")"
-                    || current_expression == "(" + statement_list[start_row].Expression + ")→(" + statement_list[end_row].Expression + ")";
+            Is_Valid = current_expression == start_expression + "→" + end_expression
+                    || current_expression == "(" + start_expression + ")→" + end_expression
+                    || current_expression == start_expression + "→(" + end_expression + ")"
+                    || current_expression == "(" + start_expression + ")→(" + end_expression + ")";
 
             if (!Is_Valid)
             {
