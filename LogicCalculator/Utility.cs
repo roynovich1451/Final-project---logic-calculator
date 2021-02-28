@@ -213,8 +213,8 @@ namespace LogicCalculator
         }
         internal static bool Check_If_Not(string left, string right)
         {
-            left = RemoveRedundant(left);
-            right = RemoveRedundant(right);
+            //left = RemoveRedundant(left);
+            //right = RemoveRedundant(right);
             
             while(left[0]== '¬'&&right[0]== '¬')
             {
@@ -230,14 +230,14 @@ namespace LogicCalculator
         }
         internal static bool Equal_With_Parenthesis(string first, string second)
         {
-            first = RemoveRedundant(first);
-            second = RemoveRedundant(second);
+            //first = RemoveRedundant(first);
+            //second = RemoveRedundant(second);
             return first == second || '(' + first + ')' == second || first == '(' + second + ')' || '(' + first + ')' == '(' + second + ')';
         }
         internal static bool Equal_With_Operator(string expression, string first, string second, string op)
         {
-            first = RemoveRedundant(first);
-            second = RemoveRedundant(second);
+            //first = RemoveRedundant(first);
+            //second = RemoveRedundant(second);
             return expression == first + op + second || expression == '(' + first + ')' + op + second || expression == first + op + '(' + second + ')' || expression == '(' + first + ')' + op + '(' + second + ')' ||
                 expression == second + op + first || expression == '(' + second + ')' + op + first || expression == second + op + '(' + first + ')' || expression == '(' + second + ')' + op + '(' + first + ')';
         }
