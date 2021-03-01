@@ -155,6 +155,12 @@ namespace LogicCalculator
         }
         private void Proven_Elimination() //TODO: change this function for using 'Match_Data'
         {
+            Is_Valid= !statement_list[current_line].Expression.Any(char.IsUpper);
+            if (!Is_Valid)
+            {
+                Utility.DisplayErrorMsg("Proven elimination is not supported for predicates", current_line);
+                return;
+            }
             Dictionary<string, string> matches = new Dictionary<string, string>();
             int proven_index = Utility.Get_Row(statement_list[current_line].First_segment, current_line);
             Is_Valid = proven_index != -1;

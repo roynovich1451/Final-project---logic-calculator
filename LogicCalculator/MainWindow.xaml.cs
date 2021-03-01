@@ -1552,6 +1552,11 @@ namespace LogicCalculator
 
                     if (rule.Equals("Proveni"))
                     {
+                        if (expression.Any(char.IsUpper))
+                        {
+                            Utility.DisplayErrorMsg("Proven induction is not supported for predicates");
+                            return;
+                        }
                         if (!IsValidLogicalEquivalent(expression))
                             return;
                     }
@@ -1948,9 +1953,9 @@ namespace LogicCalculator
             }
             if (index != -1)
             {
-                error_message += "Index: " + index;
+                error_message += "at index: " + index;
             }
-            error_message += "\nError is: " + error;
+            error_message += "\n" + error;
 
             Utility.DisplayErrorMsg(error_message);
         }
