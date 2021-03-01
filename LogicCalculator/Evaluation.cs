@@ -153,7 +153,7 @@ namespace LogicCalculator
             string[] splited = s.Split('⊢');
             return splited[1];
         }
-        private void Proven_Elimination() //TODO: change this function for using 'Match_Data'
+        private void Proven_Elimination()
         {
             Is_Valid= !statement_list[current_line].Expression.Any(char.IsUpper);
             if (!Is_Valid)
@@ -980,11 +980,22 @@ namespace LogicCalculator
         }
         private void Exists_Elimination(string rule)
         {
-            //TODO check for double cases ∃x(P(x))^∃x(Q(x))
             int previous_line = Utility.Get_Last_Line_From_Segment(statement_list[current_line].Second_segment);
             Is_Valid = previous_line != 1;
             if (!Is_Valid)
             {
+                return;
+            }
+            int original_line = Utility.Get_Row(statement_list[current_line].First_segment, current_line);
+            Is_Valid = original_line != 1;
+            if (!Is_Valid)
+            {
+                return;
+            }
+            if (!statement_list[original_line].Expression.Contains(rule))
+            {
+                Utility.DisplayErrorMsg("Missing " + rule + " in the row given in the first segment", current_line);
+                Is_Valid = false;
                 return;
             }
             string current_expression = statement_list[current_line].Expression,
