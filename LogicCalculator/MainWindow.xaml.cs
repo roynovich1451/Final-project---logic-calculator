@@ -112,6 +112,7 @@ namespace LogicCalculator
         private void NewFile()
         {
             //Proof side
+            tbQTitle.Text = "";
             tbEquation.Text = "";
             spGridTable.Children.Clear();
             table_row_num = 0;
