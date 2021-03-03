@@ -162,7 +162,7 @@ namespace LogicCalculator
                 return;
             }
             Dictionary<string, string> matches = new Dictionary<string, string>();
-            int proven_index = Utility.Get_Row(statement_list[current_line].First_segment, current_line);
+            int proven_index = Utility.Get_Line(statement_list[current_line].First_segment, current_line);
             Is_Valid = proven_index != -1;
             if (!Is_Valid)
             {
@@ -175,7 +175,7 @@ namespace LogicCalculator
                 return;
             }
             List<string> proven_data = GetData(statement_list[proven_index].Expression);
-            List<int> data_indexes = Utility.Get_Rows_For_Proven(statement_list[current_line].Second_segment);
+            List<int> data_indexes = Utility.Get_Lines_For_Proven(statement_list[current_line].Second_segment);
             if (data_indexes == null)
             {
                 Utility.DisplayErrorMsg("Proven elimination first segment must be positive integer\nSecond segment must be positive integers separate by ','", current_line);
@@ -375,33 +375,33 @@ namespace LogicCalculator
         }
         private void Copy()
         {
-            int row = Utility.Get_Row(statement_list[current_line].First_segment, current_line);
-            Is_Valid = row != -1;
+            int line = Utility.Get_Line(statement_list[current_line].First_segment, current_line);
+            Is_Valid = line != -1;
             if (!Is_Valid)
             {               
                 return;
             }
-            Is_Valid =Utility.Equal_With_Parenthesis (statement_list[row].Expression , statement_list[current_line].Expression);
+            Is_Valid =Utility.Equal_With_Parenthesis (statement_list[line].Expression , statement_list[current_line].Expression);
             if (!Is_Valid)
-                Utility.DisplayErrorMsg("Copy: \""+statement_list[row].Expression+"\" should be equal to \""+ statement_list[current_line].Expression+"\"", current_line);
+                Utility.DisplayErrorMsg("Copy: \""+statement_list[line].Expression+"\" should be equal to \""+ statement_list[current_line].Expression+"\"", current_line);
         }
         private void MP()
         {
-            int first_row = Utility.Get_Row(statement_list[current_line].First_segment, current_line),
-            index,second_row = Utility.Get_Row(statement_list[current_line].Second_segment, current_line);
-            Is_Valid = first_row != -1;
+            int first_line = Utility.Get_Line(statement_list[current_line].First_segment, current_line),
+            index,second_line = Utility.Get_Line(statement_list[current_line].Second_segment, current_line);
+            Is_Valid = first_line != -1;
             if (!Is_Valid)
             {
                 return;
             }
-            Is_Valid = second_row != -1;
+            Is_Valid = second_line != -1;
             if (!Is_Valid)
             {
                 return;
             }
 
-            string first_expression = statement_list[first_row].Expression,
-                  second_expression = statement_list[second_row].Expression,
+            string first_expression = statement_list[first_line].Expression,
+                  second_expression = statement_list[second_line].Expression,
                   current_expression = statement_list[current_line].Expression;
 
             index = first_expression.IndexOf("→");
@@ -431,22 +431,22 @@ namespace LogicCalculator
         }
         private void MT()
         {
-            int first_row = Utility.Get_Row(statement_list[current_line].First_segment, current_line),
-            second_row = Utility.Get_Row(statement_list[current_line].Second_segment, current_line), index;
-            Is_Valid = first_row != -1;
+            int first_line = Utility.Get_Line(statement_list[current_line].First_segment, current_line),
+            second_line = Utility.Get_Line(statement_list[current_line].Second_segment, current_line), index;
+            Is_Valid = first_line != -1;
             if (!Is_Valid)
             {
                 return;
             }
-            Is_Valid = second_row != -1;
+            Is_Valid = second_line != -1;
             if (!Is_Valid)
             {
                 return;
             }
 
             string left_part, right_part,
-                first_expression = statement_list[first_row].Expression,
-                second_expression = statement_list[second_row].Expression,
+                first_expression = statement_list[first_line].Expression,
+                second_expression = statement_list[second_line].Expression,
                 current_expression = statement_list[current_line].Expression;
             index = first_expression.IndexOf("→");
 
@@ -489,21 +489,28 @@ namespace LogicCalculator
         }
         private void PBC()
         {
-            List<int> rows = Utility.Get_Lines_From_Segment(statement_list[current_line].First_segment, current_line);
-            Is_Valid = rows != null;
+            int last_line = Utility.Get_Last_Line_From_Segment(statement_list[current_line].First_segment, current_line);
+            Is_Valid = last_line != -1;
             if (!Is_Valid)
             {
                 return;
             }
-            Is_Valid = statement_list[rows[rows.Count - 1]].Expression == "⊥";
+            int first_line = Utility.Get_First_Line_From_Segment(statement_list[current_line].First_segment, current_line);
+            Is_Valid = first_line != -1;
+            if (!Is_Valid)
+            {
+                return;
+            }
+
+            Is_Valid = statement_list[last_line].Expression == "⊥";
             if (!Is_Valid)
             {
                 Utility.DisplayErrorMsg("PBC: Missing ⊥ at the previous line", current_line);
                 return;
             }
-            Is_Valid &= Utility.Check_If_Not(statement_list[current_line].Expression, statement_list[rows[0]].Expression);
+            Is_Valid &= Utility.Check_If_Not(statement_list[current_line].Expression, statement_list[first_line].Expression);
             if (!Is_Valid)
-                Utility.DisplayErrorMsg("PBC: \"" + statement_list[current_line].Expression + "\" must be the negation of \"" + statement_list[rows[0]].Expression + "\"", current_line);
+                Utility.DisplayErrorMsg("PBC: \"" + statement_list[current_line].Expression + "\" must be the negation of \"" + statement_list[first_line].Expression + "\"", current_line);
         }
         private void LEM()
         {
@@ -525,14 +532,14 @@ namespace LogicCalculator
         }
         private void And_Introduction()
         {
-            int first_line = Utility.Get_Row(statement_list[current_line].First_segment, current_line);
+            int first_line = Utility.Get_Line(statement_list[current_line].First_segment, current_line);
             Is_Valid = first_line != -1;
             if (!Is_Valid)
             {
                 return;
             }
 
-            int second_line = Utility.Get_Row(statement_list[current_line].Second_segment, current_line);
+            int second_line = Utility.Get_Line(statement_list[current_line].Second_segment, current_line);
             Is_Valid = second_line != -1;
             if (!Is_Valid)
             {
@@ -560,18 +567,18 @@ namespace LogicCalculator
         }
         private void And_Elimination_One()
         {
-            int row = Utility.Get_Row(statement_list[current_line].First_segment, current_line);
-            Is_Valid = row != -1;
+            int line = Utility.Get_Line(statement_list[current_line].First_segment, current_line);
+            Is_Valid = line != -1;
             if (!Is_Valid)
             {
                 return;
             }
-            string original_expression = statement_list[row].Expression,
+            string original_expression = statement_list[line].Expression,
                 current_expression = statement_list[current_line].Expression;
             Is_Valid = original_expression.Contains("∧");
             if (!Is_Valid)
             {
-                Utility.DisplayErrorMsg("Missing ∧ in 'and elimination 1'" + row, current_line);
+                Utility.DisplayErrorMsg("Missing ∧ in 'and elimination 1'" + line, current_line);
                 return;
             }
             Is_Valid = original_expression.Contains(current_expression + "∧")
@@ -584,13 +591,13 @@ namespace LogicCalculator
         }
         private void And_Elimination_Two()
         {
-            int row = Utility.Get_Row(statement_list[current_line].First_segment, current_line);
-            Is_Valid = row != -1;
+            int line = Utility.Get_Line(statement_list[current_line].First_segment, current_line);
+            Is_Valid = line != -1;
             if (!Is_Valid)
             {
                 return;
             }
-            string original_expression = statement_list[row].Expression,
+            string original_expression = statement_list[line].Expression,
                 current_expression = statement_list[current_line].Expression;
 
             Is_Valid = original_expression.Contains("∧");
@@ -610,45 +617,62 @@ namespace LogicCalculator
         }
         private void Or_Elimination()
         {
-            List<int> first_segment_lines = Utility.Get_Lines_From_Segment(statement_list[current_line].Second_segment, current_line),
-                      second_segment_lines = Utility.Get_Lines_From_Segment(statement_list[current_line].Third_segment, current_line);
-            Is_Valid = first_segment_lines != null && second_segment_lines != null;
+            int second_seg_last_line = Utility.Get_Last_Line_From_Segment(statement_list[current_line].Second_segment, current_line);
+            Is_Valid = second_seg_last_line != -1;
             if (!Is_Valid)
             {
                 return;
             }
-            int base_row = Utility.Get_Row(statement_list[current_line].First_segment, current_line);
-            Is_Valid = base_row != -1;
+            int second_seg_first_line = Utility.Get_First_Line_From_Segment(statement_list[current_line].Second_segment, current_line);
+            Is_Valid = second_seg_first_line != -1;
+            if (!Is_Valid)
+            {
+                return;
+            }
+            int third_seg_last_line = Utility.Get_Last_Line_From_Segment(statement_list[current_line].Third_segment, current_line);
+            Is_Valid = third_seg_last_line != -1;
+            if (!Is_Valid)
+            {
+                return;
+            }
+            int third_seg_first_line = Utility.Get_First_Line_From_Segment(statement_list[current_line].Third_segment, current_line);
+            Is_Valid = third_seg_first_line != -1;
+            if (!Is_Valid)
+            {
+                return;
+            }
+            int base_line = Utility.Get_Line(statement_list[current_line].First_segment, current_line);
+            Is_Valid = base_line != -1;
             if (!Is_Valid)
             {
                 return;
             }
 
             string current_expression = statement_list[current_line].Expression,
-                   base_expression = statement_list[base_row].Expression,
-                   first_segment_start = statement_list[first_segment_lines[0]].Expression,
-                   second_segment_start = statement_list[second_segment_lines[0]].Expression,
-                   first_segment_end = statement_list[first_segment_lines[first_segment_lines.Count - 1]].Expression,
-                   second_segment_end = statement_list[second_segment_lines[second_segment_lines.Count - 1]].Expression;
+                   base_expression = statement_list[base_line].Expression,
+                   second_segment_start = statement_list[second_seg_first_line].Expression,                   
+                   second_segment_end = statement_list[second_seg_last_line].Expression,
+                   third_segment_start = statement_list[third_seg_first_line].Expression,
+                   third_segment_end = statement_list[third_seg_last_line].Expression;
 
-            Is_Valid = current_expression == first_segment_end && current_expression == second_segment_end;
+            Is_Valid = current_expression == third_segment_end && current_expression == second_segment_end;
 
             if (!Is_Valid)
             {
-                Utility.DisplayErrorMsg("∨e: " + current_expression + " Should be equal to " + first_segment_end + " and to " + second_segment_end, current_line);
+                Utility.DisplayErrorMsg("∨e: " + current_expression + " Should be equal to " + third_segment_end + " and to " + second_segment_end, current_line);
                 return;
             }
-            Is_Valid = Utility.Equal_With_Operator(base_expression, first_segment_start, second_segment_start, "∨");
+            Is_Valid = Utility.Equal_With_Operator(base_expression, third_segment_start, second_segment_start, "∨");
             if (!Is_Valid)
             {
-                Utility.DisplayErrorMsg("∨e: " + base_expression + " Should be equal to " + first_segment_start + "∨" + second_segment_start, current_line);
+                Utility.DisplayErrorMsg("∨e: " + base_expression + " Should be equal to " + third_segment_start + "∨" + second_segment_start, current_line);
                 return;
             }
         }
         private void Or_Introduction_One()
         {
-            int row = Utility.Get_Row(statement_list[current_line].First_segment, current_line);
-            Is_Valid = row != -1;
+            int line = Utility.Get_Line(statement_list[current_line].First_segment, current_line);
+            Is_Valid = line != -1;
             if (!Is_Valid)
             {
                 return;
@@ -660,17 +684,17 @@ namespace LogicCalculator
                 Utility.DisplayErrorMsg("Missing ∨ in 'or introduction 1'", current_line);
                 return;
             }
-            Is_Valid = current_expression.Contains(statement_list[row].Expression + "∨")
-                || current_expression.Contains("(" + statement_list[row].Expression + ")∨");
+            Is_Valid = current_expression.Contains(statement_list[line].Expression + "∨")
+                || current_expression.Contains("(" + statement_list[line].Expression + ")∨");
             if (!Is_Valid)
             {
                 Utility.DisplayErrorMsg("∨i1: \"" + current_expression + "\" should be equal to " +
-                   statement_list[row].Expression + "∨ <something>", current_line);
+                   statement_list[line].Expression + "∨ <something>", current_line);
             }
         }
         private void Or_Introduction_Two()
         {
-            int line = Utility.Get_Row(statement_list[current_line].First_segment, current_line);
+            int line = Utility.Get_Line(statement_list[current_line].First_segment, current_line);
             Is_Valid = line != -1;
             if (!Is_Valid)
             {
@@ -694,14 +718,24 @@ namespace LogicCalculator
         }
         private void Not_Introduction()
         {
-            Is_Valid = statement_list[current_line - 1].Expression == "⊥";
+            int last_line= Utility.Get_Last_Line_From_Segment(statement_list[current_line].First_segment, current_line);
+            Is_Valid = last_line != -1;
             if (!Is_Valid)
             {
-                Utility.DisplayErrorMsg("Missing ⊥ at the previous row", current_line);
                 return;
             }
-            int first_line = Utility.Get_First_Line_From_Segment(statement_list[current_line].First_segment);
-            Is_Valid =
+            int first_line = Utility.Get_First_Line_From_Segment(statement_list[current_line].First_segment,current_line);
+            Is_Valid = first_line != -1;
+            if (!Is_Valid)
+            {
+                return;
+            }
+            Is_Valid = statement_list[last_line].Expression == "⊥";
+            if (!Is_Valid)
+            {
+                Utility.DisplayErrorMsg("Missing ⊥ at the provided line", current_line);
+                return;
+            }
             Is_Valid &= Utility.Check_If_Not(statement_list[first_line].Expression, statement_list[current_line].Expression);
             if (!Is_Valid)
                 Utility.DisplayErrorMsg(statement_list[first_line].Expression+" should be the negation of "+ statement_list[current_line].Expression, current_line);
@@ -711,16 +745,16 @@ namespace LogicCalculator
             Is_Valid = statement_list[current_line].Expression == "⊥";
             if (!Is_Valid)
             {
-                Utility.DisplayErrorMsg("Missing ⊥ at the current row", current_line);
+                Utility.DisplayErrorMsg("Missing ⊥ at the current line", current_line);
                 return;
             }
-            int first_line = Utility.Get_Row(statement_list[current_line].First_segment, current_line);
+            int first_line = Utility.Get_Line(statement_list[current_line].First_segment, current_line);
             Is_Valid = first_line != -1;
             if (!Is_Valid)
             {
                 return;
             }
-            int second_line = Utility.Get_Row(statement_list[current_line].Second_segment, current_line);
+            int second_line = Utility.Get_Line(statement_list[current_line].Second_segment, current_line);
             Is_Valid = second_line != -1;
             if (!Is_Valid)
             {
@@ -732,25 +766,25 @@ namespace LogicCalculator
         }
         private void Contradiction_Elimination()
         {
-           int prev_row = Utility.Get_Row(statement_list[current_line].First_segment, current_line);
-            Is_Valid = prev_row != -1;
+           int prev_line = Utility.Get_Line(statement_list[current_line].First_segment, current_line);
+            Is_Valid = prev_line != -1;
             if (!Is_Valid)
             {
                 return;
             }
-            Is_Valid = statement_list[prev_row].Expression == "⊥";
+            Is_Valid = statement_list[prev_line].Expression == "⊥";
             if (!Is_Valid)
-                Utility.DisplayErrorMsg("Missing ⊥ at the row mentioned in the segment box", current_line);
+                Utility.DisplayErrorMsg("Missing ⊥ at the line mentioned in the segment", current_line);
         }
         private void Not_Not_Elimination()
         {
-            int row = Utility.Get_Row(statement_list[current_line].First_segment, current_line);
-            Is_Valid = row != -1;
+            int line = Utility.Get_Line(statement_list[current_line].First_segment, current_line);
+            Is_Valid = line != -1;
             if (!Is_Valid)
             {
                 return;
             }
-            string original_expression = statement_list[row].Expression,
+            string original_expression = statement_list[line].Expression,
                 current_expression = statement_list[current_line].Expression;
             if (!original_expression.Contains("¬¬"))
             {
@@ -766,16 +800,16 @@ namespace LogicCalculator
         }
         private void Not_Not_Introduction()
         {
-            int row = Utility.Get_Row(statement_list[current_line].First_segment, current_line);
-            Is_Valid = row != -1;
+            int line = Utility.Get_Line(statement_list[current_line].First_segment, current_line);
+            Is_Valid = line != -1;
             if (!Is_Valid)
             {
                 return;
             }
-            string original_expression = statement_list[row].Expression,
+            string original_expression = statement_list[line].Expression,
                current_expression = statement_list[current_line].Expression;
             bool contains_operator = false;
-            foreach (char c in statement_list[row].Expression) {
+            foreach (char c in statement_list[line].Expression) {
                 if (Utility.IsOperator(c)) {
                     contains_operator = true;
                     break;
@@ -793,17 +827,22 @@ namespace LogicCalculator
         }
         private void Arrow_Introduction()
         {
-            List<int> rows = Utility.Get_Lines_From_Segment(statement_list[current_line].First_segment, current_line);
-            Is_Valid = rows != null;
+            int last_line = Utility.Get_Last_Line_From_Segment(statement_list[current_line].First_segment, current_line);
+            Is_Valid = last_line != -1;
             if (!Is_Valid)
             {
                 return;
             }
-            int start_row = rows[0],
-            end_row = rows[rows.Count - 1];
+            int first_line = Utility.Get_First_Line_From_Segment(statement_list[current_line].First_segment, current_line);
+            Is_Valid = first_line != -1;
+            if (!Is_Valid)
+            {
+                return;
+            }
+            
             string current_expression = statement_list[current_line].Expression,
-                start_expression = statement_list[start_row].Expression,
-                end_expression= statement_list[end_row].Expression;            
+                start_expression = statement_list[first_line].Expression,
+                end_expression= statement_list[last_line].Expression;            
 
             Is_Valid = current_expression.Contains("→");
             if (!Is_Valid)
@@ -811,7 +850,7 @@ namespace LogicCalculator
                 Utility.DisplayErrorMsg("Missing → in 'arrow introduction", current_line);
                 return;
             }
-            Is_Valid = statement_list[start_row].Rule == "Assumption";
+            Is_Valid = statement_list[first_line].Rule == "Assumption";
             if (!Is_Valid)
             {
                 Utility.DisplayErrorMsg("The first segment provided in arrow introduction must start with assumption", current_line);
@@ -825,7 +864,7 @@ namespace LogicCalculator
 
             if (!Is_Valid)
             {
-                Utility.DisplayErrorMsg(current_expression+ " should be equal to "+ statement_list[start_row].Expression + "→" + statement_list[end_row].Expression, current_line);
+                Utility.DisplayErrorMsg(current_expression+ " should be equal to "+ start_expression + "→" + end_expression, current_line);
             }
         }
 
@@ -849,14 +888,14 @@ namespace LogicCalculator
         }
         private void Equal_Elimination()
         {
-            int index, first_line = Utility.Get_Row(statement_list[current_line].First_segment, current_line);
+            int index, first_line = Utility.Get_Line(statement_list[current_line].First_segment, current_line);
 
             Is_Valid = first_line != -1;
             if (!Is_Valid)
             {
                 return;
             }
-            int second_line = Utility.Get_Row(statement_list[current_line].Second_segment, current_line);
+            int second_line = Utility.Get_Line(statement_list[current_line].Second_segment, current_line);
             Is_Valid = second_line != -1;
             if (!Is_Valid)
             {
@@ -927,7 +966,7 @@ namespace LogicCalculator
         }
         private void All_Elimination(string rule)
         {
-            int previous_line = Utility.Get_Row(statement_list[current_line].First_segment, current_line);
+            int previous_line = Utility.Get_Line(statement_list[current_line].First_segment, current_line);
             Is_Valid = previous_line != -1;
             if (!Is_Valid)
             {
@@ -938,7 +977,7 @@ namespace LogicCalculator
             
             if (!previous_expression.Contains(rule))
             {
-                Utility.DisplayErrorMsg("Missing " + rule + " in previous row", previous_line);
+                Utility.DisplayErrorMsg("Missing " + rule + " in mentioned line", previous_line);
                 Is_Valid = false;
                 return;
             }
@@ -951,21 +990,21 @@ namespace LogicCalculator
         }
         private void All_Introduction(String rule)
         {
-            List<int> rows = Utility.Get_Lines_From_Segment(statement_list[current_line].First_segment, current_line);
-            Is_Valid = rows != null;
+            int last_line = Utility.Get_Last_Line_From_Segment(statement_list[current_line].First_segment, current_line);
+            Is_Valid = last_line != -1;
             if (!Is_Valid)
             {
                 return;
             }
-
+           
             string current_expression = statement_list[current_line].Expression,
-                previous_expression = statement_list[rows[rows.Count - 1]].Expression;
+                previous_expression = statement_list[last_line].Expression;
             string previous_letter = Utility.Find_Letter(previous_expression),
                 current_letter = Utility.Find_Letter(current_expression);
 
             if (!current_expression.Contains(rule))
             {
-                Utility.DisplayErrorMsg("Missing " + rule + " in current row", current_line);
+                Utility.DisplayErrorMsg("Missing " + rule + " in current line", current_line);
                 Is_Valid = false;
                 return;
             }
@@ -980,21 +1019,40 @@ namespace LogicCalculator
         }
         private void Exists_Elimination(string rule)
         {
-            int previous_line = Utility.Get_Last_Line_From_Segment(statement_list[current_line].Second_segment);
-            Is_Valid = previous_line != 1;
-            if (!Is_Valid)
+            int previous_line, original_line;
+            if (statement_list[current_line].Second_segment.Contains('-'))
             {
-                return;
+                previous_line = Utility.Get_Last_Line_From_Segment(statement_list[current_line].Second_segment,current_line);
+                Is_Valid = previous_line != -1;
+                if (!Is_Valid)
+                {
+                    return;
+                }
+                original_line = Utility.Get_Line(statement_list[current_line].First_segment, current_line);
+                Is_Valid = original_line != -1;
+                if (!Is_Valid)
+                {
+                    return;
+                }
             }
-            int original_line = Utility.Get_Row(statement_list[current_line].First_segment, current_line);
-            Is_Valid = original_line != 1;
-            if (!Is_Valid)
+            else
             {
-                return;
+                previous_line = Utility.Get_Last_Line_From_Segment(statement_list[current_line].First_segment,current_line);
+                Is_Valid = previous_line != -1;
+                if (!Is_Valid)
+                {
+                    return;
+                }
+                original_line = Utility.Get_Line(statement_list[current_line].Second_segment, current_line);
+                Is_Valid = original_line != -1;
+                if (!Is_Valid)
+                {
+                    return;
+                }
             }
-            if (!statement_list[original_line].Expression.Contains(rule))
+            if (!statement_list[original_line].Expression.Contains('∃'))
             {
-                Utility.DisplayErrorMsg("Missing " + rule + " in the row given in the first segment", current_line);
+                Utility.DisplayErrorMsg("Missing '∃' in the line given in the first segment", current_line);
                 Is_Valid = false;
                 return;
             }
@@ -1002,15 +1060,15 @@ namespace LogicCalculator
                 previous_expression = statement_list[previous_line].Expression,
                 previous_contents = Utility.Get_Parenthesis_Contents(previous_expression, rule),
                 current_contents = Utility.Get_Parenthesis_Contents(current_expression, rule);
-            if (!previous_expression.Contains(rule))
+            if (!previous_expression.Contains('∃'))
             {
-                Utility.DisplayErrorMsg("Missing " + rule + " in previous row", current_line);
+                Utility.DisplayErrorMsg("Missing '∃' in the last line of the box that was given", current_line);
                 Is_Valid = false;
                 return;
             }
-            if (!current_expression.Contains(rule))
+            if (!current_expression.Contains('∃'))
             {
-                Utility.DisplayErrorMsg("Missing " + rule + " in current row", current_line);
+                Utility.DisplayErrorMsg("Missing '∃' in current line", current_line);
                 Is_Valid = false;
                 return;
             }
@@ -1024,7 +1082,7 @@ namespace LogicCalculator
         }
         private void Exists_Introduction(string rule)
         {
-            int previous_line = Utility.Get_Row(statement_list[current_line].First_segment, current_line);
+            int previous_line = Utility.Get_Line(statement_list[current_line].First_segment, current_line);
             Is_Valid = previous_line != -1;
             if (!Is_Valid)
             {
@@ -1035,7 +1093,7 @@ namespace LogicCalculator
            
             if (!current_expression.Contains(rule))
             {
-                Utility.DisplayErrorMsg("Missing " + rule + " in current row", current_line);
+                Utility.DisplayErrorMsg("Missing " + rule + " in current line", current_line);
                 Is_Valid = false;
                 return;
             }

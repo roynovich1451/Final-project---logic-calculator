@@ -313,7 +313,7 @@ namespace LogicCalculator
             string projectDirectory = Directory.GetParent(workingDirectory).Parent.FullName;
             try
             {
-                Process.Start(projectDirectory + "\\User_Manual.docx", "-p");
+                Process.Start(projectDirectory + "\\User_Manual.pdf", "-p");
             }
             catch (Exception ex)
             {
@@ -1683,7 +1683,7 @@ namespace LogicCalculator
                 case var e when new Regex(@"∃.*e").IsMatch(e):
                     string segment = "first";
                     List<int> box;
-                    if (new Regex(@"∃.*e").IsMatch(rule))
+                    if (new Regex(@"∃.*e").IsMatch(rule)&&second_segment.Contains("-"))
                     {
                         box = Utility.Get_Lines_From_Segment(second_segment);
                         segment = "second";
@@ -1840,14 +1840,14 @@ namespace LogicCalculator
         private bool IsValidStatement(string expression, string rule, string first_segment,
    string second_segment, string third_segment)
         {
-            int row = statement_list.Count;
-            if (!IsValidExpression(expression, row))
+            int row = statement_list.Count-1;
+            if (!IsValidExpression(expression, row+1))
             {
                 return false;
             }
             if (string.IsNullOrEmpty(rule))
             {
-                Expression_Error(row, "Rule is empty");
+                Expression_Error(row+1, "Rule is empty");
                 return false;
             }
             int ret;
@@ -1858,7 +1858,7 @@ namespace LogicCalculator
                     Expression_Error(row, "First segment is empty");
                     return false;
                 }
-                else if ((ret = IsValidSegment(first_segment, row)) != 0)
+                else if ((ret = IsValidSegment(first_segment, row+1)) != 0)
                 {
                     if (ret == -ERRARGUMENT)
                         Expression_Error(row, "First segment is not a positive integer number");
@@ -1878,7 +1878,7 @@ namespace LogicCalculator
                     Expression_Error(row, "Second segment is empty");
                     return false;
                 }
-                if ((ret = IsValidSegment(second_segment, row)) != 0)
+                if ((ret = IsValidSegment(second_segment, row+1)) != 0)
                 {
                     if (ret == -ERRARGUMENT)
                         Expression_Error(row, "Second segment is not a positive integer number");
@@ -1898,7 +1898,7 @@ namespace LogicCalculator
                     Expression_Error(row, "Third segment is empty");
                     return false;
                 }
-                if ((ret = IsValidSegment(third_segment, row)) != 0)
+                if ((ret = IsValidSegment(third_segment, row+1)) != 0)
                 {
                     if (ret == -ERRARGUMENT)
                         Expression_Error(row, "Third segment is not a positive integer number");

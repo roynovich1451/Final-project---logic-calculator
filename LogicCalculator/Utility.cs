@@ -119,7 +119,7 @@ namespace LogicCalculator
         }
 
         #region Segment_Handeling
-        internal static int Get_Row(string s, int current_line)
+        internal static int Get_Line(string s, int current_line)
         {
             if (s.Contains("-"))
             {
@@ -147,14 +147,21 @@ namespace LogicCalculator
         {
             List<int> ret = new List<int>();
             int index = seg.IndexOf("-");
-            if (index != -1)
+
+            if (index == -1)
             {
-                int starting_number = Int32.Parse(seg.Substring(0, index)),
-                    last_number = Int32.Parse(seg.Substring(index + 1));
-                ret.AddRange(Enumerable.Range(starting_number, last_number - starting_number + 1));
+                DisplayErrorMsg("Segment does not contain '-' when it should", current_line);
+                return null;
             }
             else
-                ret.Add(Int32.Parse(seg));
+            {
+                int starting_number = Int32.Parse(seg.Substring(0, index)),
+                     last_number = Int32.Parse(seg.Substring(index + 1));
+                if(starting_number<last_number)
+                ret.AddRange(Enumerable.Range(starting_number, last_number - starting_number + 1));
+                else
+                    ret.AddRange(Enumerable.Range(last_number, starting_number - last_number + 1));
+            }
             if (!ret.Any())
             {
                 DisplayErrorMsg("Could not get line numbers from segment", current_line);
@@ -163,25 +170,37 @@ namespace LogicCalculator
 
             return ret;
         }
-        internal static int Get_First_Line_From_Segment(string seg)
+        internal static int Get_First_Line_From_Segment(string seg, int current_line)
         {
             int index = seg.IndexOf("-");
             if (index == -1)
             {
+                DisplayErrorMsg("Segment does not contain '-' when it should", current_line);
                 return -1;
             }
-            return Int32.Parse(seg.Substring(0, index));
+            int starting_number = Int32.Parse(seg.Substring(0, index)),
+                     last_number = Int32.Parse(seg.Substring(index + 1));
+            if (starting_number < last_number)
+                return starting_number;
+            else
+                return last_number;
         }
-        internal static int Get_Last_Line_From_Segment(string seg)
+        internal static int Get_Last_Line_From_Segment(string seg,int current_line)
         {
             int index = seg.IndexOf("-");
             if (index == -1)
             {
+                DisplayErrorMsg("Segment does not contain '-' when it should", current_line);
                 return -1;
             }
-            return Int32.Parse(seg.Substring(index + 1, seg.Length - index - 1));
+            int starting_number = Int32.Parse(seg.Substring(0, index)),
+                     last_number = Int32.Parse(seg.Substring(index + 1));
+            if (starting_number > last_number)
+                return starting_number;
+            else
+                return last_number;
         }
-        internal static List<int> Get_Rows_For_Proven(string seg)
+        internal static List<int> Get_Lines_For_Proven(string seg)
         {
             List<int> ret = new List<int>();
 
