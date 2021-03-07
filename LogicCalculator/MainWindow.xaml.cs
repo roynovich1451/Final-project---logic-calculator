@@ -107,7 +107,7 @@ namespace LogicalProofTool
             NewFile();
             elementWithFocus = tbEquation;
             Keyboard.Focus(elementWithFocus);
-            this.Title = "Logic Proof Tool";
+            this.Title = "Logical Proof Tool";
         }
         private void NewFile()
         {
