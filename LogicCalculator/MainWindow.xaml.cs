@@ -15,7 +15,7 @@ using Xceed.Words.NET;
 using Brushes = System.Windows.Media.Brushes;
 using Color = System.Drawing.Color;
 
-namespace LogicCalculator
+namespace LogicalProofTool
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -1513,7 +1513,7 @@ namespace LogicCalculator
         }
         private void CheckProof()
         {
-            string msg = "All input is valid";
+            string header = "Conclusion",msg = "All input is valid";
             statement_list.Clear();
             string main_expression = Utility.ReplaceAll(tbEquation.Text.Trim());
 
@@ -1528,16 +1528,14 @@ namespace LogicCalculator
             }
             if (spGridTable.Children.Count == 0)
             {
-                Utility.DisplayErrorMsg("Nothing to check");
+                Utility.DisplayInfoMsg("Main expression is valid", header);
                 return;
             }
 
             statement_list.Add(new Statement(main_expression, "first", "0"));
             string expression, rule, first_segment, second_segment, third_segment;
             int index;
-            string header = "Conclusions";
-            //One less column because of the line number column
-
+            
 
             foreach (Grid row in spGridTable.Children)
             {
@@ -1997,7 +1995,7 @@ namespace LogicCalculator
                     return false;
                 }
 
-                //Open parentheses
+                //Opener parentheses
                 else if (c == '(')
                 {
                     if (i != 0 && input[i - 1] == ')')
@@ -2009,7 +2007,7 @@ namespace LogicCalculator
                     after_predicate = false;
                     parentheses_count++;
                 }
-                //Close parentheses
+                //Closer parentheses
                 else if (c == ')')
                 {
                     if (after_operator)

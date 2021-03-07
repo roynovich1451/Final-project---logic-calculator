@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 
-namespace LogicCalculator
+namespace LogicalProofTool
 {
     static class Utility
     {
@@ -273,7 +273,7 @@ namespace LogicCalculator
             MessageBox.Show(msg, title, MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
-        internal static void DisplayInfoMsg(string msg, string title)
+        internal static void DisplayInfoMsg(string msg, string title="")
         {
             MessageBox.Show(msg, title, MessageBoxButton.OK, MessageBoxImage.Information);
             return;

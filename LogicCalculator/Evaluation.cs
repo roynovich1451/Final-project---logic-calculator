@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace LogicCalculator
+namespace LogicalProofTool
 {
     internal class Evaluation
     {

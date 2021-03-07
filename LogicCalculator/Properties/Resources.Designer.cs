@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace LogicCalculator.Properties
+namespace LogicalProofTool.Properties
 {
 
 

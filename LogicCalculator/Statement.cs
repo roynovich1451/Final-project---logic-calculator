@@ -1,4 +1,4 @@
-﻿namespace LogicCalculator
+﻿namespace LogicalProofTool
 {
     class Statement
     {
