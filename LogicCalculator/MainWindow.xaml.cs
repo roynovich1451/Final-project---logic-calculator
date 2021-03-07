@@ -313,7 +313,7 @@ namespace LogicalProofTool
             string projectDirectory = Directory.GetParent(workingDirectory).Parent.FullName;
             try
             {
-                Process.Start(projectDirectory + "\\User_Manual.pdf", "-p");
+                Process.Start("User_Manual.pdf", "-p");
             }
             catch (Exception ex)
             {
