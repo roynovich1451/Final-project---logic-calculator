@@ -1214,7 +1214,7 @@ namespace LogicalProofTool
                     }
                     if (child is ComboBox combobox)
                     {
-                        combobox.SelectedIndex = -1;
+                        combobox.SelectedIndex = 0;
                     }
                     if (child is CheckBox checkbox)
                     {
