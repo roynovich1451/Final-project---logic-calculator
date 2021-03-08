@@ -11,10 +11,6 @@
 *.baml
 .vs/LogicCalculator/v16/.suo
 calc_backup.txt
-LogicCalculator/LogicCalculator.csproj
-*.csproj
-*.user
-LogicCalculator/LogicCalculator.csproj
 *.csproj
 *.zip
 packages/System.Collections.4.3.0/ref/netcore50/zh-hans/System.Collections.xml
@@ -22,9 +18,6 @@ packages/System.Collections.4.3.0/ref/netcore50/zh-hans/System.Collections.xml
 *.p7s
 *.nupkg
 *.config
-*.config
-LogicCalculator/obj/Debug/App.g.i.cs
-LogicCalculator/obj/Debug/App.g.cs
 LogicCalculator/MainWindow.xaml-Oren-PC.cs
 LogicCalculator/obj/Debug/.NETFramework,Version=v4.7.2.AssemblyAttributes.cs
 LogicCalculator/Evaluation-Oren-PC.cs
