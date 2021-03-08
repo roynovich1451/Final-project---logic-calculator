@@ -1,4 +1,3 @@
-
 *.exe
 *.pdb
 *.cache
@@ -11,7 +10,6 @@
 *.baml
 .vs/LogicCalculator/v16/.suo
 calc_backup.txt
-*.csproj
 *.zip
 packages/System.Collections.4.3.0/ref/netcore50/zh-hans/System.Collections.xml
 *.xml
