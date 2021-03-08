@@ -28,7 +28,7 @@
     <SupportUrl>https://github.com/roynovich1451/Final_project_logic_calculator</SupportUrl>
     <ProductName>Logical Proof Tool</ProductName>
     <PublisherName>Roy Novich &amp; Oren Or</PublisherName>
-    <ApplicationRevision>12</ApplicationRevision>
+    <ApplicationRevision>14</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>true</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>

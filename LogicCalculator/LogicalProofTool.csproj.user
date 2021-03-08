@@ -2,9 +2,9 @@
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <ProjectView>ShowAllFiles</ProjectView>
-    <PublishUrlHistory>D:\OneDrive\publish\</PublishUrlHistory>
+    <PublishUrlHistory>D:\OneDrive\Final_project_logic_calculator\published\|D:\OneDrive\publish\</PublishUrlHistory>
     <InstallUrlHistory />
-    <SupportUrlHistory />
+    <SupportUrlHistory>https://github.com/roynovich1451/Final_project_logic_calculator</SupportUrlHistory>
     <UpdateUrlHistory />
     <BootstrapperUrlHistory />
     <ErrorReportUrlHistory />
