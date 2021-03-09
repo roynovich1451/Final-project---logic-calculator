@@ -6,7 +6,7 @@
         WindowStartupLocation="CenterScreen"
         mc:Ignorable="d"
         ResizeMode="CanMinimize"
-       Title="Logical Proof Tool" Height="800" Width="780">
+       Title="Logical Proof Tool" Height="780" Width="780">
 
     <DockPanel>
         <!--MENU BAR-->
@@ -181,46 +181,46 @@
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
                         <!--CAPITALS-->
-                        <Button Name="btnCapBeta" Content="Β"  Margin="2" Click="BtnCapBeta_Click"
+                        <Button Name="btnCapBeta" Content="Β"  VerticalContentAlignment="Center"  Margin="2" Click="BtnCapBeta_Click"
                              Grid.Column="0" Grid.Row="0"/>
-                        <Button Name="btnCapGama" Content="Γ"  Margin="2" Click="BtnCapGama_Click"
+                        <Button Name="btnCapGama" Content="Γ"  VerticalContentAlignment="Center"  Margin="2" Click="BtnCapGama_Click"
                              Grid.Column="1" Grid.Row="0"/>
-                        <Button Name="btnCapDelta" Content="Δ"  Margin="2" Click="BtnCapDelta_Click"
+                        <Button Name="btnCapDelta" Content="Δ"  VerticalContentAlignment="Center"  Margin="2" Click="BtnCapDelta_Click"
                              Grid.Column="2" Grid.Row="0"/>
-                        <Button Name="btnCapEpsilon" Content="Ε"  Margin="2" Click="BtnCapEpsilon_Click"
+                        <Button Name="btnCapEpsilon" Content="Ε"  VerticalContentAlignment="Center"  Margin="2" Click="BtnCapEpsilon_Click"
                              Grid.Column="3" Grid.Row="0"/>
-                        <Button Name="btnCapTeta" Content="Θ"  Margin="2" Click="BtnCapTeta_Click"
+                        <Button Name="btnCapTeta" Content="Θ"  VerticalContentAlignment="Center"  Margin="2" Click="BtnCapTeta_Click"
                              Grid.Column="4" Grid.Row="0"/>
-                        <Button Name="btnCapPai" Content="Π"  Margin="2" Click="BtnCapPai_Click"
+                        <Button Name="btnCapPai" Content="Π" VerticalContentAlignment="Center"   Margin="2" Click="BtnCapPai_Click"
                              Grid.Column="5" Grid.Row="0"/>
-                        <Button Name="btnCapPhi" Content="Φ"  Margin="2" Click="BtnCapPhi_Click"
+                        <Button Name="btnCapPhi" Content="Φ"  VerticalContentAlignment="Center"  Margin="2" Click="BtnCapPhi_Click"
                              Grid.Column="6" Grid.Row="0"/>
-                        <Button Name="btnCapChi" Content="Χ"  Margin="2" Click="BtnCapChi_Click"
+                        <Button Name="btnCapChi" Content="Χ"   VerticalContentAlignment="Center" Margin="2" Click="BtnCapChi_Click"
                              Grid.Column="7" Grid.Row="0"/>
-                        <Button Name="btnCapPsi" Content="Ψ"  Margin="2" Click="BtnCapPsi_Click"
+                        <Button Name="btnCapPsi" Content="Ψ"   VerticalContentAlignment="Center" Margin="2" Click="BtnCapPsi_Click"
                              Grid.Column="8" Grid.Row="0"/>
-                        <Button Name="btnCapOmega" Content="Ω"  Margin="2" Click="BtnCapOmega_Click"
+                        <Button Name="btnCapOmega" Content="Ω"   VerticalContentAlignment="Center" Margin="2" Click="BtnCapOmega_Click"
                              Grid.Column="9" Grid.Row="0"/>
                         <!--REGULAR-->
-                        <Button Name="btnBeta" Content="β"  Margin="2" Click="BtnBeta_Click"
+                        <Button Name="btnBeta" Content="β"   VerticalContentAlignment="Center" Margin="2" Click="BtnBeta_Click"
                              Grid.Column="0" Grid.Row="1"/>
-                        <Button Name="btnGama" Content="γ"  Margin="2" Click="BtnGama_Click"
+                        <Button Name="btnGama" Content="γ"   VerticalContentAlignment="Center" Margin="2" Click="BtnGama_Click"
                              Grid.Column="1" Grid.Row="1"/>
-                        <Button Name="btnDelta" Content="δ"  Margin="2" Click="BtnDelta_Click"
+                        <Button Name="btnDelta" Content="δ"   VerticalContentAlignment="Center" Margin="2" Click="BtnDelta_Click"
                              Grid.Column="2" Grid.Row="1"/>
-                        <Button Name="btnEpsilon" Content="ε"  Margin="2" Click="BtnEpsilon_Click"
+                        <Button Name="btnEpsilon" Content="ε"   VerticalContentAlignment="Center" Margin="2" Click="BtnEpsilon_Click"
                              Grid.Column="3" Grid.Row="1"/>
-                        <Button Name="btnTeta" Content="θ"  Margin="2" Click="BtnTeta_Click"
+                        <Button Name="btnTeta" Content="θ"   VerticalContentAlignment="Center" Margin="2" Click="BtnTeta_Click"
                              Grid.Column="4" Grid.Row="1"/>
-                        <Button Name="btnPai" Content="π"  Margin="2" Click="BtnPai_Click"
+                        <Button Name="btnPai" Content="π"   VerticalContentAlignment="Center" Margin="2" Click="BtnPai_Click"
                              Grid.Column="5" Grid.Row="1"/>
-                        <Button Name="btnPhi" Content="φ"  Margin="2" Click="BtnPhi_Click"
+                        <Button Name="btnPhi" Content="φ"   VerticalContentAlignment="Center" Margin="2" Click="BtnPhi_Click"
                              Grid.Column="6" Grid.Row="1"/>
-                        <Button Name="btnChi" Content="χ"  Margin="2" Click="BtnChi_Click"
+                        <Button Name="btnChi" Content="χ"   VerticalContentAlignment="Center" Margin="2" Click="BtnChi_Click"
                              Grid.Column="7" Grid.Row="1"/>
-                        <Button Name="btnPsi" Content="ψ"  Margin="2" Click="BtnPsi_Click"
+                        <Button Name="btnPsi" Content="ψ"   VerticalContentAlignment="Center" Margin="2" Click="BtnPsi_Click"
                              Grid.Column="8" Grid.Row="1"/>
-                        <Button Name="btnOmega" Content="ω"  Margin="2" Click="BtnOmega_Click"
+                        <Button Name="btnOmega" Content="ω"  VerticalContentAlignment="Center"  Margin="2" Click="BtnOmega_Click"
                              Grid.Column="9" Grid.Row="1"/>
                     </Grid>
                     <!--KEYBOARD SECOND LINE-->
@@ -233,17 +233,17 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <Button Name="btnFalsum" Content="⊥"  Margin="2" Click="BtnFalsum_Click"
+                        <Button Name="btnFalsum" Content="⊥"  VerticalContentAlignment="Center"  Margin="2" Click="BtnFalsum_Click"
                              Grid.Column="5" Grid.Row="2"/>
-                        <Button Name="btnNot" Margin="2" Content="¬" Click="BtnNot_Click" 
+                        <Button Name="btnNot" Margin="2" Content="¬" VerticalContentAlignment="Center"  Click="BtnNot_Click" 
                              Grid.Column="0" Grid.Row="2"/>
-                        <Button Name="btnOr" Content="∨" Margin="2" Click="BtnOr_Click" 
+                        <Button Name="btnOr" Content="∨"  VerticalContentAlignment="Center"  Margin="2" Click="BtnOr_Click" 
                              Grid.Column="3" Grid.Row="2"/>
-                        <Button Name="btnTurnstile" Content="⊢"  Margin="2" Click="BtnTurnstile_Click" 
+                        <Button Name="btnTurnstile" Content="⊢"  VerticalContentAlignment="Center"  Margin="2" Click="BtnTurnstile_Click" 
                              Grid.Column="4" Grid.Row="2"/>
-                        <Button Name="btnArrow" Content="→"  Margin="2"
+                        <Button Name="btnArrow" Content="→"  VerticalContentAlignment="Center"  Margin="2"
                              Grid.Column="1" Grid.Row="2" Click="BtnArrow_Click"/>
-                        <Button Name="btnAnd" Content="∧" Margin="2" Click="BtnAnd_Click" 
+                        <Button Name="btnAnd" Content="∧" VerticalContentAlignment="Center" Margin="2" Click="BtnAnd_Click" 
                                 Grid.Column="2" Grid.Row="3"/>
                     </Grid>
                     <!--KEYBOARD THIRD LINE-->
@@ -264,15 +264,15 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <Button Name="btnExists" Content="∃" Margin="2" Click="BtnExists_Click"
+                        <Button Name="btnExists" Content="∃"  VerticalContentAlignment="Center" Margin="2" Click="BtnExists_Click"
                             Grid.ColumnSpan="2" Grid.Column="2"/>
-                        <Button Name="btnForAll" Content="∀"  Margin="2" Click="BtnForAll_Click"
+                        <Button Name="btnForAll" Content="∀"   VerticalContentAlignment="Center" Margin="2" Click="BtnForAll_Click"
                             Grid.ColumnSpan="2" Grid.Column="10"/>
-                        <Button Name="btnX" Content="X_0"  Margin="2" Click="BtnX_Click"
+                        <Button Name="btnX" Content="X_0"   VerticalContentAlignment="Center" Margin="2" Click="BtnX_Click"
                             Grid.ColumnSpan="2" Grid.Column="0"/>
-                        <Button Name="btnY" Content="Y_0"  Margin="2" Click="BtnY_Click"
+                        <Button Name="btnY" Content="Y_0"  VerticalContentAlignment="Center"  Margin="2" Click="BtnY_Click"
                             Grid.ColumnSpan="2" Grid.Column="12"/>
-                        <Button Name="btnCreateBox" Content="Create Box"  Margin="2" Click="BtnCreateBox_Click"
+                        <Button Name="btnCreateBox" Content="Create Box"  VerticalContentAlignment="Center"  Margin="2" Click="BtnCreateBox_Click"
                             Grid.ColumnSpan="6" Grid.Column="4"/>
                     </Grid>
                 </Grid>

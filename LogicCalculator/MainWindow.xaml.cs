@@ -170,7 +170,7 @@ namespace LogicalProofTool
                         {
                             tbEquation.Text = document.Paragraphs[0].Text.Trim().Substring(17);
                         }
-                        
+
                         Table proof_table = document.Tables[0];
 
                         for (int i = 1; i < proof_table.Rows.Count; i++)
@@ -288,7 +288,7 @@ namespace LogicalProofTool
                         document.InsertParagraph(tbEditor.Text).FontSize(12d);
                         break;
                 }
-                
+
                 if (FileInUse(saveFilePath))
                     return;
                 try
@@ -558,7 +558,7 @@ namespace LogicalProofTool
             else
             {
                 btnAddBefore.IsEnabled = false;
-                btnRemove.IsEnabled =false;
+                btnRemove.IsEnabled = false;
                 btnClear.IsEnabled = false;
                 btnAddLine.IsEnabled = true;
                 btncheckButton.IsEnabled = true;
@@ -1513,7 +1513,7 @@ namespace LogicalProofTool
         }
         private void CheckProof()
         {
-            string header = "Conclusion",msg = "All input is valid";
+            string header = "Conclusion", msg = "All input is valid";
             statement_list.Clear();
             string main_expression = Utility.ReplaceAll(tbEquation.Text.Trim());
 
@@ -1535,7 +1535,7 @@ namespace LogicalProofTool
             statement_list.Add(new Statement(main_expression, "first", "0"));
             string expression, rule, first_segment, second_segment, third_segment;
             int index;
-            
+
 
             foreach (Grid row in spGridTable.Children)
             {
@@ -1634,7 +1634,7 @@ namespace LogicalProofTool
                 case "Assumption":
                     //In case of "Var i" rule above ignore check [Var i should check if box opener exists]
                     int curr_index = spGridTable.Children.IndexOf(row);
-                   
+
                     if (curr_index > 0)
                     {
                         Grid aboveRow = spGridTable.Children[curr_index - 1] as Grid;
@@ -1681,7 +1681,7 @@ namespace LogicalProofTool
                 case var e when new Regex(@"∃.*e").IsMatch(e):
                     string segment = "first";
                     List<int> box;
-                    if (new Regex(@"∃.*e").IsMatch(rule)&&second_segment.Contains("-"))
+                    if (new Regex(@"∃.*e").IsMatch(rule) && second_segment.Contains("-"))
                     {
                         box = Utility.Get_Lines_From_Segment(second_segment);
                         segment = "second";
@@ -1779,7 +1779,7 @@ namespace LogicalProofTool
                         isValid = false;
                         unvalidBoxSize = tb.Text.Length;
                     }
-                        
+
                 }
 
             }
@@ -1838,14 +1838,14 @@ namespace LogicalProofTool
         private bool IsValidStatement(string expression, string rule, string first_segment,
    string second_segment, string third_segment)
         {
-            int row = statement_list.Count-1;
-            if (!IsValidExpression(expression, row+1))
+            int row = statement_list.Count - 1;
+            if (!IsValidExpression(expression, row + 1))
             {
                 return false;
             }
             if (string.IsNullOrEmpty(rule))
             {
-                Expression_Error(row+1, "Rule is empty");
+                Expression_Error(row + 1, "Rule is empty");
                 return false;
             }
             int ret;
@@ -1856,7 +1856,7 @@ namespace LogicalProofTool
                     Expression_Error(row, "First segment is empty");
                     return false;
                 }
-                else if ((ret = IsValidSegment(first_segment, row+1)) != 0)
+                else if ((ret = IsValidSegment(first_segment, row + 1)) != 0)
                 {
                     if (ret == -ERRARGUMENT)
                         Expression_Error(row, "First segment is not a positive integer number");
@@ -1876,7 +1876,7 @@ namespace LogicalProofTool
                     Expression_Error(row, "Second segment is empty");
                     return false;
                 }
-                if ((ret = IsValidSegment(second_segment, row+1)) != 0)
+                if ((ret = IsValidSegment(second_segment, row + 1)) != 0)
                 {
                     if (ret == -ERRARGUMENT)
                         Expression_Error(row, "Second segment is not a positive integer number");
@@ -1896,7 +1896,7 @@ namespace LogicalProofTool
                     Expression_Error(row, "Third segment is empty");
                     return false;
                 }
-                if ((ret = IsValidSegment(third_segment, row+1)) != 0)
+                if ((ret = IsValidSegment(third_segment, row + 1)) != 0)
                 {
                     if (ret == -ERRARGUMENT)
                         Expression_Error(row, "Third segment is not a positive integer number");

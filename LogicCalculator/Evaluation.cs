@@ -14,7 +14,7 @@ namespace LogicalProofTool
             Is_Valid = false;
             this.statement_list = statement_list;
             current_line = statement_list.Count - 1;
-            Handle_Rule(rule);            
+            Handle_Rule(rule);
         }
         #region RULES
         private void Handle_Rule(string rule)
@@ -155,7 +155,7 @@ namespace LogicalProofTool
         }
         private void Proven_Elimination()
         {
-            Is_Valid= !statement_list[current_line].Expression.Any(char.IsUpper);
+            Is_Valid = !statement_list[current_line].Expression.Any(char.IsUpper);
             if (!Is_Valid)
             {
                 Utility.DisplayErrorMsg("Proven elimination is not supported for predicates", current_line);
@@ -200,7 +200,8 @@ namespace LogicalProofTool
             for (int i = 0; i < provided_data.Count(); i++)
             {
                 matches = BuildDict(proven_data[i], provided_data[i], matches);
-                if (matches == null) {
+                if (matches == null)
+                {
                     Is_Valid = false;
                     return;
                 }
@@ -344,7 +345,7 @@ namespace LogicalProofTool
             }
             return Tuple.Create(proven.Equals(data), proven);
         }
-   
+
         private void Data()
         {
             int index = statement_list[0].Expression.IndexOf("⊢");
@@ -378,17 +379,17 @@ namespace LogicalProofTool
             int line = Utility.Get_Line(statement_list[current_line].First_segment, current_line);
             Is_Valid = line != -1;
             if (!Is_Valid)
-            {               
+            {
                 return;
             }
-            Is_Valid =Utility.Equal_With_Parenthesis (statement_list[line].Expression , statement_list[current_line].Expression);
+            Is_Valid = Utility.Equal_With_Parenthesis(statement_list[line].Expression, statement_list[current_line].Expression);
             if (!Is_Valid)
-                Utility.DisplayErrorMsg("Copy: \""+statement_list[line].Expression+"\" should be equal to \""+ statement_list[current_line].Expression+"\"", current_line);
+                Utility.DisplayErrorMsg("Copy: \"" + statement_list[line].Expression + "\" should be equal to \"" + statement_list[current_line].Expression + "\"", current_line);
         }
         private void MP()
         {
             int first_line = Utility.Get_Line(statement_list[current_line].First_segment, current_line),
-            index,second_line = Utility.Get_Line(statement_list[current_line].Second_segment, current_line);
+            index, second_line = Utility.Get_Line(statement_list[current_line].Second_segment, current_line);
             Is_Valid = first_line != -1;
             if (!Is_Valid)
             {
@@ -409,7 +410,7 @@ namespace LogicalProofTool
             //if the first expression contains ->
             if (index == -1)
             {
-                index= second_expression.IndexOf("→");
+                index = second_expression.IndexOf("→");
                 if (index == -1)
                 {
                     Is_Valid = false;
@@ -418,12 +419,12 @@ namespace LogicalProofTool
                 }
             }
 
-                Is_Valid = (first_expression == second_expression + "→" + current_expression)
-                || (first_expression == second_expression + "→(" + current_expression + ")")
-                || (second_expression == first_expression + "→" + current_expression)
-                || (second_expression == first_expression + "→(" + current_expression + ")")
-                || Utility.Equal_With_Operator(first_expression, second_expression, current_expression, "→")
-                || Utility.Equal_With_Operator(second_expression, first_expression, current_expression, "→");
+            Is_Valid = (first_expression == second_expression + "→" + current_expression)
+            || (first_expression == second_expression + "→(" + current_expression + ")")
+            || (second_expression == first_expression + "→" + current_expression)
+            || (second_expression == first_expression + "→(" + current_expression + ")")
+            || Utility.Equal_With_Operator(first_expression, second_expression, current_expression, "→")
+            || Utility.Equal_With_Operator(second_expression, first_expression, current_expression, "→");
             if (!Is_Valid)
             {
                 Utility.DisplayErrorMsg("Misuse of MP", current_line);
@@ -527,7 +528,7 @@ namespace LogicalProofTool
             Is_Valid = Utility.Check_If_Not(left_part, right_part);
             if (!Is_Valid)
             {
-                Utility.DisplayErrorMsg("LEM \"" + left_part+ "\" must be the negation of \"" + right_part+ "\"", current_line);
+                Utility.DisplayErrorMsg("LEM \"" + left_part + "\" must be the negation of \"" + right_part + "\"", current_line);
             }
         }
         private void And_Introduction()
@@ -546,7 +547,7 @@ namespace LogicalProofTool
                 return;
             }
             string current = statement_list[current_line].Expression;
-            
+
 
             Is_Valid = current.Contains("∧");
             if (!Is_Valid)
@@ -561,8 +562,8 @@ namespace LogicalProofTool
             if (!Is_Valid)
             {
                 Utility.DisplayErrorMsg("∧i: \"" + current + "\" should be equal to \"" +
-                    first + "∧"+ second+ "\" or \""
-                    + second + "∧" + first  + "\"", current_line);
+                    first + "∧" + second + "\" or \""
+                    + second + "∧" + first + "\"", current_line);
             }
         }
         private void And_Elimination_One()
@@ -650,7 +651,7 @@ namespace LogicalProofTool
 
             string current_expression = statement_list[current_line].Expression,
                    base_expression = statement_list[base_line].Expression,
-                   second_segment_start = statement_list[second_seg_first_line].Expression,                   
+                   second_segment_start = statement_list[second_seg_first_line].Expression,
                    second_segment_end = statement_list[second_seg_last_line].Expression,
                    third_segment_start = statement_list[third_seg_first_line].Expression,
                    third_segment_end = statement_list[third_seg_last_line].Expression;
@@ -713,18 +714,18 @@ namespace LogicalProofTool
             if (!Is_Valid)
             {
                 Utility.DisplayErrorMsg("∨i2: \"" + current_expression + "\" should be equal to <something> ∨ \"" +
-                   statement_list[line].Expression+"\"", current_line);
+                   statement_list[line].Expression + "\"", current_line);
             }
         }
         private void Not_Introduction()
         {
-            int last_line= Utility.Get_Last_Line_From_Segment(statement_list[current_line].First_segment, current_line);
+            int last_line = Utility.Get_Last_Line_From_Segment(statement_list[current_line].First_segment, current_line);
             Is_Valid = last_line != -1;
             if (!Is_Valid)
             {
                 return;
             }
-            int first_line = Utility.Get_First_Line_From_Segment(statement_list[current_line].First_segment,current_line);
+            int first_line = Utility.Get_First_Line_From_Segment(statement_list[current_line].First_segment, current_line);
             Is_Valid = first_line != -1;
             if (!Is_Valid)
             {
@@ -738,7 +739,7 @@ namespace LogicalProofTool
             }
             Is_Valid &= Utility.Check_If_Not(statement_list[first_line].Expression, statement_list[current_line].Expression);
             if (!Is_Valid)
-                Utility.DisplayErrorMsg(statement_list[first_line].Expression+" should be the negation of "+ statement_list[current_line].Expression, current_line);
+                Utility.DisplayErrorMsg(statement_list[first_line].Expression + " should be the negation of " + statement_list[current_line].Expression, current_line);
         }
         private void Not_Elimination()
         {
@@ -766,7 +767,7 @@ namespace LogicalProofTool
         }
         private void Contradiction_Elimination()
         {
-           int prev_line = Utility.Get_Line(statement_list[current_line].First_segment, current_line);
+            int prev_line = Utility.Get_Line(statement_list[current_line].First_segment, current_line);
             Is_Valid = prev_line != -1;
             if (!Is_Valid)
             {
@@ -791,11 +792,11 @@ namespace LogicalProofTool
 
                 Utility.DisplayErrorMsg("'Not Not Elimination' called without ¬¬", current_line);
             }
-            Is_Valid = Utility.Equal_With_Parenthesis(original_expression ,"¬¬" + current_expression)
-                || Utility.Equal_With_Parenthesis(original_expression , "¬¬(" + current_expression + ")");
+            Is_Valid = Utility.Equal_With_Parenthesis(original_expression, "¬¬" + current_expression)
+                || Utility.Equal_With_Parenthesis(original_expression, "¬¬(" + current_expression + ")");
             if (!Is_Valid)
             {
-                Utility.DisplayErrorMsg(original_expression+ " should be equal to ¬¬(" + current_expression + ")", current_line);
+                Utility.DisplayErrorMsg(original_expression + " should be equal to ¬¬(" + current_expression + ")", current_line);
             }
         }
         private void Not_Not_Introduction()
@@ -809,14 +810,16 @@ namespace LogicalProofTool
             string original_expression = statement_list[line].Expression,
                current_expression = statement_list[current_line].Expression;
             bool contains_operator = false;
-            foreach (char c in statement_list[line].Expression) {
-                if (Utility.IsOperator(c)) {
+            foreach (char c in statement_list[line].Expression)
+            {
+                if (Utility.IsOperator(c))
+                {
                     contains_operator = true;
                     break;
                 }
             }
             if (contains_operator)
-                Is_Valid = current_expression == "¬¬(" + original_expression + ")" ;            
+                Is_Valid = current_expression == "¬¬(" + original_expression + ")";
             else
                 Is_Valid = current_expression == "¬¬" + original_expression ||
                     current_expression == "¬¬(" + original_expression + ")";
@@ -839,10 +842,10 @@ namespace LogicalProofTool
             {
                 return;
             }
-            
+
             string current_expression = statement_list[current_line].Expression,
                 start_expression = statement_list[first_line].Expression,
-                end_expression= statement_list[last_line].Expression;            
+                end_expression = statement_list[last_line].Expression;
 
             Is_Valid = current_expression.Contains("→");
             if (!Is_Valid)
@@ -864,7 +867,7 @@ namespace LogicalProofTool
 
             if (!Is_Valid)
             {
-                Utility.DisplayErrorMsg(current_expression+ " should be equal to "+ start_expression + "→" + end_expression, current_line);
+                Utility.DisplayErrorMsg(current_expression + " should be equal to " + start_expression + "→" + end_expression, current_line);
             }
         }
 
@@ -883,8 +886,8 @@ namespace LogicalProofTool
             Is_Valid = Utility.Equal_With_Parenthesis(current_expression.Substring(0, index),
                 current_expression.Substring(index + 1));
             if (!Is_Valid)
-                Utility.DisplayErrorMsg("=i:"+current_expression.Substring(0, index)+
-                    " should be equal to "+ current_expression.Substring(index + 1), current_line);
+                Utility.DisplayErrorMsg("=i:" + current_expression.Substring(0, index) +
+                    " should be equal to " + current_expression.Substring(index + 1), current_line);
         }
         private void Equal_Elimination()
         {
@@ -907,11 +910,11 @@ namespace LogicalProofTool
                 second_expression = statement_list[second_line].Expression,
                 left, right, reverse;
 
-            if (first_expression[0] == '('&&first_expression[first_expression.Length-1]==')')
+            if (first_expression[0] == '(' && first_expression[first_expression.Length - 1] == ')')
                 first_expression = first_expression.Substring(1, first_expression.Length - 2);
-            if (second_expression[0] == '(' && second_expression[second_expression.Length-1] == ')')
+            if (second_expression[0] == '(' && second_expression[second_expression.Length - 1] == ')')
                 second_expression = second_expression.Substring(1, second_expression.Length - 2);
-            if (current_expression[0] == '(' && current_expression[current_expression.Length-1] == ')')
+            if (current_expression[0] == '(' && current_expression[current_expression.Length - 1] == ')')
                 current_expression = current_expression.Substring(1, current_expression.Length - 2);
 
             index = first_expression.IndexOf("=");
@@ -931,7 +934,7 @@ namespace LogicalProofTool
 
                     Is_Valid = Utility.Equal_With_Parenthesis(first_expression, current_expression.Replace(left, right)) ||
                         Utility.Equal_With_Parenthesis(first_expression, current_expression.Replace(right, left));
-                        
+
                     if (!Is_Valid)
                     {
                         Utility.DisplayErrorMsg("Misuse of equal elimination", current_line);
@@ -951,7 +954,7 @@ namespace LogicalProofTool
                 right = first_expression.Substring(index + 1);
                 Is_Valid = Utility.Equal_With_Parenthesis(second_expression, current_expression.Replace(left, right)) ||
                         Utility.Equal_With_Parenthesis(second_expression, current_expression.Replace(right, left));
-                if (!Is_Valid&&second_expression.Contains('='))
+                if (!Is_Valid && second_expression.Contains('='))
                 {
                     reverse = Utility.FlipByOperator(first_expression, '=');
                     Is_Valid = Utility.Equal_With_Parenthesis(reverse, current_expression.Replace(left, right)) ||
@@ -974,7 +977,7 @@ namespace LogicalProofTool
             }
             string current_expression = statement_list[current_line].Expression,
                 previous_expression = statement_list[previous_line].Expression;
-            
+
             if (!previous_expression.Contains(rule))
             {
                 Utility.DisplayErrorMsg("Missing " + rule + " in mentioned line", previous_line);
@@ -996,7 +999,7 @@ namespace LogicalProofTool
             {
                 return;
             }
-           
+
             string current_expression = statement_list[current_line].Expression,
                 previous_expression = statement_list[last_line].Expression;
             string previous_letter = Utility.Find_Letter(previous_expression),
@@ -1022,7 +1025,7 @@ namespace LogicalProofTool
             int previous_line, original_line;
             if (statement_list[current_line].Second_segment.Contains('-'))
             {
-                previous_line = Utility.Get_Last_Line_From_Segment(statement_list[current_line].Second_segment,current_line);
+                previous_line = Utility.Get_Last_Line_From_Segment(statement_list[current_line].Second_segment, current_line);
                 Is_Valid = previous_line != -1;
                 if (!Is_Valid)
                 {
@@ -1037,7 +1040,7 @@ namespace LogicalProofTool
             }
             else
             {
-                previous_line = Utility.Get_Last_Line_From_Segment(statement_list[current_line].First_segment,current_line);
+                previous_line = Utility.Get_Last_Line_From_Segment(statement_list[current_line].First_segment, current_line);
                 Is_Valid = previous_line != -1;
                 if (!Is_Valid)
                 {
@@ -1090,7 +1093,7 @@ namespace LogicalProofTool
             }
             string current_expression = statement_list[current_line].Expression,
                 previous_expression = statement_list[previous_line].Expression;
-           
+
             if (!current_expression.Contains(rule))
             {
                 Utility.DisplayErrorMsg("Missing " + rule + " in current line", current_line);

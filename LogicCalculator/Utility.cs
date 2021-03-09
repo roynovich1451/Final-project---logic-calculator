@@ -8,8 +8,9 @@ namespace LogicalProofTool
     static class Utility
     {
         internal static readonly int PREDICATE_LENGTH = 3;
-        internal static string FlipByOperator(string s,char op)        {
-           
+        internal static string FlipByOperator(string s, char op)
+        {
+
             if (s[0] == '(')
                 s = s.Substring(1, s.Length - 2);
             int index = s.IndexOf(op);
@@ -22,7 +23,7 @@ namespace LogicalProofTool
         }
         internal static string RemoveRedundant(string s)
         {
-            while (s.Length>2&&s[0] == '(' && s[s.Length - 1] == ')')
+            while (s.Length > 2 && s[0] == '(' && s[s.Length - 1] == ')')
                 s = s.Substring(1, s.Length - 2);
             return s;
         }
@@ -76,7 +77,7 @@ namespace LogicalProofTool
             int i, j, counter = 0, start;
             string temp;
             List<string> ret = new List<string>();
-           
+
             i = original.IndexOf(rule);            //find index of predicate rule
             if (i == -1 || original.Substring(0, i) != to_check.Substring(0, i))
                 return false;
@@ -89,7 +90,7 @@ namespace LogicalProofTool
                     break;
                 }
             }
-            start = i+2;                           //save starting index
+            start = i + 2;                           //save starting index
             for (j = i + 1; j < original.Length; j++)
             {
                 if (original[j] == '(')
@@ -107,7 +108,7 @@ namespace LogicalProofTool
             temp = original.Substring(i + 1, j - i - 1);
             if (temp.Length > 1)
                 ret.Add(temp.Substring(0, temp.Length - 1));//add the last string only if its legit
-            j++;           
+            j++;
             if (j < original.Length && original.Substring(j, original.Length - j) != to_check.Substring(j - start, to_check.Length - j + start))
                 return false;
             foreach (string s in ret)
@@ -157,8 +158,8 @@ namespace LogicalProofTool
             {
                 int starting_number = Int32.Parse(seg.Substring(0, index)),
                      last_number = Int32.Parse(seg.Substring(index + 1));
-                if(starting_number<last_number)
-                ret.AddRange(Enumerable.Range(starting_number, last_number - starting_number + 1));
+                if (starting_number < last_number)
+                    ret.AddRange(Enumerable.Range(starting_number, last_number - starting_number + 1));
                 else
                     ret.AddRange(Enumerable.Range(last_number, starting_number - last_number + 1));
             }
@@ -185,7 +186,7 @@ namespace LogicalProofTool
             else
                 return last_number;
         }
-        internal static int Get_Last_Line_From_Segment(string seg,int current_line)
+        internal static int Get_Last_Line_From_Segment(string seg, int current_line)
         {
             int index = seg.IndexOf("-");
             if (index == -1)
@@ -217,13 +218,13 @@ namespace LogicalProofTool
         #region Checks
         internal static bool IsOperator(char c)
         {
-            return  c == '∧' || c == '→' || c == '∨' || c == '⊢' || c == '⊥' || c == '¬' || c == '=';
+            return c == '∧' || c == '→' || c == '∨' || c == '⊢' || c == '⊥' || c == '¬' || c == '=';
         }
         internal static bool HasOperatorInside(string s)
         {
             if (s[0] == '(')
                 return false;
-            foreach(char c in s)
+            foreach (char c in s)
             {
                 if (c == '∧' || c == '→' || c == '∨' || c == '⊢' || c == '⊥' || c == '=')//this is different from IsOperator because we don't check for '¬' 
                     return true;
@@ -234,8 +235,8 @@ namespace LogicalProofTool
         {
             //left = RemoveRedundant(left);
             //right = RemoveRedundant(right);
-            
-            while(left[0]== '¬'&&right[0]== '¬')
+
+            while (left[0] == '¬' && right[0] == '¬')
             {
                 right = right.Substring(1);
                 left = left.Substring(1);
@@ -273,7 +274,7 @@ namespace LogicalProofTool
             MessageBox.Show(msg, title, MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
-        internal static void DisplayInfoMsg(string msg, string title="")
+        internal static void DisplayInfoMsg(string msg, string title = "")
         {
             MessageBox.Show(msg, title, MessageBoxButton.OK, MessageBoxImage.Information);
             return;
