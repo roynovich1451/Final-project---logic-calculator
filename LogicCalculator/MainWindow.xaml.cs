@@ -91,8 +91,10 @@ namespace LogicalProofTool
         private int spaces_chunks = MIN_HYPHEN_CHUNKS;
         #endregion VARIABLES
         public MainWindow()
-        {
-            InitializeComponent();
+        {           
+            InitializeComponent();           
+            this.Left = (SystemParameters.PrimaryScreenWidth / 2) - (Width / 2);
+            this.Top = (SystemParameters.PrimaryScreenHeight / 2) - (Height / 2);
         }
         #region MENUBAR_CLICKS
         private void MenuItemNew_Click(object sender, RoutedEventArgs e)

@@ -15,7 +15,7 @@
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
     <IsWebBootstrapper>false</IsWebBootstrapper>
-    <PublishUrl>D:\OneDrive\Final_project_logic_calculator\published\</PublishUrl>
+    <PublishUrl>C:\Users\Oren\Desktop\published\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
     <UpdateEnabled>false</UpdateEnabled>
@@ -28,7 +28,7 @@
     <SupportUrl>https://github.com/roynovich1451/Final_project_logic_calculator</SupportUrl>
     <ProductName>Logical Proof Tool</ProductName>
     <PublisherName>Roy Novich &amp; Oren Or</PublisherName>
-    <ApplicationRevision>19</ApplicationRevision>
+    <ApplicationRevision>23</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>true</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
