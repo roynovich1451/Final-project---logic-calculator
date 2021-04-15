@@ -460,9 +460,21 @@ namespace LogicalProofTool
                 Is_Valid = Utility.Check_If_Not(right_part, second_expression);
                 if (!Is_Valid)
                 {
-                    Utility.DisplayErrorMsg("MT: missing ¬", current_line);
-                    return;
+                    index = second_expression.IndexOf("→");
+                    Is_Valid = index != -1;
+                    if (Is_Valid)
+                    {
+                        left_part = second_expression.Substring(0, index);
+                        right_part = second_expression.Substring(index + 1);
+                        Is_Valid = Utility.Check_If_Not(right_part, first_expression);
+                                            }
+                    if (!Is_Valid)
+                    {
+                        Utility.DisplayErrorMsg("MT: missing ¬", current_line);
+                        return;
+                    }
                 }
+
             }
             else //check if the second expression contains ->
             {
@@ -787,10 +799,11 @@ namespace LogicalProofTool
             }
             string original_expression = statement_list[line].Expression,
                 current_expression = statement_list[current_line].Expression;
-            if (!original_expression.Contains("¬¬"))
+            Is_Valid = original_expression.Contains("¬¬");
+            if (!Is_Valid)
             {
-
                 Utility.DisplayErrorMsg("'Not Not Elimination' called without ¬¬", current_line);
+                return;
             }
             Is_Valid = Utility.Equal_With_Parenthesis(original_expression, "¬¬" + current_expression)
                 || Utility.Equal_With_Parenthesis(original_expression, "¬¬(" + current_expression + ")");
