@@ -178,7 +178,13 @@ namespace LogicalProofTool
             List<int> data_indexes = Utility.Get_Lines_For_Proven(statement_list[current_line].Second_segment);
             if (data_indexes == null)
             {
-                Utility.DisplayErrorMsg("Proven elimination first segment must be positive integer\nSecond segment must be positive integers separate by ','", current_line);
+                Utility.DisplayErrorMsg("Proven elimination first segment must be positive integer\nSecond segment must be positive integers separate by ',' OR '0' in case no data needed in proven introduction", current_line);
+                Is_Valid = false;
+                return;
+            }
+            if (data_indexes.Contains(0) && data_indexes.Count > 1)
+            {
+                Utility.DisplayErrorMsg("Second segment can contain '0' only in case no data needed in proven introduction", current_line);
                 Is_Valid = false;
                 return;
             }
@@ -195,6 +201,16 @@ namespace LogicalProofTool
             }
             string proven_goal = GetGoal(statement_list[proven_index].Expression);
             string current_goal = statement_list[current_line].Expression;
+            //--------IN CASE PROVENI HAS NO DATA-------//
+            //--------CREATE DICTIONARY USING GOALS-----//
+            if (data_indexes[0] == 0)
+            {
+                data_indexes[0] = current_line;
+                provided_data.Clear();
+                provided_data.Add(current_goal);
+                proven_data.Clear();
+                proven_data.Add(proven_goal);
+            }
             // ------------ALL DATA RECIEVED-------------//
             // ------------BUILD DICT-------------//
             for (int i = 0; i < provided_data.Count(); i++)
@@ -337,7 +353,7 @@ namespace LogicalProofTool
             {
                 if (proven.Contains(k))
                 {
-                    if (matches[k].Length > 1 && proven.Length > 1)
+                    if (Utility.HasOperatorInside(matches[k]) && proven.Length > 1)
                         proven = proven.Replace(k, $"({matches[k]})");
                     else
                         proven = proven.Replace(k, matches[k]);
