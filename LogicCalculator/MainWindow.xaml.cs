@@ -1634,9 +1634,10 @@ namespace LogicalProofTool
                     return true;
 
                 case "Assumption":
-                    //In case of "Var i" rule above ignore check [Var i should check if box opener exists]
-                    int curr_index = spGridTable.Children.IndexOf(row);
 
+                    int curr_index = spGridTable.Children.IndexOf(row);
+                    
+                    //In case of "X0/Y0i" rule above ignore check [Var i should check if box opener exists]
                     if (curr_index > 0)
                     {
                         Grid aboveRow = spGridTable.Children[curr_index - 1] as Grid;
@@ -1675,6 +1676,18 @@ namespace LogicalProofTool
                             $"\nlines mentioned in second and third segments must be wrapped with boxes");
                         return false;
                     }
+                    if (!SameBox(firstbox[0], firstbox[firstbox.Count - 1]))
+                    {
+                        Utility.DisplayErrorMsg($"Error:  Or elimination at line {((Label)row.Children[LABEL_INDEX]).Content}," +
+                            $"\nLines mentioned in second segment must be of same box");
+                        return false;
+                    }
+                    if (!SameBox(secondBox[0], secondBox[secondBox.Count - 1]))
+                    {
+                        Utility.DisplayErrorMsg($"Error:  Or elimination at line {((Label)row.Children[LABEL_INDEX]).Content}," +
+                            $"\nLines mentioned in third segment must be of same box");
+                        return false;
+                    }
                     return true;
 
                 case "¬i":
@@ -1682,6 +1695,15 @@ namespace LogicalProofTool
                 case var a when new Regex(@"∀.*i").IsMatch(a):
                 case var e when new Regex(@"∃.*e").IsMatch(e):
                     string segment = "first";
+                    string messageRule = "rule";
+                    if (rule.Equals("¬i"))
+                        messageRule = "Not introduction";
+                    else if (rule.Equals("→i"))
+                        messageRule = "Arrow introducstion";
+                    else if (new Regex(@"∀.*i").IsMatch(rule))
+                        messageRule = "All introdution";
+                    else if (new Regex(@"∃.*e").IsMatch(rule))
+                        messageRule = "Exist elimination";
                     List<int> box;
                     if (new Regex(@"∃.*e").IsMatch(rule) && second_segment.Contains("-"))
                     {
@@ -1692,25 +1714,41 @@ namespace LogicalProofTool
                         box = Utility.Get_Lines_From_Segment(first_segment);
                     if (!HasWrapBox(box[0], box[box.Count - 1]))
                     {
-                        string messageRule = "rule";
-                        if (rule.Equals("¬i"))
-                            messageRule = "Not introduction";
-                        else if (rule.Equals("→i"))
-                            messageRule = "Arrow introducstion";
-                        else if (new Regex(@"∀.*i").IsMatch(rule))
-                            messageRule = "All introdution";
-                        else if (new Regex(@"∃.*e").IsMatch(rule))
-                            messageRule = "Exist elimination";
+                        
                         Utility.DisplayErrorMsg($"Error: {messageRule} at line {((Label)row.Children[LABEL_INDEX]).Content}," +
                             $"\nlines mentioned in {segment} segment must be wrapped with box");
                         return false;
                     }
+
+                    if (!SameBox(box[0], box[box.Count - 1]))
+                    {
+                        Utility.DisplayErrorMsg($"Error: {messageRule} at line {((Label)row.Children[LABEL_INDEX]).Content}," +
+                            $"\nLines mentioned in {segment} segment must be of same box");
+                        return false;
+                    }
+                    
                     return true;
 
                 default:
                     return true;
             }
         }
+
+        private bool SameBox(int open, int close)
+        {
+            int realOpenIndex = GetspGridIndex(open),
+               realCloseIndex = GetspGridIndex(close);
+            Grid openRow = spGridTable.Children[realOpenIndex - 1] as Grid;
+            Grid expectedCloser = GetCloserGrid(spGridTable, openRow);
+            int expectedIndex = spGridTable.Children.IndexOf(expectedCloser);
+            if ( expectedIndex != realCloseIndex + 1)
+            {
+                return false;
+            }
+            return true;
+        }
+
+
         private bool HasWrapBox(int open, int close)
         {
             int realOpenIndex = GetspGridIndex(open),

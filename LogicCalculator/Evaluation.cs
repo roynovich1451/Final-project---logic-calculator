@@ -670,6 +670,13 @@ namespace LogicalProofTool
             {
                 return;
             }
+            Is_Valid = !(second_seg_first_line == third_seg_first_line && second_seg_last_line == third_seg_last_line);
+            if (!Is_Valid)
+            {
+                Utility.DisplayErrorMsg("∨e: Lines mentiond in segments second and third must be different." , current_line);
+                return;
+            }
+
             int base_line = Utility.Get_Line(statement_list[current_line].First_segment, current_line);
             Is_Valid = base_line != -1;
             if (!Is_Valid)
