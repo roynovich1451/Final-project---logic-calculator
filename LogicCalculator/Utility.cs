@@ -8,7 +8,7 @@ namespace LogicalProofTool
     static class Utility
     {
         internal static readonly int PREDICATE_LENGTH = 3;
-        internal static string FlipByOperator(string s, char op)
+        internal static string Flip_By_Operator(string s, char op)
         {
 
             if (s[0] == '(')
@@ -17,11 +17,11 @@ namespace LogicalProofTool
             s = s.Substring(index + 1) + op + s.Substring(0, index);
             return s;
         }
-        internal static string ReplaceAll(string s)
+        internal static string Replace_All(string s)
         {
             return s.Trim().Replace('^', '∧').Replace('V', '∨').Replace('~', '¬').Replace(" ", "").Replace('>', '→');
         }
-        internal static string RemoveRedundant(string s)
+        internal static string Remove_Redundant(string s)
         {
             while (s.Length > 2 && s[0] == '(' && s[s.Length - 1] == ')')
                 s = s.Substring(1, s.Length - 2);
@@ -233,31 +233,21 @@ namespace LogicalProofTool
         }
         internal static bool Check_If_Not(string left, string right)
         {
-            //left = RemoveRedundant(left);
-            //right = RemoveRedundant(right);
-
-            while (left[0] == '¬' && right[0] == '¬')
-            {
-                right = right.Substring(1);
-                left = left.Substring(1);
-            }
-            if (left[0] == '¬')
-                left = left.Substring(1);
-            else if (right[0] == '¬')
-                right = right.Substring(1);
-            else return false;
-            return Equal_With_Parenthesis(left, right);
+            return left == "¬" + right 
+                || left == "¬(" + right + ")" 
+                || "(" + left + ")" == "¬" + right + "" 
+                || "(" + left + ")" == "¬(" + right + ")"
+                || right == "¬" + left
+                || right == "¬(" + left + ")" 
+                || "(" + right + ")" == "¬" + left + ""
+                || "(" + right + ")" == "¬(" + left + ")";
         }
         internal static bool Equal_With_Parenthesis(string first, string second)
         {
-            //first = RemoveRedundant(first);
-            //second = RemoveRedundant(second);
             return first == second || '(' + first + ')' == second || first == '(' + second + ')' || '(' + first + ')' == '(' + second + ')';
         }
         internal static bool Equal_With_Operator(string expression, string first, string second, string op)
         {
-            //first = RemoveRedundant(first);
-            //second = RemoveRedundant(second);
             return expression == first + op + second || expression == '(' + first + ')' + op + second || expression == first + op + '(' + second + ')' || expression == '(' + first + ')' + op + '(' + second + ')' ||
                 expression == second + op + first || expression == '(' + second + ')' + op + first || expression == second + op + '(' + first + ')' || expression == '(' + second + ')' + op + '(' + first + ')';
         }

@@ -91,8 +91,8 @@ namespace LogicalProofTool
         private int spaces_chunks = MIN_HYPHEN_CHUNKS;
         #endregion VARIABLES
         public MainWindow()
-        {           
-            InitializeComponent();           
+        {
+            InitializeComponent();
             this.Left = (SystemParameters.PrimaryScreenWidth / 2) - (Width / 2);
             this.Top = (SystemParameters.PrimaryScreenHeight / 2) - (Height / 2);
         }
@@ -170,6 +170,7 @@ namespace LogicalProofTool
                         }
                         else
                         {
+                            tbQTitle.Text = "";
                             tbEquation.Text = document.Paragraphs[0].Text.Trim().Substring(17);
                         }
 
@@ -1517,7 +1518,7 @@ namespace LogicalProofTool
         {
             string header = "Conclusion", msg = "All input is valid";
             statement_list.Clear();
-            string main_expression = Utility.ReplaceAll(tbEquation.Text.Trim());
+            string main_expression = Utility.Replace_All(tbEquation.Text.Trim());
 
             if (string.IsNullOrEmpty(main_expression))
             {
@@ -1544,11 +1545,11 @@ namespace LogicalProofTool
                 index = spGridTable.Children.IndexOf(row);
                 if (row.Children[LABEL_INDEX] is Label)
                 {
-                    expression = Utility.ReplaceAll(((TextBox)row.Children[STATEMENT_INDEX]).Text);
-                    rule = Utility.ReplaceAll(((ComboBox)row.Children[COMBOBOX_INDEX]).Text);
-                    first_segment = ((TextBox)row.Children[SEGMENT1_INDEX]).IsEnabled ? Utility.ReplaceAll(((TextBox)row.Children[SEGMENT1_INDEX]).Text) : null;
-                    second_segment = ((TextBox)row.Children[SEGMENT2_INDEX]).IsEnabled ? Utility.ReplaceAll(((TextBox)row.Children[SEGMENT2_INDEX]).Text) : null;
-                    third_segment = ((TextBox)row.Children[SEGMENT3_INDEX]).IsEnabled ? Utility.ReplaceAll(((TextBox)row.Children[SEGMENT3_INDEX]).Text) : null;
+                    expression = Utility.Replace_All(((TextBox)row.Children[STATEMENT_INDEX]).Text);
+                    rule = Utility.Replace_All(((ComboBox)row.Children[COMBOBOX_INDEX]).Text);
+                    first_segment = ((TextBox)row.Children[SEGMENT1_INDEX]).IsEnabled ? Utility.Replace_All(((TextBox)row.Children[SEGMENT1_INDEX]).Text) : null;
+                    second_segment = ((TextBox)row.Children[SEGMENT2_INDEX]).IsEnabled ? Utility.Replace_All(((TextBox)row.Children[SEGMENT2_INDEX]).Text) : null;
+                    third_segment = ((TextBox)row.Children[SEGMENT3_INDEX]).IsEnabled ? Utility.Replace_All(((TextBox)row.Children[SEGMENT3_INDEX]).Text) : null;
                     statement_list.Add(new Statement(expression, rule, first_segment, second_segment, third_segment));
 
                     if (rule.Equals("Proveni"))
@@ -1580,11 +1581,11 @@ namespace LogicalProofTool
                     index = spGridTable.Children.IndexOf(row);
                     if (row.Children[LABEL_INDEX] is Label)
                     {
-                        expression = Utility.ReplaceAll(((TextBox)row.Children[STATEMENT_INDEX]).Text);
-                        rule = Utility.ReplaceAll(((ComboBox)row.Children[COMBOBOX_INDEX]).Text);
-                        first_segment = ((TextBox)row.Children[SEGMENT1_INDEX]).IsEnabled ? Utility.ReplaceAll(((TextBox)row.Children[SEGMENT1_INDEX]).Text) : null;
-                        second_segment = ((TextBox)row.Children[SEGMENT2_INDEX]).IsEnabled ? Utility.ReplaceAll(((TextBox)row.Children[SEGMENT2_INDEX]).Text) : null;
-                        third_segment = ((TextBox)row.Children[SEGMENT3_INDEX]).IsEnabled ? Utility.ReplaceAll(((TextBox)row.Children[SEGMENT3_INDEX]).Text) : null;
+                        expression = Utility.Replace_All(((TextBox)row.Children[STATEMENT_INDEX]).Text);
+                        rule = Utility.Replace_All(((ComboBox)row.Children[COMBOBOX_INDEX]).Text);
+                        first_segment = ((TextBox)row.Children[SEGMENT1_INDEX]).IsEnabled ? Utility.Replace_All(((TextBox)row.Children[SEGMENT1_INDEX]).Text) : null;
+                        second_segment = ((TextBox)row.Children[SEGMENT2_INDEX]).IsEnabled ? Utility.Replace_All(((TextBox)row.Children[SEGMENT2_INDEX]).Text) : null;
+                        third_segment = ((TextBox)row.Children[SEGMENT3_INDEX]).IsEnabled ? Utility.Replace_All(((TextBox)row.Children[SEGMENT3_INDEX]).Text) : null;
 
                         if (!IsValidBox(row, rule, first_segment, second_segment, third_segment))
                             return;
@@ -1604,8 +1605,8 @@ namespace LogicalProofTool
             {
                 return false;
             }
-            string lastRowInput = Utility.ReplaceAll(((TextBox)lastRow.Children[STATEMENT_INDEX]).Text);
-            string needToProof = Utility.ReplaceAll(GetGoal(tbEquation.Text));
+            string lastRowInput = Utility.Replace_All(((TextBox)lastRow.Children[STATEMENT_INDEX]).Text);
+            string needToProof = Utility.Replace_All(GetGoal(tbEquation.Text));
             return Utility.Equal_With_Parenthesis(lastRowInput, needToProof);
         }
         private string GetData(string s)
@@ -1636,14 +1637,14 @@ namespace LogicalProofTool
                 case "Assumption":
 
                     int curr_index = spGridTable.Children.IndexOf(row);
-                    
+
                     //In case of "X0/Y0i" rule above ignore check [Var i should check if box opener exists]
                     if (curr_index > 0)
                     {
                         Grid aboveRow = spGridTable.Children[curr_index - 1] as Grid;
                         if (aboveRow.Children.Count > 2 && aboveRow.Children[COMBOBOX_INDEX] is ComboBox cmb)
                         {
-                            if (Utility.ReplaceAll(cmb.SelectedItem.ToString()).Equals("X0/Y0i"))
+                            if (Utility.Replace_All(cmb.SelectedItem.ToString()).Equals("X0/Y0i"))
                                 return true;
                         }
 
@@ -1714,7 +1715,7 @@ namespace LogicalProofTool
                         box = Utility.Get_Lines_From_Segment(first_segment);
                     if (!HasWrapBox(box[0], box[box.Count - 1]))
                     {
-                        
+
                         Utility.DisplayErrorMsg($"Error: {messageRule} at line {((Label)row.Children[LABEL_INDEX]).Content}," +
                             $"\nlines mentioned in {segment} segment must be wrapped with box");
                         return false;
@@ -1726,7 +1727,7 @@ namespace LogicalProofTool
                             $"\nLines mentioned in {segment} segment must be of same box");
                         return false;
                     }
-                    
+
                     return true;
 
                 default:
@@ -1741,7 +1742,7 @@ namespace LogicalProofTool
             Grid openRow = spGridTable.Children[realOpenIndex - 1] as Grid;
             Grid expectedCloser = GetCloserGrid(spGridTable, openRow);
             int expectedIndex = spGridTable.Children.IndexOf(expectedCloser);
-            if ( expectedIndex != realCloseIndex + 1)
+            if (expectedIndex != realCloseIndex + 1)
             {
                 return false;
             }

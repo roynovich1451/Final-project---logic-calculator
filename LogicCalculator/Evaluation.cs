@@ -466,24 +466,27 @@ namespace LogicalProofTool
                 second_expression = statement_list[second_line].Expression,
                 current_expression = statement_list[current_line].Expression;
             index = first_expression.IndexOf("→");
-
+            left_part = current_expression.Substring(1);
             //if the first expression contains ->
             if (index != -1)
             {
-                left_part = first_expression.Substring(0, index);
-                right_part = first_expression.Substring(index + 1);
-
-                Is_Valid = Utility.Check_If_Not(right_part, second_expression);
+                right_part = second_expression[0] == '¬' ? second_expression.Substring(1) : '¬' + second_expression;
+                Is_Valid = first_expression == left_part + "→" + right_part
+                   || first_expression == left_part + "→(" + right_part + ")"
+                   || first_expression == "(" + left_part + ")→" + right_part
+                   || first_expression == "(" + left_part + ")→(" + right_part + ")";
                 if (!Is_Valid)
                 {
                     index = second_expression.IndexOf("→");
                     Is_Valid = index != -1;
                     if (Is_Valid)
                     {
-                        left_part = second_expression.Substring(0, index);
-                        right_part = second_expression.Substring(index + 1);
-                        Is_Valid = Utility.Check_If_Not(right_part, first_expression);
-                                            }
+                        right_part = first_expression[0] == '¬' ? first_expression.Substring(1) : '¬' + first_expression;
+                        Is_Valid = second_expression == left_part + "→" + right_part
+                   || second_expression == left_part + "→(" + right_part + ")"
+                   || second_expression == "(" + left_part + ")→" + right_part
+                   || second_expression == "(" + left_part + ")→(" + right_part + ")";
+                    }
                     if (!Is_Valid)
                     {
                         Utility.DisplayErrorMsg("MT: missing ¬", current_line);
@@ -498,9 +501,11 @@ namespace LogicalProofTool
                 Is_Valid = index != -1;
                 if (Is_Valid)
                 {
-                    left_part = second_expression.Substring(0, index);
-                    right_part = second_expression.Substring(index + 1);
-                    Is_Valid = Utility.Check_If_Not(right_part, first_expression);
+                    right_part = first_expression[0] == '¬' ? first_expression.Substring(1) : '¬'+ first_expression;
+                    Is_Valid = second_expression == left_part + "→" + right_part
+               || second_expression == left_part + "→(" + right_part + ")"
+               || second_expression == "(" + left_part + ")→" + right_part
+               || second_expression == "(" + left_part + ")→(" + right_part + ")";
                     if (!Is_Valid)
                     {
                         Utility.DisplayErrorMsg("MT: missing ¬", current_line);
@@ -514,7 +519,7 @@ namespace LogicalProofTool
                 }
             }
             if (!Is_Valid)
-                Utility.DisplayErrorMsg("MT: \"" + left_part + "\" must be the negation of \"" + current_expression + "\"", current_line);
+                Utility.DisplayErrorMsg("MT: given expression must be the negation of \"" + current_expression + "\"", current_line);
         }
         private void PBC()
         {
@@ -673,7 +678,7 @@ namespace LogicalProofTool
             Is_Valid = !(second_seg_first_line == third_seg_first_line && second_seg_last_line == third_seg_last_line);
             if (!Is_Valid)
             {
-                Utility.DisplayErrorMsg("∨e: Lines mentiond in segments second and third must be different." , current_line);
+                Utility.DisplayErrorMsg("∨e: Lines mentiond in segments second and third must be different.", current_line);
                 return;
             }
 
@@ -978,7 +983,7 @@ namespace LogicalProofTool
                     }
                     if (!Is_Valid && first_expression.Contains('='))
                     {
-                        reverse = Utility.FlipByOperator(first_expression, '=');
+                        reverse = Utility.Flip_By_Operator(first_expression, '=');
                         Is_Valid = Utility.Equal_With_Parenthesis(reverse, current_expression.Replace(left, right)) ||
                             Utility.Equal_With_Parenthesis(reverse, current_expression.Replace(right, left));
                     }
@@ -992,7 +997,7 @@ namespace LogicalProofTool
                         Utility.Equal_With_Parenthesis(second_expression, current_expression.Replace(right, left));
                 if (!Is_Valid && second_expression.Contains('='))
                 {
-                    reverse = Utility.FlipByOperator(first_expression, '=');
+                    reverse = Utility.Flip_By_Operator(first_expression, '=');
                     Is_Valid = Utility.Equal_With_Parenthesis(reverse, current_expression.Replace(left, right)) ||
                         Utility.Equal_With_Parenthesis(reverse, current_expression.Replace(right, left));
                 }
