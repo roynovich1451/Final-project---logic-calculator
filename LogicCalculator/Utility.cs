@@ -233,12 +233,12 @@ namespace LogicalProofTool
         }
         internal static bool Check_If_Not(string left, string right)
         {
-            return left == "¬" + right 
-                || left == "¬(" + right + ")" 
-                || "(" + left + ")" == "¬" + right + "" 
+            return left == "¬" + right
+                || left == "¬(" + right + ")"
+                || "(" + left + ")" == "¬" + right + ""
                 || "(" + left + ")" == "¬(" + right + ")"
                 || right == "¬" + left
-                || right == "¬(" + left + ")" 
+                || right == "¬(" + left + ")"
                 || "(" + right + ")" == "¬" + left + ""
                 || "(" + right + ")" == "¬(" + left + ")";
         }

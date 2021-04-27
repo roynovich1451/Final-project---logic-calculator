@@ -26,7 +26,7 @@ namespace LogicalProofTool
                     Var_Introduction();
                     break;
                 case "Proveni":
-                    //THIS ON VERIFIED IN MAINWINDOW
+                    //THIS IS VERIFIED IN MAINWINDOW
                     Is_Valid = true;
                     break;
                 case "Provene":
@@ -470,22 +470,22 @@ namespace LogicalProofTool
             //if the first expression contains ->
             if (index != -1)
             {
-                right_part = second_expression[0] == '¬' ? second_expression.Substring(1) : '¬' + second_expression;
-                Is_Valid = first_expression == left_part + "→" + right_part
-                   || first_expression == left_part + "→(" + right_part + ")"
-                   || first_expression == "(" + left_part + ")→" + right_part
-                   || first_expression == "(" + left_part + ")→(" + right_part + ")";
+                right_part = second_expression[0] == '¬' ? second_expression.Substring(1) : second_expression;
+                Is_Valid = first_expression == left_part + "→¬" + right_part
+                   || first_expression == left_part + "→¬(" + right_part + ")"
+                   || first_expression == "(" + left_part + ")→¬" + right_part
+                   || first_expression == "(" + left_part + ")→¬(" + right_part + ")";
                 if (!Is_Valid)
                 {
                     index = second_expression.IndexOf("→");
                     Is_Valid = index != -1;
                     if (Is_Valid)
                     {
-                        right_part = first_expression[0] == '¬' ? first_expression.Substring(1) : '¬' + first_expression;
-                        Is_Valid = second_expression == left_part + "→" + right_part
-                   || second_expression == left_part + "→(" + right_part + ")"
-                   || second_expression == "(" + left_part + ")→" + right_part
-                   || second_expression == "(" + left_part + ")→(" + right_part + ")";
+                        right_part = first_expression[0] == '¬' ? first_expression.Substring(1) : first_expression;
+                        Is_Valid = second_expression == left_part + "→¬" + right_part
+                   || second_expression == left_part + "→¬(" + right_part + ")"
+                   || second_expression == "(" + left_part + ")→¬" + right_part
+                   || second_expression == "(" + left_part + ")→¬(" + right_part + ")";
                     }
                     if (!Is_Valid)
                     {
@@ -501,11 +501,11 @@ namespace LogicalProofTool
                 Is_Valid = index != -1;
                 if (Is_Valid)
                 {
-                    right_part = first_expression[0] == '¬' ? first_expression.Substring(1) : '¬'+ first_expression;
-                    Is_Valid = second_expression == left_part + "→" + right_part
-               || second_expression == left_part + "→(" + right_part + ")"
-               || second_expression == "(" + left_part + ")→" + right_part
-               || second_expression == "(" + left_part + ")→(" + right_part + ")";
+                    right_part = first_expression[0] == '¬' ? first_expression.Substring(1) : first_expression;
+                    Is_Valid = second_expression == left_part + "→¬" + right_part
+               || second_expression == left_part + "→¬(" + right_part + ")"
+               || second_expression == "(" + left_part + ")→¬" + right_part
+               || second_expression == "(" + left_part + ")→¬(" + right_part + ")";
                     if (!Is_Valid)
                     {
                         Utility.DisplayErrorMsg("MT: missing ¬", current_line);
